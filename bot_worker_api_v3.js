@@ -1,5 +1,9 @@
 require("./env_boot");   // nạp .env theo BOT_ENV (thật/thử) — phải ở dòng đầu
 const turnLog = require("./turn_log");   // log có cấu trúc mỗi lượt (nền cho mục 9.4 + 9.5)
+const dieuTiet = require("./dieu_tiet");   // [GĐ1] chạy song song theo hội thoại + giữ nhịp gọi Pancake
+const nguonHoiThoai = require("./nguon_hoi_thoai");   // [GĐ1 · mục 3.5] ký hiệu nguồn: quảng cáo / bình luận / nhắn thẳng
+dieuTiet.bocFetch();                       // mọi lời gọi pages.fm tự xếp hàng theo page (chống 429)
+const MAX_MOI_NHIP = Number(process.env.MAX_MOI_NHIP || 30);   // trần số hội thoại xử trong MỘT nhịp poll
 
 console.log("[BUILD] patched-2026-07-01: inspect-đuôi-linh-hoạt + regex ktra/đk + nhãn INSPECT_REQUEST/TRYON_REQUEST + price PRICE_OBJECTION 2 câu");
 
@@ -112,7 +116,18 @@ function stripRepeatedSizeWords(text) {
     .replace(/\s+([.,!?])/g, "$1")
     .trim();
 }
-let _turnCtx = null;   // ngữ cảnh lượt hiện tại để tự hẹn follow-up: { convId, mem, productInfo }
+// ===== NGỮ CẢNH THEO TỪNG LƯỢT (không còn dùng chung một biến toàn module) =====
+// Trước GĐ1, ba biến ngữ cảnh này là biến toàn module dùng chung. Chạy tuần tự
+// thì tạm ổn; chạy SONG SONG (mục 3.9 "một khách gửi ảnh không làm chậm khách khác")
+// thì hội thoại này ghi đè ngữ cảnh của hội thoại kia -> các lớp bảo vệ dạng
+// "if (turnCtx.convId === conversationId)" âm thầm trượt và tính năng ngừng chạy.
+// Nay mỗi lượt có túi riêng, gắn vào chính lượt log của turn_log (AsyncLocalStorage).
+const _luotNgoaiLuot = {};   // dùng cho việc chạy NGOÀI một lượt (quét follow-up định kỳ)
+function _luot() {
+  const t = turnLog.hienTai();
+  if (!t) return _luotNgoaiLuot;
+  return t._luot || (t._luot = {});
+}
 // ===== ICON LINH HOẠT: xoay vòng nhiều icon ấm (không phải lúc nào cũng), và để THƯA cho đỡ nhàm =====
 // Chỉ thêm icon nếu câu GỐC vốn có icon (giữ đúng ý câu nào cần / không cần). Đếm theo từng hội thoại.
 const _heartCtr = new Map();
@@ -190,7 +205,7 @@ async function sendInboxMessage(target, text) {
   //   Dòng 2: "{câu chương trình} ạ."
   //   Dòng 3: "{đuôi hỏi size/CTA}"
   try {
-    const _sgF = saleProgram(_curPageId);
+    const _sgF = saleProgram(_luot().curPageId);
     if (_sgF && _sgF.che_do_sale_gon && _sgF.cau_kem_bao_gia && String(text || "").includes(_sgF.cau_kem_bao_gia)) {
       text = String(text).split(_sgF.cau_kem_bao_gia + " ạ. ").join(_sgF.cau_kem_bao_gia + " ạ.\n");
     }
@@ -255,9 +270,9 @@ async function sendInboxMessage(target, text) {
         console.log("  [gửi tin] CHẶN: hội thoại VỪA có thẻ giữ (CHỜ XL/ĐƠN ƯU TIÊN/Hàng đổi/Đang hoàn) -> nhường người thật, KHÔNG gửi:", String(text).slice(0, 50));
       } catch (_) {}
       try {
-        if (_turnCtx && _turnCtx.convId === target && _turnCtx.mem) {
-          _turnCtx.mem.aiStandsOut = true;
-          updateConversationState(target, _turnCtx.mem);
+        if (_luot().turnCtx && _luot().turnCtx.convId === target && _luot().turnCtx.mem) {
+          _luot().turnCtx.mem.aiStandsOut = true;
+          updateConversationState(target, _luot().turnCtx.mem);
         }
       } catch (_) {}
       try { cancelFollowup(target); } catch (_) {}
@@ -265,8 +280,8 @@ async function sendInboxMessage(target, text) {
     }
   } catch (_) {}
   // QUY TẮC THỨ TỰ: mẫu CẦN size mà CHƯA có size của khách -> TUYỆT ĐỐI KHÔNG xin SĐT/địa chỉ. Hỏi size TRƯỚC.
-  if (_turnCtx && _turnCtx.convId === target && _asksContactInReply(text)) {
-    const _m = _turnCtx.mem, _p = _turnCtx.productInfo;
+  if (_luot().turnCtx && _luot().turnCtx.convId === target && _asksContactInReply(text)) {
+    const _m = _luot().turnCtx.mem, _p = _luot().turnCtx.productInfo;
     if (_m && !_m.customerSize && orderNeedsSize(_m, _p)) {
       text = "Dạ chị thường mặc size nào để em tư vấn cho mình nha ạ";
       try { console.log("  [thứ tự] CHƯA có size -> KHÔNG xin SĐT/địa chỉ, hỏi size trước."); } catch (_) {}
@@ -287,8 +302,8 @@ async function sendInboxMessage(target, text) {
   }
   rememberSentId(r);
   // TỰ HẸN FOLLOW-UP: câu vừa gửi nếu là TRẢ LỜI SUÔNG (không hành động, không phải chờ-xử-lý) -> 60s nhắc.
-  if (!_sendingFollowup && _turnCtx && _turnCtx.convId === target) {
-    try { scheduleFollowup(target, _turnCtx.mem, _turnCtx.productInfo, cleaned); } catch (_) {}
+  if (!_luot().sendingFollowup && _luot().turnCtx && _luot().turnCtx.convId === target) {
+    try { scheduleFollowup(target, _luot().turnCtx.mem, _luot().turnCtx.productInfo, cleaned); } catch (_) {}
   }
   return r;
 }
@@ -528,7 +543,7 @@ function _nhanCamRegex(mem, tenNhanh, allowKinds) {
   } catch (_) { return false; }
 }
 const _va = require("./vn_address");   // map tỉnh/thành 2025 -> suy tỉnh từ quận/huyện + token ambiguous
-let _curPageId = "";   // [SALE GỌN] page của lượt đang xử (cho các hàm thuần tra chương trình KM)
+// [SALE GỌN] page của lượt đang xử -> nay nằm trong _luot().curPageId (xem đầu file).
 // ===== [AI-QUYẾT 2026-07-07] tầng AI quyết định (referent + địa chỉ/chốt đơn) =====
 const aiQuyet = require("./ai_quyet");
 function aiQuyetCfg() {
@@ -4505,7 +4520,7 @@ async function customerSpokeSince(conversationId, sinceMs) {
 // Gửi GALLERY (caption tên+giá + ảnh) cho khách. Nhớ mã đã gửi để lần sau không lặp.
 async function sendGallery(conversationId, gallery, mem, intro) {
   // Mốc tin khách cuối lúc BẮT ĐẦU lượt -> để biết khách có chen tin MỚI trong lúc đang gửi ảnh.
-  const _sinceMs = (_turnCtx && _turnCtx.convId === conversationId && _turnCtx.lastCustAt) ? _turnCtx.lastCustAt : 0;
+  const _sinceMs = (_luot().turnCtx && _luot().turnCtx.convId === conversationId && _luot().turnCtx.lastCustAt) ? _luot().turnCtx.lastCustAt : 0;
 
   if (intro) { await sendInboxMessage(conversationId, intro); await delay(400); }
   if (gallery.caption) { await sendInboxMessage(conversationId, gallery.caption); await delay(500); }
@@ -4709,9 +4724,9 @@ async function maybeSendImages(conversationId, code, mem, force, leadText) {
   }
   // [FIX Đặng Vân] CHỐNG ẢNH LẶP TRONG 1 LƯỢT: cùng mã đã gửi ảnh ở lượt NÀY rồi -> KHÔNG gửi lại (kể cả force).
   //   (Lỗi cũ: path chào/ad gửi ảnh, path báo-giá force=true gửi lại y chang -> khách thấy ảnh 2 lần.)
-  //   Marker theo lượt (_turnCtx._imgSentCodes, reset mỗi lượt) -> lượt SAU vẫn gửi lại bình thường.
-  if (_turnCtx && _turnCtx.convId === conversationId && _turnCtx._imgSentCodes
-      && _turnCtx._imgSentCodes.has(String(code || "").toUpperCase())) {
+  //   Marker theo lượt (_luot().turnCtx._imgSentCodes, reset mỗi lượt) -> lượt SAU vẫn gửi lại bình thường.
+  if (_luot().turnCtx && _luot().turnCtx.convId === conversationId && _luot().turnCtx._imgSentCodes
+      && _luot().turnCtx._imgSentCodes.has(String(code || "").toUpperCase())) {
     console.log(`IMG ${String(code || "").toUpperCase()}: đã gửi ảnh ở LƯỢT NÀY -> KHÔNG gửi lại (chống lặp trong lượt).`);
     if (leadText) { try { await _sendInboxMessage(conversationId, leadText); } catch (_) {} }
     return;
@@ -4870,7 +4885,7 @@ async function maybeSendImages(conversationId, code, mem, force, leadText) {
     pendingImageResends.delete(String(conversationId));
     try { await untagXuLyAnh(conversationId); } catch (_) {}   // GỬI ĐƯỢC ẢNH -> luôn TỰ GỠ thẻ AI-XL ảnh (184)
     if (!mem.sentImageCodes.includes(code)) mem.sentImageCodes.push(code);
-    if (_turnCtx && _turnCtx.convId === conversationId && _turnCtx._imgSentCodes) _turnCtx._imgSentCodes.add(C);   // [Đặng Vân] đánh dấu đã gửi mã này trong lượt
+    if (_luot().turnCtx && _luot().turnCtx.convId === conversationId && _luot().turnCtx._imgSentCodes) _luot().turnCtx._imgSentCodes.add(C);   // [Đặng Vân] đánh dấu đã gửi mã này trong lượt
     mem.lastShownCode = C; mem.lastShownAt = Date.now();   // NHỚ mẫu của bộ ẢNH GẦN NHẤT đã hiện -> follow-up "có màu khác/size" bám đúng mẫu này
     if (_allColorItems) {
       // Đã gửi ĐỦ MÀU -> KHÔNG chốt 1 màu mặc định; đánh dấu để lúc chốt HỎI "lấy màu nào".
@@ -5044,7 +5059,7 @@ function priceLine(p) {
   // KHÔNG công bố số-sau-giảm (giảm 50% với đơn THANH TOÁN TRƯỚC — giá cuối do người thật chốt theo
   // hình thức thanh toán). Áp cho MỌI mẫu (kể cả cột K trống), xét TRƯỚC priceText.
   try {
-    const _sgG = saleProgram(_curPageId);
+    const _sgG = saleProgram(_luot().curPageId);
     if (_sgG && _sgG.che_do_sale_gon && _sgG.cau_kem_bao_gia && gocOk) {
       return `có giá ${formatPrice(gocRaw)} ạ.\n${_sgG.cau_kem_bao_gia}`;
     }
@@ -5056,7 +5071,7 @@ function priceLine(p) {
   if (hasSale && gocOk && _numOf(sale) >= _numOf(gocRaw)) {
     console.log(`[KM GIÁ GỐC SAI] mẫu ${p.code || p.name || "?"}: giá gốc ${gocRaw} <= giá KM ${sale} -> kiểm tra sheet (cột H phải là giá cũ, cột K giá giảm). Tạm báo 1 giá.`);
     try {
-      const _sg1 = saleProgram(_curPageId);
+      const _sg1 = saleProgram(_luot().curPageId);
       if (_sg1 && _sg1.che_do_sale_gon && _sg1.cau_kem_bao_gia) return `có giá ${formatPrice(sale)} chị nha 🥰\n${_sg1.cau_kem_bao_gia}`;
     } catch (_) {}
     return `giá ${formatPrice(sale)}`;
@@ -5065,7 +5080,7 @@ function priceLine(p) {
     // [SALE GỌN 2026-07] câu báo giá theo chương trình (khuyen_mai.json, tự tắt khi hết hạn/gạt cờ):
     // "Dạ mẫu {tên} có giá {gốc}, đang giảm còn {sale} chị nha 🥰 {câu chương trình} ạ. {Đuôi}"
     try {
-      const _sg = saleProgram(_curPageId);
+      const _sg = saleProgram(_luot().curPageId);
       if (_sg && _sg.che_do_sale_gon && _sg.cau_kem_bao_gia) {
         return `có giá ${formatPrice(gocRaw)}, đang giảm còn ${formatPrice(sale)} chị nha 🥰\n${_sg.cau_kem_bao_gia}`;
       }
@@ -5198,7 +5213,7 @@ function openerOrLead(product, mem) {
 // ===== FOLLOW-UP: câu CHỈ TRẢ LỜI (không kèm hành động) -> chờ ~30s, khách im thì gửi 1 CÂU HÀNH ĐỘNG =====
 const FOLLOWUP_DELAY_MS = 15 * 1000;   // mặc định 15s khách im -> gửi 1 câu hành động
 const pendingFollowups = new Map();   // convId -> { at, action, delay }
-let _sendingFollowup = false;         // đang gửi 1 follow-up -> KHÔNG cho hook tự hẹn follow-up MỚI (tránh nhắc vô hạn)
+// đang gửi 1 follow-up -> KHÔNG cho hook tự hẹn follow-up MỚI. Nay theo lượt: _luot().sendingFollowup
 
 // ===== MAP TAY: Ad ID THẬT -> mẫu (cứu ad "dark post" không đọc được ảnh/caption) =====
 // File ad_product_map.json cạnh bot:  { "120253029752640550": "CORINE", ... }
@@ -5637,7 +5652,7 @@ async function sweepFollowups() {
           }
         }
       } catch (_) { /* đọc lỗi -> vẫn gửi follow như cũ (an toàn) */ }
-      _sendingFollowup = true;
+      _luot().sendingFollowup = true;
       await sendInboxMessage(cid, info.action);
       const m = getConversationState(cid);
       m.lastBotReply = info.action;
@@ -5656,7 +5671,7 @@ async function sweepFollowups() {
         }
       }
     } catch (e) { console.log("Lỗi follow-up:", e.message); }
-    finally { _sendingFollowup = false; }
+    finally { _luot().sendingFollowup = false; }
   }
 }
 
@@ -5675,14 +5690,14 @@ async function processOneConversation(conversation) {
   const _unreadCustomerWaiting = (conversation.seen === false) && khachDangCho(conversation);
   const mem = getConversationState(conversationId);
   mem._pageId = String(conversationId).split("_")[0];   // [CHƯƠNG TRÌNH KM] cho buildDiscountReply tra khuyen_mai.json theo page
-  _curPageId = mem._pageId;   // [SALE GỌN] cho priceLine (hàm thuần, không có mem) tra được chương trình
+  _luot().curPageId = mem._pageId;   // [SALE GỌN] cho priceLine (hàm thuần, không có mem) tra được chương trình
   // CHỈ huỷ follow-up khi KHÁCH thật sự là người nhắn CUỐI (tức khách vừa nhắn tin mới -> đang chờ shop).
   // Nếu tin cuối là phía shop/bot (khachDangCho=false) -> ĐỪNG huỷ: để câu nhắc 15s/60s kịp bắn,
   // không bị xoá oan mỗi vòng poll. (Trước đây huỷ cho MỌI hội thoại trong fresh -> có thể giết follow-up sớm.)
   if (khachDangCho(conversation)) cancelFollowup(conversationId);
   // RỬA dữ liệu cũ: FREESIZE KHÔNG phải size người -> xoá khỏi customerSize (memory cũ có thể đã lưu nhầm).
   if (mem.customerSize === "FREESIZE") { mem.customerSize = null; mem.sizeFromCustomer = false; }
-  _turnCtx = { convId: conversationId, mem, productInfo: null, _imgSentCodes: new Set() };   // ngữ cảnh để sendInboxMessage tự hẹn follow-up; _imgSentCodes: chống gửi ảnh CÙNG mã 2 lần trong 1 lượt (Đặng Vân)
+  _luot().turnCtx = { convId: conversationId, mem, productInfo: null, _imgSentCodes: new Set() };   // ngữ cảnh để sendInboxMessage tự hẹn follow-up; _imgSentCodes: chống gửi ảnh CÙNG mã 2 lần trong 1 lượt (Đặng Vân)
   mem.sentImageCodes = mem.sentImageCodes || [];
   mem.pricedCodes = mem.pricedCodes || [];
 
@@ -5759,8 +5774,8 @@ async function processOneConversation(conversation) {
   // trong lúc đang gửi loạt ảnh (thì NGỪNG bắn tiếp, tránh đè/trôi tin khách).
   try {
     const _lastCust = getLastCustomerMessages(data.messages);
-    if (_turnCtx && _turnCtx.convId === conversationId && _lastCust.length) {
-      _turnCtx.lastCustAt = new Date(_lastCust[_lastCust.length - 1].insertedAt).getTime();
+    if (_luot().turnCtx && _luot().turnCtx.convId === conversationId && _lastCust.length) {
+      _luot().turnCtx.lastCustAt = new Date(_lastCust[_lastCust.length - 1].insertedAt).getTime();
     }
   } catch (_) {}
 
@@ -5816,6 +5831,24 @@ async function processOneConversation(conversation) {
 
   const isCommentOrigin =
     String(conversation.type || "").toUpperCase() === "COMMENT" || !!data.postId;
+
+  // ===== [GĐ1 · mục 3.5] KÝ HIỆU NGUỒN — MỌI hội thoại, đúng một lần =====
+  // Trước đây chỉ hội thoại từ quảng cáo CÓ BÁO GIÁ mới được ghi chú nguồn; khách từ
+  // bình luận hoặc ca bot nhường người thật thì nhân viên mở lên không biết khách ở đâu ra.
+  try {
+    await nguonHoiThoai.danhDau({
+      conversationId,
+      mem,
+      chiTiet: {
+        fromAd: !!data.fromAd,
+        adId: data.adId || null,
+        isCommentOrigin,
+        postId: data.adPostId || data.postId || null,
+        tenAd: data.adTitle || data.postCaption || null
+      },
+      ghiChuHam: addConversationNote
+    });
+  } catch (_) {}
   const windowOpen = data.canInbox === true || hasInboxMessage(data.messages);
   const inboxId = data.inboxConversationId;
   // ĐÍCH gửi DM cho tin ĐẦU từ comment:
@@ -6547,16 +6580,11 @@ async function processOneConversation(conversation) {
       } catch (_) {}
       // ĐẢO THỨ TỰ: gửi TEXT opener (giá + câu hành động ở cuối) SAU khi đã gửi ảnh -> ảnh trước, text sau, hành động sau cùng.
       await sendInboxMessage(conversationId, opener);
-      // Ghi NGUỒN ADS vào ô Ghi chú (1 lần/hội thoại) -> NV thấy khách đến từ ad nào, bài nào.
+      // Ghi chú BỔ SUNG: mẫu nào ứng với quảng cáo khách bấm.
+      // (Dấu nguồn "🎯 TỪ QUẢNG CÁO | tên ad | bài | adId" đã ghi ngay từ đầu hội thoại trong
+      //  nguon_hoi_thoai.danhDau — ở đây chỉ thêm phần mẫu, không lặp lại phần kia.)
       if (!mem.adNoteWritten) {
-        const _postId = data.adPostId || data.postId || "";
-        const _postLink = _postId ? `facebook.com/${_postId}` : "";
-        const _adName = String(data.adTitle || data.postCaption || "").split("\n")[0].slice(0, 60).trim();
-        const _note = `🎯 Khách từ ADS${_adName ? `: ${_adName}` : ""}`
-          + (_postLink ? ` | bài: ${_postLink}` : "")
-          + ` | mẫu: ${product.name} (${product.code})`
-          + (_adId ? ` | adId: ${_adId}` : "");
-        try { await addConversationNote(conversationId, _note); } catch (_) {}
+        try { await addConversationNote(conversationId, `🎯 Mẫu ứng với quảng cáo: ${product.name} (${product.code})`); } catch (_) {}
         mem.adNoteWritten = true;
       }
       mem.lastBotReply = opener;
@@ -6670,7 +6698,7 @@ async function processOneConversation(conversation) {
     const latestTextRaw = batch.filter(x => x.type === "text").map(x => (x.text || "").normalize("NFKC")).join(" ");
     const latestText = normalizeViet(latestTextRaw);   // dò ý trên bản CHUẨN HOÁ (viết tắt/lặp -> chuẩn)
     mem._lastCustText = latestText;   // [CHƯƠNG TRÌNH KM] để buildDiscountReply phân biệt khách hỏi "áp dụng online không"
-    if (_turnCtx) _turnCtx.customerText = latestText;   // để scheduleFollowup biết khách vừa HỎI gì
+    if (_luot().turnCtx) _luot().turnCtx.customerText = latestText;   // để scheduleFollowup biết khách vừa HỎI gì
     let askImages = wantsImages(latestText);
     mem.lastIntent = detectIntent(latestText);
     let priceAsk = isPriceAsk(latestText, mem.lastIntent);   // [AI-QUYẾT giá] giá trị regex BAN ĐẦU; sẽ bị AI ghi đè ngay sau khi AI đọc (xem dưới)
@@ -7763,7 +7791,7 @@ async function processOneConversation(conversation) {
       }
     }
 
-    if (_turnCtx) _turnCtx.productInfo = productInfo;   // cho sendInboxMessage chọn câu follow-up đúng mẫu
+    if (_luot().turnCtx) _luot().turnCtx.productInfo = productInfo;   // cho sendInboxMessage chọn câu follow-up đúng mẫu
     // ≥2 CÂU HỎI THUỘC TÍNH trong 1 lượt (chất liệu / co giãn / lót / set-liền) -> để AI GỘP trả ĐỦ ý
     // (mượt + không bỏ sót), thay vì handler đơn lẻ trả 1 ý rồi return. Chỉ khi AI_REPLY_MODE=on.
     const _attrQ = [
@@ -8426,7 +8454,7 @@ async function processOneConversation(conversation) {
           mem.orderColor = _wantColor;        // nhớ màu đã chọn để LÊN ĐƠN
           mem.orderColorByCode = Object.assign({}, mem.orderColorByCode || {}, { [String(picked.code || "").toUpperCase()]: _wantColor });
           mem.upsellAsked = false;
-          if (_turnCtx) _turnCtx.productInfo = picked;
+          if (_luot().turnCtx) _luot().turnCtx.productInfo = picked;
           console.log(`[${BOT_NAME}] Khách chọn theo MÀU "${_wantColor}" -> co về mẫu ${picked.code} (${picked.name}) | nguồn màu: ${byImg ? "ảnh" : "sheet"}.`);
         }
       } else if (_wantColor && _cluster.length === 1 && _pickIntent && !_isAvailQ) {
@@ -12687,22 +12715,26 @@ async function processOnce() {
         console.log(`  -> type=${c.type} | from=${c.from && c.from.name} | last_sent_by=${lsb} | id=${c.id}`);
       }
     }
-    // Xử NHIỀU khách/nhịp (không còn 1-khách-rồi-nghỉ): giải quyết hàng đợi nhanh.
-    // Cap 5/nhịp + nghỉ nhẹ 400ms giữa 2 khách để không dồn request (vẫn dưới 5/s, tính riêng mỗi page).
-    let _handled = 0;
-    const MAX_PER_CYCLE = 5;
-    for (const conv of fresh) {
-      const handled = await turnLog.run({
-        conversationId: conv.id,
-        pageId: pageRegistry.pageIdFromConv(conv.id) || String(conv.id).split("_")[0],
-        kenh: String(conv.type || "").toUpperCase().includes("COMMENT") ? "COMMENT" : "INBOX"
-      }, () => processOneConversation(conv));
-      if (handled) {
-        _handled++;
-        if (_handled >= MAX_PER_CYCLE) return;
-        try { await delay(400); } catch (_) {}
-      }
+    // ===== [GĐ1] XỬ LÝ SONG SONG THEO HỘI THOẠI =====
+    // Trước: tuần tự, tối đa 5 hội thoại/nhịp, nghỉ 400ms giữa hai khách -> một ca nhận diện
+    // ảnh 6 giây là cả hàng đợi đứng chờ. Không đạt mục 3.9 ("một khách gửi ảnh không làm
+    // chậm khách khác").
+    // Nay: SONG_SONG hội thoại chạy cùng lúc; MỖI hội thoại vẫn có khoá riêng (không bao giờ
+    // hai luồng cùng xử một khách); nhịp gọi Pancake do dieu_tiet.js giữ theo TỪNG page nên
+    // không còn phải chèn delay(400) thủ công.
+    // Đổi mức song song: SONG_SONG=<n> trong .env. SONG_SONG=1 = quay về y hệt cách cũ.
+    const _dangXu = fresh.filter(c => !dieuTiet.dangBanKhoa(String(c.id)));   // hội thoại đang được luồng khác xử -> bỏ qua nhịp này
+    if (_dangXu.length < fresh.length && process.env.SHOW_QUEUE === "1") {
+      console.log(`[song song] ${fresh.length - _dangXu.length} hội thoại đang được xử ở nhịp trước -> để nguyên.`);
     }
+    await dieuTiet.chayNhieu(_dangXu, (conv) =>
+      dieuTiet.khoaTheoKhoa(String(conv.id), () =>
+        turnLog.run({
+          conversationId: conv.id,
+          pageId: pageRegistry.pageIdFromConv(conv.id) || String(conv.id).split("_")[0],
+          kenh: String(conv.type || "").toUpperCase().includes("COMMENT") ? "COMMENT" : "INBOX"
+        }, () => processOneConversation(conv))
+      ), { toiDa: dieuTiet.SONG_SONG, dungSau: MAX_MOI_NHIP });
   } catch (err) {
     console.log("Lỗi processOnce:", err.message);
   } finally {

@@ -127,6 +127,7 @@ function run(ctx, fn) {
         t.nhuongNguoiThat = t._lyDo || "khong-ro";
       }
       delete t._lyDo;
+      delete t._luot;   // túi ngữ cảnh của lượt (Set, object bộ nhớ...) — không đưa vào log
       // Lượt không làm gì (bot bỏ qua hội thoại) thì không cần ghi -> log khỏi loãng.
       if (t.daTraLoi || t.ai.length || t.theGan.length || t.theGo.length || t.nhuongNguoiThat || t.loi) {
         ghiDong(t);
