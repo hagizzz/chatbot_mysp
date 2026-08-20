@@ -1,0 +1,902 @@
+[
+  {
+    "nguon": "bo_nho",
+    "conversationId": "1468690110033030_#07b72730",
+    "tinKhach": "mình xin giá ạ",
+    "mong": {
+      "nhanRegex": "ASK_PRICE",
+      "nhanAI": "PRICE_ASK",
+      "maSanPham": "MGKVX6310",
+      "size": null,
+      "canNang": null,
+      "giaiDoan": "consulting"
+    },
+    "boiCanh": {
+      "daBaoGia": true,
+      "daGuiAnh": true,
+      "daChotDon": false,
+      "coSDT": false,
+      "coDiaChi": false
+    }
+  },
+  {
+    "nguon": "bo_nho",
+    "conversationId": "1468690110033030_#9c11b16b",
+    "tinKhach": "mẫu này có hở lưng quá không ạ không mình sợ mak áo con hở ỏ trong ý ạ",
+    "mong": {
+      "nhanRegex": "ASK_COLOR",
+      "nhanAI": "PRODUCT_DETAIL_QA",
+      "maSanPham": "MGKVX6010",
+      "size": "M",
+      "canNang": null,
+      "giaiDoan": "consulting"
+    },
+    "boiCanh": {
+      "daBaoGia": true,
+      "daGuiAnh": true,
+      "daChotDon": false,
+      "coSDT": false,
+      "coDiaChi": false
+    }
+  },
+  {
+    "nguon": "bo_nho",
+    "conversationId": "1468690110033030_#7d401ab4",
+    "tinKhach": "tư vấn cho chị thiết kế zoise mặt hàng này có giá bao nhiêu?",
+    "mong": {
+      "nhanRegex": "ASK_PRICE",
+      "nhanAI": "PRICE_ASK",
+      "maSanPham": "MRKSQ6040",
+      "size": null,
+      "canNang": null,
+      "giaiDoan": "consulting"
+    },
+    "boiCanh": {
+      "daBaoGia": true,
+      "daGuiAnh": true,
+      "daChotDon": false,
+      "coSDT": false,
+      "coDiaChi": false
+    }
+  },
+  {
+    "nguon": "bo_nho",
+    "conversationId": "1468690110033030_#7b9133af",
+    "tinKhach": "set này màu trắng kem hả em chị cao 1.53m nặng 48 kí",
+    "mong": {
+      "nhanRegex": "ASK_COLOR",
+      "nhanAI": "COLOR_ASK",
+      "maSanPham": "MRAD5171",
+      "size": null,
+      "canNang": 48,
+      "giaiDoan": "consulting"
+    },
+    "boiCanh": {
+      "daBaoGia": false,
+      "daGuiAnh": false,
+      "daChotDon": false,
+      "coSDT": false,
+      "coDiaChi": false
+    }
+  },
+  {
+    "nguon": "bo_nho",
+    "conversationId": "1468690110033030_#1ec42ea0",
+    "tinKhach": "bắt đầu mẫu này có size 1m6 56kg không ạ",
+    "mong": {
+      "nhanRegex": "ASK_SIZE_ADVICE",
+      "nhanAI": "SIZE_ADVICE",
+      "maSanPham": null,
+      "size": null,
+      "canNang": 56,
+      "giaiDoan": "consulting"
+    },
+    "boiCanh": {
+      "daBaoGia": false,
+      "daGuiAnh": false,
+      "daChotDon": false,
+      "coSDT": false,
+      "coDiaChi": false
+    }
+  },
+  {
+    "nguon": "bo_nho",
+    "conversationId": "1468690110033030_#ebeea95d",
+    "tinKhach": "1m55 47kg",
+    "mong": {
+      "nhanRegex": "ASK_SIZE_ADVICE",
+      "nhanAI": "WEIGHT_HEIGHT",
+      "maSanPham": null,
+      "size": null,
+      "canNang": 47,
+      "giaiDoan": "consulting"
+    },
+    "boiCanh": {
+      "daBaoGia": true,
+      "daGuiAnh": false,
+      "daChotDon": false,
+      "coSDT": false,
+      "coDiaChi": false
+    }
+  },
+  {
+    "nguon": "bo_nho",
+    "conversationId": "1468690110033030_#d6e8d519",
+    "tinKhach": "không phải set ah shop",
+    "mong": {
+      "nhanRegex": "UNKNOWN",
+      "nhanAI": "OTHER",
+      "maSanPham": "MRAK5158",
+      "size": null,
+      "canNang": null,
+      "giaiDoan": "consulting"
+    },
+    "boiCanh": {
+      "daBaoGia": true,
+      "daGuiAnh": true,
+      "daChotDon": false,
+      "coSDT": false,
+      "coDiaChi": false
+    }
+  },
+  {
+    "nguon": "bo_nho",
+    "conversationId": "615738195133683_#593006bc",
+    "tinKhach": "xin gia",
+    "mong": {
+      "nhanRegex": "ASK_PRICE",
+      "nhanAI": "PRICE_ASK",
+      "maSanPham": "MGKVX6310",
+      "size": null,
+      "canNang": null,
+      "giaiDoan": "consulting"
+    },
+    "boiCanh": {
+      "daBaoGia": true,
+      "daGuiAnh": true,
+      "daChotDon": false,
+      "coSDT": false,
+      "coDiaChi": false
+    }
+  },
+  {
+    "nguon": "bo_nho",
+    "conversationId": "1468690110033030_#552cad07",
+    "tinKhach": "bắt đầu giá bao nhiêu ạ",
+    "mong": {
+      "nhanRegex": "ASK_PRICE",
+      "nhanAI": "PRICE_ASK",
+      "maSanPham": null,
+      "size": null,
+      "canNang": null,
+      "giaiDoan": "consulting"
+    },
+    "boiCanh": {
+      "daBaoGia": false,
+      "daGuiAnh": true,
+      "daChotDon": false,
+      "coSDT": false,
+      "coDiaChi": false
+    }
+  },
+  {
+    "nguon": "bo_nho",
+    "conversationId": "1468690110033030_#2b749aa6",
+    "tinKhach": "xin giá a",
+    "mong": {
+      "nhanRegex": "ASK_PRICE",
+      "nhanAI": "PRICE_ASK",
+      "maSanPham": null,
+      "size": null,
+      "canNang": null,
+      "giaiDoan": "consulting"
+    },
+    "boiCanh": {
+      "daBaoGia": false,
+      "daGuiAnh": false,
+      "daChotDon": false,
+      "coSDT": false,
+      "coDiaChi": false
+    }
+  },
+  {
+    "nguon": "bo_nho",
+    "conversationId": "1468690110033030_#2872308b",
+    "tinKhach": "shop ơi tầm mấy ngày e nhận được đồ v ạ",
+    "mong": {
+      "nhanRegex": "GREETING",
+      "nhanAI": "ORDER_STATUS",
+      "maSanPham": "MRAD5171",
+      "size": "L",
+      "canNang": null,
+      "giaiDoan": "consulting"
+    },
+    "boiCanh": {
+      "daBaoGia": false,
+      "daGuiAnh": false,
+      "daChotDon": false,
+      "coSDT": false,
+      "coDiaChi": false
+    }
+  },
+  {
+    "nguon": "bo_nho",
+    "conversationId": "1468690110033030_#fa844ba6",
+    "tinKhach": "co màu gi không mặt hàng này có giá bao nhiêu?",
+    "mong": {
+      "nhanRegex": "ASK_PRICE",
+      "nhanAI": "COLOR_ASK",
+      "maSanPham": "MRAD5446",
+      "size": null,
+      "canNang": null,
+      "giaiDoan": "consulting"
+    },
+    "boiCanh": {
+      "daBaoGia": false,
+      "daGuiAnh": false,
+      "daChotDon": false,
+      "coSDT": false,
+      "coDiaChi": false
+    }
+  },
+  {
+    "nguon": "bo_nho",
+    "conversationId": "1468690110033030_#bfac12e2",
+    "tinKhach": "bắt đầu",
+    "mong": {
+      "nhanRegex": "UNKNOWN",
+      "nhanAI": null,
+      "maSanPham": null,
+      "size": null,
+      "canNang": null,
+      "giaiDoan": "consulting"
+    },
+    "boiCanh": {
+      "daBaoGia": false,
+      "daGuiAnh": true,
+      "daChotDon": false,
+      "coSDT": false,
+      "coDiaChi": false
+    }
+  },
+  {
+    "nguon": "bo_nho",
+    "conversationId": "1468690110033030_#2fcc3da6",
+    "tinKhach": "👍",
+    "mong": {
+      "nhanRegex": "UNKNOWN",
+      "nhanAI": "OTHER",
+      "maSanPham": "MR0SV6441",
+      "size": null,
+      "canNang": null,
+      "giaiDoan": "consulting"
+    },
+    "boiCanh": {
+      "daBaoGia": false,
+      "daGuiAnh": false,
+      "daChotDon": false,
+      "coSDT": false,
+      "coDiaChi": false
+    }
+  },
+  {
+    "nguon": "bo_nho",
+    "conversationId": "1468690110033030_#6868a65b",
+    "tinKhach": "chất có bị nóng không e ha",
+    "mong": {
+      "nhanRegex": "UNKNOWN",
+      "nhanAI": "MATERIAL_QA",
+      "maSanPham": null,
+      "size": null,
+      "canNang": 44,
+      "giaiDoan": "consulting"
+    },
+    "boiCanh": {
+      "daBaoGia": false,
+      "daGuiAnh": false,
+      "daChotDon": false,
+      "coSDT": false,
+      "coDiaChi": false
+    }
+  },
+  {
+    "nguon": "bo_nho",
+    "conversationId": "1468690110033030_#58d75f02",
+    "tinKhach": "áo không là như thế nào z sh,? cho xin hình được lg như thế này là áo hay nguyên set z sh",
+    "mong": {
+      "nhanRegex": "UNKNOWN",
+      "nhanAI": "PRODUCT_DETAIL_QA",
+      "maSanPham": "MRAD5446",
+      "size": "L",
+      "canNang": 57,
+      "giaiDoan": "consulting"
+    },
+    "boiCanh": {
+      "daBaoGia": true,
+      "daGuiAnh": true,
+      "daChotDon": false,
+      "coSDT": false,
+      "coDiaChi": false
+    }
+  },
+  {
+    "nguon": "bo_nho",
+    "conversationId": "1468690110033030_#66938e2e",
+    "tinKhach": "mẫu này e nhé, size s",
+    "mong": {
+      "nhanRegex": "PROVIDE_SIZE",
+      "nhanAI": "ORDER_CLOSE",
+      "maSanPham": "MGKVX6310",
+      "size": "S",
+      "canNang": null,
+      "giaiDoan": "consulting"
+    },
+    "boiCanh": {
+      "daBaoGia": false,
+      "daGuiAnh": false,
+      "daChotDon": false,
+      "coSDT": false,
+      "coDiaChi": false
+    }
+  },
+  {
+    "nguon": "bo_nho",
+    "conversationId": "1468690110033030_#2cc7c56d",
+    "tinKhach": "chất gì vậy c",
+    "mong": {
+      "nhanRegex": "UNKNOWN",
+      "nhanAI": "MATERIAL_QA",
+      "maSanPham": null,
+      "size": null,
+      "canNang": null,
+      "giaiDoan": "consulting"
+    },
+    "boiCanh": {
+      "daBaoGia": false,
+      "daGuiAnh": false,
+      "daChotDon": false,
+      "coSDT": false,
+      "coDiaChi": false
+    }
+  },
+  {
+    "nguon": "bo_nho",
+    "conversationId": "1468690110033030_#ea505a12",
+    "tinKhach": "m hỏi xe ghép 150k ship",
+    "mong": {
+      "nhanRegex": "PROVIDE_SIZE",
+      "nhanAI": "PRICE_ASK",
+      "maSanPham": null,
+      "size": null,
+      "canNang": 44,
+      "giaiDoan": "consulting"
+    },
+    "boiCanh": {
+      "daBaoGia": false,
+      "daGuiAnh": false,
+      "daChotDon": false,
+      "coSDT": false,
+      "coDiaChi": false
+    }
+  },
+  {
+    "nguon": "bo_nho",
+    "conversationId": "1468690110033030_#eeb5abce",
+    "tinKhach": "áo có sẵn store hn không e",
+    "mong": {
+      "nhanRegex": "ASK_SIZE",
+      "nhanAI": "STORE_STOCK",
+      "maSanPham": "MRAD5171",
+      "size": "M",
+      "canNang": null,
+      "giaiDoan": "consulting"
+    },
+    "boiCanh": {
+      "daBaoGia": false,
+      "daGuiAnh": false,
+      "daChotDon": false,
+      "coSDT": false,
+      "coDiaChi": false
+    }
+  },
+  {
+    "nguon": "bo_nho",
+    "conversationId": "1468690110033030_#f5d5cc34",
+    "tinKhach": "tư vấn cho chị thiết kế camellia",
+    "mong": {
+      "nhanRegex": "UNKNOWN",
+      "nhanAI": "PRICE_ASK",
+      "maSanPham": "MRAD5171",
+      "size": null,
+      "canNang": null,
+      "giaiDoan": "consulting"
+    },
+    "boiCanh": {
+      "daBaoGia": true,
+      "daGuiAnh": true,
+      "daChotDon": false,
+      "coSDT": false,
+      "coDiaChi": false
+    }
+  },
+  {
+    "nguon": "bo_nho",
+    "conversationId": "1468690110033030_#7e423ec0",
+    "tinKhach": "tư vấn chị thiết kế zoellea",
+    "mong": {
+      "nhanRegex": "UNKNOWN",
+      "nhanAI": "PRICE_ASK",
+      "maSanPham": "MRKVX6382",
+      "size": null,
+      "canNang": null,
+      "giaiDoan": "consulting"
+    },
+    "boiCanh": {
+      "daBaoGia": true,
+      "daGuiAnh": true,
+      "daChotDon": false,
+      "coSDT": false,
+      "coDiaChi": false
+    }
+  },
+  {
+    "nguon": "bo_nho",
+    "conversationId": "1468690110033030_#cc5671f9",
+    "tinKhach": "70kg vừa không ạ",
+    "mong": {
+      "nhanRegex": "ASK_SIZE_ADVICE",
+      "nhanAI": "SIZE_ADVICE",
+      "maSanPham": "MMQD591",
+      "size": "L",
+      "canNang": 70,
+      "giaiDoan": "consulting"
+    },
+    "boiCanh": {
+      "daBaoGia": true,
+      "daGuiAnh": false,
+      "daChotDon": false,
+      "coSDT": false,
+      "coDiaChi": false
+    }
+  },
+  {
+    "nguon": "bo_nho",
+    "conversationId": "1468690110033030_#de6f0ce5",
+    "tinKhach": "m55 45kg size nào",
+    "mong": {
+      "nhanRegex": "ASK_SIZE_ADVICE",
+      "nhanAI": "SIZE_ADVICE",
+      "maSanPham": "MGVX5197",
+      "size": "S",
+      "canNang": 50,
+      "giaiDoan": "consulting"
+    },
+    "boiCanh": {
+      "daBaoGia": true,
+      "daGuiAnh": true,
+      "daChotDon": false,
+      "coSDT": false,
+      "coDiaChi": false
+    }
+  },
+  {
+    "nguon": "bo_nho",
+    "conversationId": "1468690110033030_#0e509a97",
+    "tinKhach": "c có hỏi set này đâu mà e tư vấn",
+    "mong": {
+      "nhanRegex": "UNKNOWN",
+      "nhanAI": "OTHER",
+      "maSanPham": "MRKSQ6310",
+      "size": "M",
+      "canNang": null,
+      "giaiDoan": "consulting"
+    },
+    "boiCanh": {
+      "daBaoGia": true,
+      "daGuiAnh": true,
+      "daChotDon": false,
+      "coSDT": false,
+      "coDiaChi": false
+    }
+  },
+  {
+    "nguon": "bo_nho",
+    "conversationId": "1468690110033030_#dfe6a1ad",
+    "tinKhach": "mẫu này có sẵn size m không shop",
+    "mong": {
+      "nhanRegex": "PROVIDE_SIZE",
+      "nhanAI": "STOCK",
+      "maSanPham": "MRKVX6371",
+      "size": "M",
+      "canNang": null,
+      "giaiDoan": "consulting"
+    },
+    "boiCanh": {
+      "daBaoGia": false,
+      "daGuiAnh": false,
+      "daChotDon": false,
+      "coSDT": false,
+      "coDiaChi": false
+    }
+  },
+  {
+    "nguon": "bo_nho",
+    "conversationId": "1468690110033030_#673dd8f8",
+    "tinKhach": "thank e, c nghĩ chút r c nhắn nhé",
+    "mong": {
+      "nhanRegex": "THANKS",
+      "nhanAI": "DEFER_DECISION",
+      "maSanPham": "MGKVX6010",
+      "size": null,
+      "canNang": null,
+      "giaiDoan": "consulting"
+    },
+    "boiCanh": {
+      "daBaoGia": true,
+      "daGuiAnh": true,
+      "daChotDon": false,
+      "coSDT": false,
+      "coDiaChi": false
+    }
+  },
+  {
+    "nguon": "bo_nho",
+    "conversationId": "1468690110033030_#faaa8b34",
+    "tinKhach": "mặt hàng này có giá bao nhiêu?",
+    "mong": {
+      "nhanRegex": "ASK_PRICE",
+      "nhanAI": "PRICE_ASK",
+      "maSanPham": null,
+      "size": null,
+      "canNang": null,
+      "giaiDoan": "consulting"
+    },
+    "boiCanh": {
+      "daBaoGia": false,
+      "daGuiAnh": false,
+      "daChotDon": false,
+      "coSDT": false,
+      "coDiaChi": false
+    }
+  },
+  {
+    "nguon": "bo_nho",
+    "conversationId": "1468690110033030_#0942b442",
+    "tinKhach": "cho xem anh thạt",
+    "mong": {
+      "nhanRegex": "UNKNOWN",
+      "nhanAI": "IMAGE_REQ",
+      "maSanPham": "MRKVX6382",
+      "size": null,
+      "canNang": null,
+      "giaiDoan": "consulting"
+    },
+    "boiCanh": {
+      "daBaoGia": true,
+      "daGuiAnh": true,
+      "daChotDon": false,
+      "coSDT": false,
+      "coDiaChi": false
+    }
+  },
+  {
+    "nguon": "bo_nho",
+    "conversationId": "615738195133683_#6842dc8b",
+    "tinKhach": "ngực 105 eo 85 mặc vừa không em",
+    "mong": {
+      "nhanRegex": "ASK_SIZE_ADVICE",
+      "nhanAI": "SIZE_ADVICE",
+      "maSanPham": "MRVX5422",
+      "size": null,
+      "canNang": null,
+      "giaiDoan": "consulting"
+    },
+    "boiCanh": {
+      "daBaoGia": true,
+      "daGuiAnh": true,
+      "daChotDon": false,
+      "coSDT": false,
+      "coDiaChi": false
+    }
+  },
+  {
+    "nguon": "bo_nho",
+    "conversationId": "1468690110033030_#f5e58c0e",
+    "tinKhach": "váy giá bao nhiêu v ạ",
+    "mong": {
+      "nhanRegex": "ASK_PRICE",
+      "nhanAI": "PRICE_ASK",
+      "maSanPham": "MR0VS6078",
+      "size": null,
+      "canNang": null,
+      "giaiDoan": "consulting"
+    },
+    "boiCanh": {
+      "daBaoGia": true,
+      "daGuiAnh": true,
+      "daChotDon": false,
+      "coSDT": false,
+      "coDiaChi": false
+    }
+  },
+  {
+    "nguon": "bo_nho",
+    "conversationId": "1468690110033030_#04d2512a",
+    "tinKhach": "m7 60kg thì sai gì được ạ",
+    "mong": {
+      "nhanRegex": "ASK_SIZE_ADVICE",
+      "nhanAI": "WEIGHT_HEIGHT",
+      "maSanPham": "MRKSV6177",
+      "size": null,
+      "canNang": 42,
+      "giaiDoan": "consulting"
+    },
+    "boiCanh": {
+      "daBaoGia": true,
+      "daGuiAnh": true,
+      "daChotDon": false,
+      "coSDT": false,
+      "coDiaChi": false
+    }
+  },
+  {
+    "nguon": "bo_nho",
+    "conversationId": "1468690110033030_#38c24f27",
+    "tinKhach": "tư vấn cho chị thiết kế zoya",
+    "mong": {
+      "nhanRegex": "UNKNOWN",
+      "nhanAI": "PRICE_ASK",
+      "maSanPham": "MR0SV6441",
+      "size": null,
+      "canNang": null,
+      "giaiDoan": "consulting"
+    },
+    "boiCanh": {
+      "daBaoGia": true,
+      "daGuiAnh": true,
+      "daChotDon": false,
+      "coSDT": false,
+      "coDiaChi": false
+    }
+  },
+  {
+    "nguon": "bo_nho",
+    "conversationId": "1468690110033030_#9f7d2ad2",
+    "tinKhach": "giá bộ nay",
+    "mong": {
+      "nhanRegex": "ASK_PRICE",
+      "nhanAI": null,
+      "maSanPham": null,
+      "size": null,
+      "canNang": null,
+      "giaiDoan": "consulting"
+    },
+    "boiCanh": {
+      "daBaoGia": false,
+      "daGuiAnh": false,
+      "daChotDon": false,
+      "coSDT": false,
+      "coDiaChi": false
+    }
+  },
+  {
+    "nguon": "bo_nho",
+    "conversationId": "615738195133683_#17a715eb",
+    "tinKhach": "tư vấn cho chị mẫu agnes",
+    "mong": {
+      "nhanRegex": "ASK_COLOR",
+      "nhanAI": "PRICE_ASK",
+      "maSanPham": "MRKAK6490",
+      "size": null,
+      "canNang": null,
+      "giaiDoan": "consulting"
+    },
+    "boiCanh": {
+      "daBaoGia": true,
+      "daGuiAnh": true,
+      "daChotDon": false,
+      "coSDT": false,
+      "coDiaChi": false
+    }
+  },
+  {
+    "nguon": "bo_nho",
+    "conversationId": "615738195133683_#994ed5cf",
+    "tinKhach": "tư vấn cho chị mẫu ingrid",
+    "mong": {
+      "nhanRegex": "ASK_COLOR",
+      "nhanAI": "PRICE_ASK",
+      "maSanPham": null,
+      "size": null,
+      "canNang": null,
+      "giaiDoan": "consulting"
+    },
+    "boiCanh": {
+      "daBaoGia": true,
+      "daGuiAnh": true,
+      "daChotDon": false,
+      "coSDT": false,
+      "coDiaChi": false
+    }
+  },
+  {
+    "nguon": "bo_nho",
+    "conversationId": "1468690110033030_#a1092b19",
+    "tinKhach": "xin giáays mẫu này",
+    "mong": {
+      "nhanRegex": "ASK_PRICE",
+      "nhanAI": "PRICE_ASK",
+      "maSanPham": "MGVX5147",
+      "size": null,
+      "canNang": null,
+      "giaiDoan": "consulting"
+    },
+    "boiCanh": {
+      "daBaoGia": true,
+      "daGuiAnh": true,
+      "daChotDon": false,
+      "coSDT": false,
+      "coDiaChi": false
+    }
+  },
+  {
+    "nguon": "bo_nho",
+    "conversationId": "615738195133683_#02dbabf8",
+    "tinKhach": "cho mình giá và bảng size mẫu này nhé",
+    "mong": {
+      "nhanRegex": "ASK_PRICE",
+      "nhanAI": null,
+      "maSanPham": null,
+      "size": null,
+      "canNang": null,
+      "giaiDoan": "consulting"
+    },
+    "boiCanh": {
+      "daBaoGia": false,
+      "daGuiAnh": false,
+      "daChotDon": false,
+      "coSDT": false,
+      "coDiaChi": false
+    }
+  },
+  {
+    "nguon": "bo_nho",
+    "conversationId": "1468690110033030_#a95530b8",
+    "tinKhach": "shop em ở đâu e ơi",
+    "mong": {
+      "nhanRegex": "UNKNOWN",
+      "nhanAI": "STORE_ADDRESS",
+      "maSanPham": "MRVS5190",
+      "size": null,
+      "canNang": 53,
+      "giaiDoan": "consulting"
+    },
+    "boiCanh": {
+      "daBaoGia": true,
+      "daGuiAnh": false,
+      "daChotDon": false,
+      "coSDT": false,
+      "coDiaChi": false
+    }
+  },
+  {
+    "nguon": "bo_nho",
+    "conversationId": "1468690110033030_#1a48026b",
+    "tinKhach": "ib gia chất liệu vải là gì em",
+    "mong": {
+      "nhanRegex": "ASK_PRICE",
+      "nhanAI": "PRICE_ASK",
+      "maSanPham": null,
+      "size": null,
+      "canNang": 51,
+      "giaiDoan": "consulting"
+    },
+    "boiCanh": {
+      "daBaoGia": true,
+      "daGuiAnh": true,
+      "daChotDon": false,
+      "coSDT": false,
+      "coDiaChi": false
+    }
+  },
+  {
+    "nguon": "bo_nho",
+    "conversationId": "1468690110033030_#60a1b281",
+    "tinKhach": "ib",
+    "mong": {
+      "nhanRegex": "UNKNOWN",
+      "nhanAI": "GREETING",
+      "maSanPham": "MGKVX6310",
+      "size": null,
+      "canNang": null,
+      "giaiDoan": "consulting"
+    },
+    "boiCanh": {
+      "daBaoGia": false,
+      "daGuiAnh": false,
+      "daChotDon": false,
+      "coSDT": false,
+      "coDiaChi": false
+    }
+  },
+  {
+    "nguon": "bo_nho",
+    "conversationId": "615738195133683_#4c68e1e4",
+    "tinKhach": "ok em",
+    "mong": {
+      "nhanRegex": "THANKS",
+      "nhanAI": "POST_ORDER_CHITCHAT",
+      "maSanPham": "MRKSQ6040",
+      "size": "S",
+      "canNang": null,
+      "giaiDoan": "consulting"
+    },
+    "boiCanh": {
+      "daBaoGia": false,
+      "daGuiAnh": false,
+      "daChotDon": false,
+      "coSDT": true,
+      "coDiaChi": true
+    }
+  },
+  {
+    "nguon": "bo_nho",
+    "conversationId": "1468690110033030_#8bda44f5",
+    "tinKhach": "m xin giá",
+    "mong": {
+      "nhanRegex": "PROVIDE_SIZE",
+      "nhanAI": "PRICE_ASK",
+      "maSanPham": null,
+      "size": null,
+      "canNang": null,
+      "giaiDoan": "consulting"
+    },
+    "boiCanh": {
+      "daBaoGia": false,
+      "daGuiAnh": false,
+      "daChotDon": false,
+      "coSDT": false,
+      "coDiaChi": false
+    }
+  },
+  {
+    "nguon": "bo_nho",
+    "conversationId": "1468690110033030_#456fa5aa",
+    "tinKhach": "e lên đơn gửi lại rồi nhé shop",
+    "mong": {
+      "nhanRegex": "UNKNOWN",
+      "nhanAI": "SEND_ADDRESS_LATER",
+      "maSanPham": null,
+      "size": "M",
+      "canNang": null,
+      "giaiDoan": "consulting"
+    },
+    "boiCanh": {
+      "daBaoGia": false,
+      "daGuiAnh": false,
+      "daChotDon": false,
+      "coSDT": false,
+      "coDiaChi": false
+    }
+  },
+  {
+    "nguon": "bo_nho",
+    "conversationId": "615738195133683_#725c8734",
+    "tinKhach": "váy liền hay rời vậy sộp",
+    "mong": {
+      "nhanRegex": "UNKNOWN",
+      "nhanAI": "SET_TYPE",
+      "maSanPham": null,
+      "size": "M",
+      "canNang": null,
+      "giaiDoan": "consulting"
+    },
+    "boiCanh": {
+      "daBaoGia": false,
+      "daGuiAnh": false,
+      "daChotDon": false,
+      "coSDT": false,
+      "coDiaChi": false
+    }
+  }
+]

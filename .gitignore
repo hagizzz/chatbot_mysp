@@ -45,3 +45,5 @@ lichsu_log.txt
 dump.txt
 fresh.txt
 raw.txt
+test/ca_vang/tra_cuu_conv.local.json
+*.local.json

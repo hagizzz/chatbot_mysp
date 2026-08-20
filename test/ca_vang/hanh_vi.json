@@ -1,0 +1,347 @@
+[
+  {
+    "nguon": "log:log.txt",
+    "conversationId": "1405324086167653_#e604ca1a",
+    "tinKhach": "Bộ này có những màu nào shop",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[reader] CLIP trượt -> đọc TÊN từ caption ad/post -> MRKVX6305 (Celyne) | \"𝐂𝐄𝐋𝐘𝐍𝐄 – 𝐍𝐄́𝐓 𝐊𝐈𝐄̂𝐔 𝐊𝐘̀ 𝐂𝐔̉𝐀 𝐍�\"",
+      "[AI-READ] nhãn=COLOR_ASK | size=- addr=false order=false price=true chart=false concern=-",
+      "[ảnh] album content_id lỗi: {\"message\":\"Cannot send 'message' together with 'content_ids' or 'content_url'\",\"success\":false,\""
+    ]
+  },
+  {
+    "nguon": "log:log.txt",
+    "conversationId": "1468690110033030_#c89b5c38",
+    "tinKhach": "e lấy nha c",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[REQ] 19 request Pancake / 10s | nguồn: {\"list-hoithoai\":10,\"doc-tin-nhan\":9}",
+      "[catalog] đã nạp 552 sản phẩm",
+      "[reader] CLIP trượt -> đọc TÊN từ caption ad/post -> MRKSQ6035 (Miretta) | \"Dạ mẫu Miretta này có quần trong chị nha, chị yên \""
+    ]
+  },
+  {
+    "nguon": "log:log.txt",
+    "conversationId": "615738195133683_#f2dedf74",
+    "tinKhach": "Tư vấn cho chị mẫu này! | text: Tư vấn cho chị mẫu này!",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": true,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[183],\"timestamp\":1782926181514191,\"success\":true}",
+      "[reader] AD 1450796913740815: caption + ảnh bài đều KHÔNG ra mẫu -> GẮN người thật (không vớ mẫu shop cũ).",
+      "[VÀO XỬ] Yenanh Le | seen=false | last_sent_by=(rỗng=khách) | updated=2026-07-01T15:07:55.000000 | id=1405324086167653_275879360"
+    ]
+  },
+  {
+    "nguon": "log:log.txt",
+    "conversationId": "2058685704152385_#7d164f4a",
+    "tinKhach": "giá | image: [Photo]",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[Photo]",
+      "[vision] màu (từ tên file): HỒNG | mã MRKVX6069 | img 1iiupHdLGkz9wrtbv43wRTtXon2cw8mBw",
+      "[REQ] 21 request Pancake / 10s | nguồn: {\"list-hoithoai\":9,\"doc-tin-nhan\":5,\"lay-baiviet-ads\":7}"
+    ]
+  },
+  {
+    "nguon": "log:log.txt",
+    "conversationId": "1468690110033030_#9e4a0ba6",
+    "tinKhach": "Cho xin giá set xanh",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": true,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[183],\"timestamp\":1782926407569578,\"success\":true}",
+      "[reader] AD 1551198899894936: caption + ảnh bài đều KHÔNG ra mẫu -> GẮN người thật (không vớ mẫu shop cũ).",
+      "[VÀO XỬ] Yenanh Le | seen=false | last_sent_by=(rỗng=khách) | updated=2026-07-01T15:07:55.000000 | id=1405324086167653_275879360"
+    ]
+  },
+  {
+    "nguon": "log:log.txt",
+    "conversationId": "1468690110033030_#4e96afb4",
+    "tinKhach": "Cao 1m60 nặng 56kg",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": true,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[catalog] đã nạp 552 sản phẩm",
+      "[183],\"timestamp\":1782926468606006,\"success\":true}",
+      "[reader] AD 120252624957570550: caption + ảnh bài đều KHÔNG ra mẫu -> GẮN người thật (không vớ mẫu shop cũ)."
+    ]
+  },
+  {
+    "nguon": "log:log.txt",
+    "conversationId": "1468690110033030_#7830431b",
+    "tinKhach": "Bắt đầu | text: e xin gia | image: [Photo]",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[Photo]",
+      "[catalog] đã nạp 552 sản phẩm",
+      "[vision] màu (từ tên file): HỒNG | mã MRKVX6069 | img 1iiupHdLGkz9wrtbv43wRTtXon2cw8mBw"
+    ]
+  },
+  {
+    "nguon": "log:log.txt",
+    "conversationId": "1468690110033030_#5e71adb9",
+    "tinKhach": "Mình đk ktra hàng k shop",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": true,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[183],\"timestamp\":1782926877266940,\"success\":true}",
+      "[reader] AD 120254526531590550: caption + ảnh bài đều KHÔNG ra mẫu -> GẮN người thật (không vớ mẫu shop cũ).",
+      "[VÀO XỬ] Mia Mia | seen=false | last_sent_by=(rỗng=khách) | updated=2026-07-01T15:52:36.000000 | id=1405324086167653_25215304178"
+    ]
+  },
+  {
+    "nguon": "log:log.txt",
+    "conversationId": "615738195133683_#f2dedf74",
+    "tinKhach": "Tư vấn cho chị mẫu này!",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MGKSQ6309 (Givora).",
+      "[AI-READ] nhãn=PRICE_ASK | size=- addr=false order=false price=true chart=false concern=-",
+      "[Bảo Trâm] Hỏi giá nhưng mẫu MGKSQ6309 ĐÃ báo giá lượt trước (bot) -> KHÔNG báo lại / không gửi lại ảnh (chống lặp)."
+    ]
+  },
+  {
+    "nguon": "log:log.txt",
+    "conversationId": "1468690110033030_#716b97ac",
+    "tinKhach": "Mình xin giá nha",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MR0SV6348 (Genova).",
+      "[REQ] 12 request Pancake / 10s | nguồn: {\"doc-tin-nhan\":4,\"list-hoithoai\":8}",
+      "[AI-READ] nhãn=PRICE_ASK | size=- addr=false order=false price=true chart=false concern=-"
+    ]
+  },
+  {
+    "nguon": "log:log.txt",
+    "conversationId": "1468690110033030_#cc8adb0f",
+    "tinKhach": "Giá sản phẩm là bao nhiêu?",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": true,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MGKSQ6072 (Corae).",
+      "[AI-READ] nhãn=PRICE_ASK | size=- addr=false order=false price=true chart=false concern=-",
+      "[Bảo Trâm] Hỏi giá nhưng mẫu MGKSQ6072 ĐÃ báo giá lượt trước (bot) -> KHÔNG báo lại / không gửi lại ảnh (chống lặp)."
+    ]
+  },
+  {
+    "nguon": "log:log.txt",
+    "conversationId": "1468690110033030_#203267b6",
+    "tinKhach": "Tư vấn cho Chị thiết kế Meridian",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[AI-READ] nhãn=PRICE_ASK | size=- addr=false order=false price=true chart=false concern=-",
+      "[REQ] 10 request Pancake / 10s | nguồn: {\"list-hoithoai\":8,\"doc-tin-nhan\":2}",
+      "[ảnh] ALBUM 3 tấm bằng content_id."
+    ]
+  },
+  {
+    "nguon": "log:log3.txt",
+    "conversationId": "1468690110033030_#824966f8",
+    "tinKhach": "Bn ạ | image: [Photo]",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[Photo]",
+      "[vision] màu (từ tên file): HỒNG | mã MGKVX6310 | img ",
+      "[AI-READ] nhãn=PRICE_ASK | size=- addr=false order=false price=true "
+    ]
+  },
+  {
+    "nguon": "log:log4.txt",
+    "conversationId": "1468690110033030_#31637c3d",
+    "tinKhach": "Giá của chiếc váy là bao nhiêu?",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[AI-READ] nhãn=PRICE_ASK | size=- addr=false order=false price=true ",
+      "[REQ] 9 request Pancake / 10s | nguồn: ",
+      "[Bảo Trâm] [follow-skip] KHÔNG có product | "
+    ]
+  },
+  {
+    "nguon": "log:ngockoy.txt",
+    "conversationId": "1468690110033030_#7a1451cf",
+    "tinKhach": "Sét này còn k ạ",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": true,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[183],\"timestamp\":1782566492085395,\"success\":true}",
+      "[reader] AD 120253809183330550: caption + ảnh bài đều KHÔNG ra mẫu ",
+      "[VÀO XỬ] Xuân Lương | seen=true | last_sent_by=(rỗng=khách) | "
+    ]
+  },
+  {
+    "nguon": "log:ngockoy2.txt",
+    "conversationId": "1468690110033030_#7a1451cf",
+    "tinKhach": "Sét này nữa | text: M52 nặng 55",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[REQ] 20 request Pancake / 10s | nguồn: ",
+      "[catalog] đã nạp 543 sản phẩm",
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: "
+    ]
+  },
+  {
+    "nguon": "log:tl.txt",
+    "conversationId": "1468690110033030_#8225cbe5",
+    "tinKhach": "Minhf xin giá shop oi",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": true,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[183],\"timestamp\":1782616546524475,\"success\":true}",
+      "[reader] AD 1555383752809784: caption + ảnh bài đều KHÔNG ra mẫu -> GẮN người thật ",
+      "[REQ] 15 request Pancake / 10s | nguồn: "
+    ]
+  },
+  {
+    "nguon": "log:ln.txt",
+    "conversationId": "1468690110033030_#b1aef7eb",
+    "tinKhach": "MRVX559 gửi c xem video",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[AI-READ] nhãn=IMAGE_REQ | size=- addr=false order=false ",
+      "[images] đã nạp ảnh cho 678 mã sản phẩm",
+      "[Bảo Trâm] [follow-hẹn] stage 1, sau 600s -> \"Dạ mẫu này đang có "
+    ]
+  },
+  {
+    "nguon": "log:ln2.txt",
+    "conversationId": "1468690110033030_#b1aef7eb",
+    "tinKhach": "gửi c xem video mà",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: ",
+      "[AI-READ] nhãn=VIDEO_REQ | size=- addr=false order=false ",
+      "[Bảo Trâm] Khách XIN VIDEO (nhãn=VIDEO_REQ) -> gửi video mẫu "
+    ]
+  },
+  {
+    "nguon": "log:vid.txt",
+    "conversationId": "1468690110033030_#de6f0ce5",
+    "tinKhach": "cho c giá | image: [Photo] | text: . | text: có video ko",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[Photo] | text: . | text: có video ko",
+      "[vision] màu (từ tên file): XANH NHẠT | mã MRAD5171 | img ",
+      "[AI-READ] nhãn=PRICE_ASK | size=- addr=false order=false "
+    ]
+  },
+  {
+    "nguon": "log:pm2_out.log",
+    "conversationId": "1468690110033030_#2c229093",
+    "tinKhach": "Lên đơn mẫu này cho mình chưa nhỉ | image: [Photo reply]",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": true,
+      "botDaGui": true
+    },
+    "ghiChu": [
+      "[Photo reply]",
+      "[vision] màu (từ tên file): NÂU XÁM | mã MRAD572 | img 1LpmSGDTlrFXHV8xq_5a6ucfpJISo9Qtk",
+      "[AI-READ] nhãn=ORDER_STATUS | size=- addr=false order=false price=false chart=false concern=- | phone=- addrDu=false provConfirm="
+    ]
+  },
+  {
+    "nguon": "log:pm2_out.log",
+    "conversationId": "1468690110033030_#b33f0ff1",
+    "tinKhach": "Ko em | text: Tks em",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[VÀO XỬ] Hà Mini | seen=false | last_sent_by=Public API | updated=2026-07-19T09:48:14.392000 | id=1468690110033030_2874389560187",
+      "[VÀO XỬ] Tường Vi | seen=true | last_sent_by=(rỗng=khách) | updated=2026-07-19T09:26:42.000000 | id=1468690110033030_92614329206",
+      "[VÀO XỬ] Nguyễn Thanh Huyền | seen=true | last_sent_by=(rỗng=khách) | updated=2026-07-19T09:24:22.000000 | id=1468690110033030_2"
+    ]
+  },
+  {
+    "nguon": "log:pm2_out.log",
+    "conversationId": "1468690110033030_#ea175b1b",
+    "tinKhach": "Gui size mình chọn",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": true,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[Bảo Trâm] Ad 120253809183330550 -> MAP NGUỒN CUỐI (adPostId 1555383752809784) ra mẫu MGKVX6310 (Giannal) — mọi nguồn tươi đã cạn,",
+      "[AI-READ] nhãn=OTHER | size=- addr=false order=false price=false chart=false concern=- | phone=- addrDu=false provConfirm=false r",
+      "[AI-QUYẾT] referent=MGKVX6310(1) | mẫu_cũ=[] | địa_chỉ=KHONG_CO(thiếu sdt+dia_chi) | hành_động=XIN_SDT | 3150ms"
+    ]
+  }
+]

@@ -2,10 +2,15 @@
   "name": "ai-htk-bot",
   "version": "5.0.0",
   "private": true,
-  "description": "Bot tu van khach hang MYS.P qua Pancake (Giai doan 1)",
+  "description": "Bot tu van ban hang qua Pancake (nhan dien anh, chuan hoa dia chi, tu len don POS)",
   "main": "bot_worker_api_v3.js",
   "scripts": {
-    "start": "node bot_worker_api_v3.js"
+    "start": "node bot_worker_api_v3.js",
+    "don": "node order_worker.js",
+    "test": "node --test \"test/*.test.js\"",
+    "ca-vang": "node test/trich_ca_vang.js",
+    "thong-ke": "node thong_ke.js 7 --ly-do",
+    "chuyen-bo-nho": "node chuyen_bo_nho_sang_sqlite.js"
   },
   "dependencies": {
     "dotenv": "^16.4.5",

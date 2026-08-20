@@ -4,7 +4,16 @@ const turnLog = require("./turn_log");
 const OpenAI = require("openai");
 const { getScript, getAgentRules } = require("./knowledge_loader");
 
-const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+// Nạp LƯỜI, giống ai_intent.js / ai_quyet.js: thiếu/hỏng khoá thì chỉ hỏng ĐÚNG lượt
+// cần gọi AI (rồi nhường người thật), chứ không làm sập cả bot ngay lúc khởi động.
+let _client = null;
+function client() {
+  if (_client) return _client;
+  const key = process.env.OPENAI_API_KEY;
+  if (!key) return null;
+  _client = new OpenAI({ apiKey: key });
+  return _client;
+}
 
 const HUMAN_CHECK_REPLY =
   "Dạ chị đợi em kiểm tra lại thông tin cho mình ạ, chị chờ em một chút nhé.";
@@ -371,8 +380,14 @@ ${JSON.stringify(conversationBrief, null, 2)}
 NHIỆM VỤ: Trả lời tin nhắn mới nhất của khách đúng kịch bản + luật, rồi trả về JSON {reply, action} như yêu cầu.
 `;
 
+  const _c = client();
+  if (!_c) {
+    // Không có khoá AI -> KHÔNG bịa câu, nhường người thật (nguyên tắc mục 2).
+    console.log("[reasoning] Thiếu OPENAI_API_KEY -> nhường NGƯỜI THẬT, không tự soạn câu.");
+    return { reply: "", action: "TAG_HUMAN" };
+  }
   const _t0 = Date.now();
-  const response = await client.chat.completions.create({
+  const response = await _c.chat.completions.create({
     model: "gpt-4.1-mini",
     temperature: 0.1,
     messages: [
@@ -406,4 +421,5 @@ function parseReplyAction(raw) {
   return { reply, action };
 }
 
-module.exports = { reasoning, HUMAN_CHECK_REPLY };
+// parseReplyAction xuất ra để bộ test kiểm được nguyên tắc "AI trả về rác -> KHÔNG gửi, nhường người thật".
+module.exports = { reasoning, HUMAN_CHECK_REPLY, parseReplyAction };
