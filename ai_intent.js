@@ -10,6 +10,7 @@
 // bot_worker cứ chạy thuần code như cũ (không phụ thuộc AI để hoạt động).
 // ============================================================================
 require("dotenv").config();
+const turnLog = require("./turn_log");
 const OpenAI = require("openai");
 
 let _client = null;
@@ -287,7 +288,9 @@ async function classifyIntent({ text, lockedProductName = "", lastShopLine = "",
       ]
     });
     const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error("timeout")), timeoutMs));
+    const _t0 = Date.now();
     const resp = await Promise.race([p, timeout]);
+    turnLog.tuOpenAI(resp, "ai_intent", "gpt-4.1-mini", Date.now() - _t0);
     let raw = String(resp.choices?.[0]?.message?.content || "").trim();
     raw = raw.replace(/^```(json)?/i, "").replace(/```$/i, "").trim();
     const i = raw.indexOf("{"), j = raw.lastIndexOf("}");
@@ -295,6 +298,7 @@ async function classifyIntent({ text, lockedProductName = "", lastShopLine = "",
     const obj = JSON.parse(raw);
     return _safe(obj);
   } catch (e) {
+    turnLog.ai({ model: "gpt-4.1-mini", where: "ai_intent", ok: false });
     return { ok: false, reason: (e && e.message === "timeout") ? ("timeout>" + timeoutMs + "ms") : ("loi:" + ((e && e.message) || "khong-ro")) };
   }
 }

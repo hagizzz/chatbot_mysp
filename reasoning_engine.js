@@ -1,4 +1,5 @@
 require("dotenv").config();
+const turnLog = require("./turn_log");
 
 const OpenAI = require("openai");
 const { getScript, getAgentRules } = require("./knowledge_loader");
@@ -370,6 +371,7 @@ ${JSON.stringify(conversationBrief, null, 2)}
 NHIỆM VỤ: Trả lời tin nhắn mới nhất của khách đúng kịch bản + luật, rồi trả về JSON {reply, action} như yêu cầu.
 `;
 
+  const _t0 = Date.now();
   const response = await client.chat.completions.create({
     model: "gpt-4.1-mini",
     temperature: 0.1,
@@ -378,6 +380,7 @@ NHIỆM VỤ: Trả lời tin nhắn mới nhất của khách đúng kịch b�
       { role: "user", content: userPrompt }
     ]
   });
+  turnLog.tuOpenAI(response, "reasoning_engine", "gpt-4.1-mini", Date.now() - _t0);
 
   const raw = String(response.choices?.[0]?.message?.content || "");
   return parseReplyAction(raw);

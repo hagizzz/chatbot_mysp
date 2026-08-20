@@ -24,6 +24,7 @@
 // Lỗi/timeout -> {ok:false} -> worker chạy luật cũ y nguyên (không phụ thuộc AI).
 // ============================================================================
 require("dotenv").config();
+const turnLog = require("./turn_log");
 const OpenAI = require("openai");
 
 let _client = null;
@@ -145,7 +146,9 @@ async function quyetDinh({ turns = "", candidatesText = "", known = "", timeoutM
       messages: [{ role: "system", content: SYS }, { role: "user", content: userPrompt }]
     });
     const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error("timeout")), timeoutMs));
+    const _t0 = Date.now();
     const resp = await Promise.race([p, timeout]);
+    turnLog.tuOpenAI(resp, "ai_quyet", "gpt-4.1-mini", Date.now() - _t0);
     let raw = String(resp.choices?.[0]?.message?.content || "").trim();
     raw = raw.replace(/^```(json)?/i, "").replace(/```$/i, "").trim();
     const i = raw.indexOf("{"), j = raw.lastIndexOf("}");
@@ -156,6 +159,7 @@ async function quyetDinh({ turns = "", candidatesText = "", known = "", timeoutM
     else out.tin_nhan = String(out.tin_nhan || "").replace(/\{COD\}/g, "").trim();
     return out;
   } catch (e) {
+    turnLog.ai({ model: "gpt-4.1-mini", where: "ai_quyet", ok: false });
     return { ok: false, reason: (e && e.message === "timeout") ? ("timeout>" + timeoutMs + "ms") : ("loi:" + ((e && e.message) || "khong-ro")) };
   }
 }

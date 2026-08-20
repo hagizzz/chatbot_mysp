@@ -1,4 +1,5 @@
 require("./env_boot");   // nạp .env theo BOT_ENV (thật/thử) — phải ở dòng đầu
+const turnLog = require("./turn_log");   // log có cấu trúc mỗi lượt (nền cho mục 9.4 + 9.5)
 
 console.log("[BUILD] patched-2026-07-01: inspect-đuôi-linh-hoạt + regex ktra/đk + nhãn INSPECT_REQUEST/TRYON_REQUEST + price PRICE_OBJECTION 2 câu");
 
@@ -12691,7 +12692,11 @@ async function processOnce() {
     let _handled = 0;
     const MAX_PER_CYCLE = 5;
     for (const conv of fresh) {
-      const handled = await processOneConversation(conv);
+      const handled = await turnLog.run({
+        conversationId: conv.id,
+        pageId: pageRegistry.pageIdFromConv(conv.id) || String(conv.id).split("_")[0],
+        kenh: String(conv.type || "").toUpperCase().includes("COMMENT") ? "COMMENT" : "INBOX"
+      }, () => processOneConversation(conv));
       if (handled) {
         _handled++;
         if (_handled >= MAX_PER_CYCLE) return;

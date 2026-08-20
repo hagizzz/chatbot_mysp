@@ -1,4 +1,5 @@
 require("dotenv").config();
+const turnLog = require("./turn_log");   // ghi nhận bot đã gửi gì / gắn gỡ thẻ nào (mục 9.4)
 const reg = require("./page_registry");
 
 const PAGE_ID = process.env.PANCAKE_PAGE_ID;
@@ -37,7 +38,9 @@ async function sendInboxMessage(conversationId, text) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ action: "reply_inbox", message: String(text).trim() })
   });
-  return await res.json();
+  const _out = await res.json();
+  if (_out && _out.success !== false) turnLog.sent("inbox", text);
+  return _out;
 }
 
 // TRẢ LỜI COMMENT CÔNG KHAI. action: "reply_comment", cần message_id = id comment của khách.
@@ -51,7 +54,9 @@ async function replyComment(conversationId, text, commentId) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body)
   });
-  return await res.json().catch(() => ({ success: false, reason: "BAD_JSON" }));
+  const _out = await res.json().catch(() => ({ success: false, reason: "BAD_JSON" }));
+  if (_out && _out.success !== false) turnLog.sent("comment", text);
+  return _out;
 }
 
 // Gửi ẢNH bằng content_ids (id ảnh đã up sẵn lên Pancake qua upload_contents).
@@ -166,7 +171,7 @@ async function addTag(conversationId, tagId) {
         });
         const data = await res.json().catch(() => ({}));
         last = data;
-        if (res.ok && data && data.success !== false) return data;
+        if (res.ok && data && data.success !== false) { turnLog.tag("add", tagId); return data; }
       } catch (e) {
         last = { error: e.message };
       }
@@ -203,7 +208,7 @@ async function removeTag(conversationId, tagId) {
         });
         const data = await res.json().catch(() => ({}));
         last = data;
-        if (res.ok && data && data.success !== false) return data;
+        if (res.ok && data && data.success !== false) { turnLog.tag("remove", tagId); return data; }
       } catch (e) { last = { error: e.message }; }
     }
     if (round < 3) await new Promise(r => setTimeout(r, 1200));
