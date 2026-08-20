@@ -1,0 +1,50 @@
+========================================
+   BẢN SỬA LỖI v10 - 2026-06-27 (ca Nguyet Tran: bài ads ko nhận ra -> dội mẫu mới)
+========================================
+
+CHÉP ĐÈ vào C:\AI_HTK_BOT_V5 (Replace), TẮT bot mở lại:
+   - bot_worker_api_v3.js   (đã sửa - QUAN TRỌNG)
+   - ai_intent.js           (giữ từ v9)
+   - catalog_cache.js       (giữ từ v9)
+Chạy: node bot_worker_api_v3.js
+
+==================================================
+CÂU HỎI: "bài ads tại sao ko nhận ra? đi gửi mẫu mới?" + "tên ko ra thì phải
+         nhận diện HÌNH ẢNH bài ad chứ?"  (ca Nguyet Tran, ad ALISSE)
+==================================================
+GIẢI THÍCH: Bot CÓ bước nhận diện ảnh bài ad (vision), NHƯNG ở ca này nó KHÔNG
+chạy. Lý do: tin tới qua WEBHOOK (đẩy xử liền), mà gói webhook lúc đó ad_ids RỖNG
+-> bot tưởng "không có bài ad" -> BỎ LUÔN bước tải bài ad + đọc ảnh ad -> không ra
+mẫu -> rơi vào dội 10 mẫu mới.
+Bằng chứng trong log: conv Nguyet Tran KHÔNG có một dòng "[AD SRC]/đọc bài THẬT"
+nào (mọi conv khác đều có). So với Thu Hường (cũng webhook, ad_ids cũng rỗng) nhưng
+khách GỬI ẢNH thật trong tin -> vision đọc ảnh đó -> ra mẫu ngay.
+=> Không phải vision sai. Là ad_ids của gói webhook tới rỗng nên bỏ qua cả khâu ad.
+
+--------------------------------------------------
+ĐÃ SỬA 2 phần:
+
+(A) HOÃN 1 NHỊP để ĐỌC ĐƯỢC bài ad: khi khách "váy NÀY bao nhiêu" (chỉ vào 1 mẫu
+    cụ thể) mà chưa ra mẫu + ad_ids chưa kịp tải (webhook) -> bot HOÃN 1 nhịp. Nhịp
+    poll sau lấy conv từ LIST (CÓ ad_ids) -> chạy đọc bài ad + nhận diện ẢNH ad +
+    khớp TÊN -> RA mẫu, báo giá đúng. Hoãn tối đa 1 lần; nếu nhịp sau VẪN không ra
+    -> giao người thật (AI-CHỜ XL), KHÔNG dội 10 mẫu mới.
+    (Câu hỏi giá CHUNG CHUNG "giá váy bao nhiêu" - không "này/đó" - vẫn gửi gallery
+     như cũ, không đụng.)
+
+(B) KHỚP TÊN MẪU TỪ CAPTION ADS = FUZZY (gần đúng): ad ghi "ALISSE" nhưng catalog
+    là "Galisse" -> khớp chính xác trượt. Nay thử fuzzy (lệch 1-2 ký tự) -> "ALISSE"
+    ra "Galisse". (Tiện thể SỬA 1 BUG: chỗ fuzzy cũ gán nhầm cả cục {product,dist,
+    token} vào biến product -> mã/tên ra rỗng; nay lấy đúng .product.)
+
+--------------------------------------------------
+GIỮ NGUYÊN các fix cũ (cộng dồn) trong bản này:
+  - v9: CRASH "_ai is not defined" (tryBrowseGallery); chốt SAI MÀU (ad hồng nhưng
+        khách gõ "màu kem" -> nay ghi đè đúng kem).
+  - v7/v8: tên mẫu gõ sai (fuzzy luồng chữ), địa chỉ rác, đơn đã gửi không hỏi lại
+        size, "có quần luôn" (concern=lot), hoãn-1-nhịp mở màn (Diễm).
+--------------------------------------------------
+- bot_worker_api_v3.js qua node --check. Logic A+B test trên đúng câu/tên của ca này.
+- Theo dõi log, ca giống Nguyet Tran sẽ thấy:
+  '... HOÃN 1 nhịp đợi ad_ids để ĐỌC ẢNH/TÊN bài ad.'  (nhịp 1)
+  rồi '[ADS ...] ... -> RA <mã> ... qua tên dẫn đầu FUZZY ...'  (nhịp 2, ra mẫu)

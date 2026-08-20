@@ -1,0 +1,78 @@
+﻿
+.pm2\logs\bot-out.log:42743:2026-06-27T20:16:45:   [LỌC RỚT] Vũ Tuyến | type=INBOX | seen=true | last_sent_by=Public 
+API | updated=2026-06-27T13:05:48.380000 | -> seen=true & SHOP/bot nhắn cuối (list coi như đã trả) | 
+id=1468690110033030_34409702685342704
+.pm2\logs\bot-out.log:42814:2026-06-27T20:16:50:   [LỌC RỚT] Vũ Tuyến | type=INBOX | seen=true | last_sent_by=Public 
+API | updated=2026-06-27T13:05:48.380000 | -> seen=true & SHOP/bot nhắn cuối (list coi như đã trả) | 
+id=1468690110033030_34409702685342704
+.pm2\logs\bot-out.log:42859:2026-06-27T20:16:54:   [LỌC RỚT] Vũ Tuyến | type=INBOX | seen=true | last_sent_by=Public 
+API | updated=2026-06-27T13:05:48.380000 | -> seen=true & SHOP/bot nhắn cuối (list coi như đã trả) | 
+id=1468690110033030_34409702685342704
+.pm2\logs\bot-out.log:42904:2026-06-27T20:16:58:   [LỌC RỚT] Vũ Tuyến | type=INBOX | seen=true | last_sent_by=Public 
+API | updated=2026-06-27T13:05:48.380000 | -> seen=true & SHOP/bot nhắn cuối (list coi như đã trả) | 
+id=1468690110033030_34409702685342704
+.pm2\logs\bot-out.log:42948:2026-06-27T20:17:02:   [LỌC RỚT] Vũ Tuyến | type=INBOX | seen=true | last_sent_by=Public 
+API | updated=2026-06-27T13:05:48.380000 | -> seen=true & SHOP/bot nhắn cuối (list coi như đã trả) | 
+id=1468690110033030_34409702685342704
+.pm2\logs\bot-out.log:42993:2026-06-27T20:17:06:   [LỌC RỚT] Vũ Tuyến | type=INBOX | seen=true | last_sent_by=Public 
+API | updated=2026-06-27T13:05:48.380000 | -> seen=true & SHOP/bot nhắn cuối (list coi như đã trả) | 
+id=1468690110033030_34409702685342704
+.pm2\logs\bot-out.log:43038:2026-06-27T20:17:10:   [LỌC RỚT] Vũ Tuyến | type=INBOX | seen=true | last_sent_by=Public 
+API | updated=2026-06-27T13:05:48.380000 | -> seen=true & SHOP/bot nhắn cuối (list coi như đã trả) | 
+id=1468690110033030_34409702685342704
+.pm2\logs\bot-out.log:43084:2026-06-27T20:17:14:   [LỌC RỚT] Vũ Tuyến | type=INBOX | seen=true | last_sent_by=Public 
+API | updated=2026-06-27T13:05:48.380000 | -> seen=true & SHOP/bot nhắn cuối (list coi như đã trả) | 
+id=1468690110033030_34409702685342704
+.pm2\logs\bot-out.log:43129:2026-06-27T20:17:19:   [LỌC RỚT] Vũ Tuyến | type=INBOX | seen=true | last_sent_by=Public 
+API | updated=2026-06-27T13:05:48.380000 | -> seen=true & SHOP/bot nhắn cuối (list coi như đã trả) | 
+id=1468690110033030_34409702685342704
+.pm2\logs\bot-out.log:43173:2026-06-27T20:17:22:   [LỌC RỚT] Vũ Tuyến | type=INBOX | seen=true | last_sent_by=Public 
+API | updated=2026-06-27T13:05:48.380000 | -> seen=true & SHOP/bot nhắn cuối (list coi như đã trả) | 
+id=1468690110033030_34409702685342704
+.pm2\logs\bot-out.log:43218:2026-06-27T20:17:26:   [LỌC RỚT] Vũ Tuyến | type=INBOX | seen=true | last_sent_by=Public 
+API | updated=2026-06-27T13:05:48.380000 | -> seen=true & SHOP/bot nhắn cuối (list coi như đã trả) | 
+id=1468690110033030_34409702685342704
+.pm2\logs\bot-out.log:43262:2026-06-27T20:17:30:   [LỌC RỚT] Vũ Tuyến | type=INBOX | seen=true | last_sent_by=Public 
+API | updated=2026-06-27T13:05:48.380000 | -> seen=true & SHOP/bot nhắn cuối (list coi như đã trả) | 
+id=1468690110033030_34409702685342704
+.pm2\logs\bot-out.log:43306:2026-06-27T20:17:34:   [LỌC RỚT] Vũ Tuyến | type=INBOX | seen=true | last_sent_by=Public 
+API | updated=2026-06-27T13:05:48.380000 | -> seen=true & SHOP/bot nhắn cuối (list coi như đã trả) | 
+id=1468690110033030_34409702685342704
+.pm2\logs\bot-out.log:43351:2026-06-27T20:17:38:   [LỌC RỚT] Vũ Tuyến | type=INBOX | seen=true | last_sent_by=Public 
+API | updated=2026-06-27T13:05:48.380000 | -> seen=true & SHOP/bot nhắn cuối (list coi như đã trả) | 
+id=1468690110033030_34409702685342704
+.pm2\logs\bot-out.log:43395:2026-06-27T20:17:42:   [LỌC RỚT] Vũ Tuyến | type=INBOX | seen=true | last_sent_by=Public 
+API | updated=2026-06-27T13:05:48.380000 | -> seen=true & SHOP/bot nhắn cuối (list coi như đã trả) | 
+id=1468690110033030_34409702685342704
+.pm2\logs\bot-out.log:43440:2026-06-27T20:17:50:   [LỌC RỚT] Vũ Tuyến | type=INBOX | seen=true | last_sent_by=Public 
+API | updated=2026-06-27T13:05:48.380000 | -> seen=true & SHOP/bot nhắn cuối (list coi như đã trả) | 
+id=1468690110033030_34409702685342704
+.pm2\logs\bot-out.log:43511:2026-06-27T20:17:54:   [LỌC RỚT] Vũ Tuyến | type=INBOX | seen=true | last_sent_by=Public 
+API | updated=2026-06-27T13:05:48.380000 | -> seen=true & SHOP/bot nhắn cuối (list coi như đã trả) | 
+id=1468690110033030_34409702685342704
+.pm2\logs\bot-out.log:43557:2026-06-27T20:17:58:   [LỌC RỚT] Vũ Tuyến | type=INBOX | seen=true | last_sent_by=Public 
+API | updated=2026-06-27T13:05:48.380000 | -> seen=true & SHOP/bot nhắn cuối (list coi như đã trả) | 
+id=1468690110033030_34409702685342704
+.pm2\logs\bot-out.log:43604:2026-06-27T20:18:03:   [LỌC RỚT] Vũ Tuyến | type=INBOX | seen=true | last_sent_by=Public 
+API | updated=2026-06-27T13:05:48.380000 | -> seen=true & SHOP/bot nhắn cuối (list coi như đã trả) | 
+id=1468690110033030_34409702685342704
+.pm2\logs\bot-out.log:43657:2026-06-27T20:18:06:   [LỌC RỚT] Vũ Tuyến | type=INBOX | seen=true | last_sent_by=Public 
+API | updated=2026-06-27T13:05:48.380000 | -> seen=true & SHOP/bot nhắn cuối (list coi như đã trả) | 
+id=1468690110033030_34409702685342704
+.pm2\logs\bot-out.log:43702:2026-06-27T20:18:10:   [LỌC RỚT] Vũ Tuyến | type=INBOX | seen=true | last_sent_by=Public 
+API | updated=2026-06-27T13:05:48.380000 | -> seen=true & SHOP/bot nhắn cuối (list coi như đã trả) | 
+id=1468690110033030_34409702685342704
+.pm2\logs\bot-out.log:43748:2026-06-27T20:18:15:   [LỌC RỚT] Vũ Tuyến | type=INBOX | seen=true | last_sent_by=Public 
+API | updated=2026-06-27T13:05:48.380000 | -> seen=true & SHOP/bot nhắn cuối (list coi như đã trả) | 
+id=1468690110033030_34409702685342704
+.pm2\logs\bot-out.log:43793:2026-06-27T20:18:19:   [LỌC RỚT] Vũ Tuyến | type=INBOX | seen=true | last_sent_by=Public 
+API | updated=2026-06-27T13:05:48.380000 | -> seen=true & SHOP/bot nhắn cuối (list coi như đã trả) | 
+id=1468690110033030_34409702685342704
+.pm2\logs\bot-out.log:43837:2026-06-27T20:18:22:   [LỌC RỚT] Vũ Tuyến | type=INBOX | seen=true | last_sent_by=Public 
+API | updated=2026-06-27T13:05:48.380000 | -> seen=true & SHOP/bot nhắn cuối (list coi như đã trả) | 
+id=1468690110033030_34409702685342704
+.pm2\logs\bot-out.log:44233:2026-06-27T20:18:58:   [LỌC RỚT] Vũ Tuyến | type=INBOX | seen=true | last_sent_by=Public 
+API | updated=2026-06-27T13:05:48.380000 | -> seen=true & SHOP/bot nhắn cuối (list coi như đã trả) | 
+id=1468690110033030_34409702685342704
+
+

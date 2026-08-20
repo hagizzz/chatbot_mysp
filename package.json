@@ -1,0 +1,16 @@
+{
+  "name": "ai-htk-bot",
+  "version": "5.0.0",
+  "private": true,
+  "description": "Bot tu van khach hang MYS.P qua Pancake (Giai doan 1)",
+  "main": "bot_worker_api_v3.js",
+  "scripts": {
+    "start": "node bot_worker_api_v3.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "googleapis": "^144.0.0",
+    "openai": "^4.67.0",
+    "tesseract.js": "^7.0.0"
+  }
+}

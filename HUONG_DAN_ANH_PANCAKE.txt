@@ -1,0 +1,44 @@
+============================================================
+ẢNH HẾT VỠ TRÊN PANCAKE - up ảnh sẵn lên Pancake, gửi bằng content_id
+============================================================
+Khách vẫn nhận ảnh như cũ; thêm vào đó BẠN cũng xem được ảnh trên Pancake.
+
+3 file trong gói:
+  - upload_to_pancake.py   (MỚI) up sẵn toàn bộ ảnh lên Pancake, lưu content_id
+  - product_images.js      (đè)  bot lấy content_id để gửi
+  - pancake_sender.js      (đè)  gửi ảnh bằng content_ids (chuẩn Pancake)
+
+============================================================
+CÁC BƯỚC (làm đúng thứ tự):
+============================================================
+1. TẮT BOT.
+
+2. Copy 3 file trên đè vào C:\AI_HTK_BOT_V5.
+
+3. Cài thư viện (1 lần, nếu chưa có):
+      cd /d C:\AI_HTK_BOT_V5
+      pip install requests python-dotenv pillow
+
+4. Up sẵn ảnh lên Pancake (ảnh được THU NHỎ + NÉN trước khi up cho nhanh):
+      python upload_to_pancake.py
+   Sẽ thấy:
+      Tổng 12387 ảnh | cần up: 12387 ảnh
+      ...đã up 20 ảnh
+      ...
+      XONG. Đã up N ảnh lên Pancake.
+   (Up tới đâu lưu tới đó. Lỡ ngắt giữa chừng, chạy lại sẽ up tiếp phần còn thiếu.)
+
+5. Mở lại bot: bấm đúp start_bot.bat
+
+6. Test: gửi 1 ảnh cho bot -> bot báo giá + gửi ảnh.
+   Mở Pancake xem -> ẢNH ĐÃ HIỆN (không còn ô vỡ).
+
+============================================================
+LƯU Ý
+============================================================
+- ĐỪNG chạy upload_to_pancake.py CÙNG LÚC với bot (giành tài nguyên).
+- Ảnh mới thêm sau này: sau khi chạy update_index.py, chạy thêm
+  upload_to_pancake.py 1 lần để up ảnh mới lên Pancake (nó chỉ up ảnh chưa có
+  content_id, rất nhanh).
+- Mã nào CHƯA up được content_id thì bot sẽ không gửi ảnh mã đó (báo giá vẫn chạy).
+  Chạy lại upload_to_pancake.py để bổ sung.

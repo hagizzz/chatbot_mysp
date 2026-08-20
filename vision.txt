@@ -1,0 +1,162 @@
+﻿
+> .pm2\logs\bot-out.log:165283:IMG MGKVX6310: gửi ảnh -> OK (màu: HỒNG, khớp: có). ĐÍCH: 
+615738195133683_26833644479620881
+  .pm2\logs\bot-out.log:165284:[Bảo Trâm] [follow-hẹn] stage 1, sau 600s -> "Dạ chị ơi, mình xem mẫu Galisse thấy ưng" 
+| conv=615738195133683_26833644479620881
+  .pm2\logs\bot-out.log:165343:  [THEO DÕI] Phuong Pham | type=INBOX | seen=true | last_sent_by=Public API | 
+updated=2026-06-28T03:14:41.023000 | -> RỚT (seen=true & shop/bot nhắn cuối) | id=615738195133683_26833644479620881
+> .pm2\logs\bot-out.log:165344:      [THEO DÕI/tin] 615738195133683_26833644479620881: KHÁCH-inbox=50 | 
+KHÁCH-comment=0 | tin cuối khách @2026-06-28T03:14:41.023000 -> ❗ CÓ tin INBOX của khách -> BOT PHẢI TRẢ | text:"Váy 
+Giannal giá 890.000đ ạ."  text:"Dạ chị cho em xin chiều cao và cân nặng "
+  .pm2\logs\bot-out.log:165345:  [THEO DÕI] Phuong Pham | type=INBOX | seen=true | last_sent_by=(rỗng=khách nhắn cuối) 
+| updated=2026-06-27T16:51:48.000000 | -> VÀO 'Cần xử lý' | id=1468690110033030_6394346307338466
+  .pm2\logs\bot-out.log:165354:[ADS RAW] conv=1555383752809784_1541149197365815 | ad_ids=null | ads=null | post_id=- | 
+readerAdId=1468690110033030_1555383752809784
+> .pm2\logs\bot-out.log:165355:[vision] màu (từ tên file): HỒNG | mã MGKVX6310 | img 1hDLrDH2G3MYuZXoADtgz_NOn48cm_R3d
+  .pm2\logs\bot-out.log:165356:COMMENT chuẩn bị nhắn riêng | post: 1468690110033030_1555383752809784 | inboxId: 
+1468690110033030_27398025306516900 | privateReplyId: null | commentId: 1555383752809784_1541149197365815 | can_inbox: 
+false
+  .pm2\logs\bot-out.log:165357:COMMENT private_replies | commentId: 1555383752809784_1541149197365815 | post_id: 
+1468690110033030_1555383752809784 | can_reply_privately: true | PHẢN HỒI: 
+{"id":"m_otH6U7wYMQe--DPg4Y2gbrsIu7xtDL8vc1TkeL_GWLiTJewGxMDoiWsOsUtyB5EGbGxjCamLPoSk4x_QQzCW1Q","success":true}
+> .pm2\logs\bot-out.log:165358:COMMENT->INBOX (tin sản phẩm): Dạ Váy Giannal giá 890.000đ ạ. Chị cho em xin chiều cao 
+và cân nặng để em tư vấn size chuẩn cho mình nha! | mẫu: Giannal(MGKVX6310) | đích ảnh: 
+1468690110033030_27398025306516900 | gửi OK?: true
+> .pm2\logs\bot-out.log:165359:[Bảo Trâm] Comment: màu Ở BÀI = "HỒNG" (mẫu MGKVX6310) -> gửi lại ảnh đúng màu bài 
+(khách chưa xin màu).
+  .pm2\logs\bot-out.log:165360:TAG AI-XL ảnh: {"data":[184],"timestamp":1782616494688542,"success":true}
+  .pm2\logs\bot-out.log:165361:UNREAD: {"success":true}
+> .pm2\logs\bot-out.log:165362:[Bảo Trâm] COMMENT: cửa sổ 24h CHƯA mở -> HOÃN gửi ảnh mẫu MGKVX6310, GẮN thẻ AI-XL ảnh 
+(đang nợ ảnh; khách nhắn inbox sẽ gửi + TỰ GỠ thẻ).
+  .pm2\logs\bot-out.log:165363:COMMENT (CÔNG KHAI điều hướng): Dạ chị Trần Tâm check tin nhắn shop vừa gửi nhe ạ, em 
+vừa gửi thông tin chi tiết để tư vấn kỹ hơn cho mình rồi đó ạ | OK?: true | PHẢN HỒI: 
+{"id":"1555383752809784_4553128184932819","success":true}
+  .pm2\logs\bot-out.log:165416:[AD SRC] adId=1468690110033030_1555383752809784 | ad_clicks=0 sug_posts=0 sug_prods=0 | 
+adPostId=- repliedId=- capCands=0 titleLen=397 imgs=6 photo=có
+> .pm2\logs\bot-out.log:165417:[ADS GATE] fromAd=true adId=1468690110033030_1555383752809784 | commentOrigin=true 
+commentOpener=false human=false orderClosed=false turnImg=false alreadyQuoted=false tries=0 shopReplied=false | 
+lock=MGKVX6310 cap="🌸 𝐆𝐈𝐀𝐍𝐍𝐀𝐋 | 𝐍𝐀̀𝐍𝐆 𝐓𝐇𝐎̛ 𝐌𝐀̀ �"
+  .pm2\logs\bot-out.log:165418:[BỎ QUA] Trần Tâm (1555383752809784_1541149197365815): KHÔNG lấy được cụm tin khách 
+(batch rỗng). Tổng tin: 2 | tin cuối sender=shop channel=COMMENT
+  .pm2\logs\bot-out.log:166022:  [THEO DÕI] Phuong Pham | type=INBOX | seen=true | last_sent_by=Public API | 
+updated=2026-06-28T03:14:41.023000 | -> RỚT (seen=true & shop/bot nhắn cuối) | id=615738195133683_26833644479620881
+> .pm2\logs\bot-out.log:166023:      [THEO DÕI/tin] 615738195133683_26833644479620881: KHÁCH-inbox=50 | 
+KHÁCH-comment=0 | tin cuối khách @2026-06-28T03:14:41.023000 -> ❗ CÓ tin INBOX của khách -> BOT PHẢI TRẢ | text:"Váy 
+Giannal giá 890.000đ ạ."  text:"Dạ chị cho em xin chiều cao và cân nặng "
+  .pm2\logs\bot-out.log:166024:  [THEO DÕI] Phuong Pham | type=INBOX | seen=true | last_sent_by=(rỗng=khách nhắn cuối) 
+| updated=2026-06-27T16:51:48.000000 | -> VÀO 'Cần xử lý' | id=1468690110033030_6394346307338466
+  .pm2\logs\bot-out.log:166453:  [THEO DÕI] Phuong Pham | type=INBOX | seen=true | last_sent_by=Public API | 
+updated=2026-06-28T03:14:41.023000 | -> RỚT (seen=true & shop/bot nhắn cuối) | id=615738195133683_26833644479620881
+> .pm2\logs\bot-out.log:166454:      [THEO DÕI/tin] 615738195133683_26833644479620881: KHÁCH-inbox=50 | 
+KHÁCH-comment=0 | tin cuối khách @2026-06-28T03:14:41.023000 -> ❗ CÓ tin INBOX của khách -> BOT PHẢI TRẢ | text:"Váy 
+Giannal giá 890.000đ ạ."  text:"Dạ chị cho em xin chiều cao và cân nặng "
+  .pm2\logs\bot-out.log:166455:  [THEO DÕI] Phuong Pham | type=INBOX | seen=true | last_sent_by=(rỗng=khách nhắn cuối) 
+| updated=2026-06-27T16:51:48.000000 | -> VÀO 'Cần xử lý' | id=1468690110033030_6394346307338466
+  .pm2\logs\bot-out.log:167080:  [THEO DÕI] Phuong Pham | type=INBOX | seen=true | last_sent_by=Public API | 
+updated=2026-06-28T03:14:41.023000 | -> RỚT (seen=true & shop/bot nhắn cuối) | id=615738195133683_26833644479620881
+> .pm2\logs\bot-out.log:167081:      [THEO DÕI/tin] 615738195133683_26833644479620881: KHÁCH-inbox=50 | 
+KHÁCH-comment=0 | tin cuối khách @2026-06-28T03:14:41.023000 -> ❗ CÓ tin INBOX của khách -> BOT PHẢI TRẢ | text:"Váy 
+Giannal giá 890.000đ ạ."  text:"Dạ chị cho em xin chiều cao và cân nặng "
+  .pm2\logs\bot-out.log:167082:  [THEO DÕI] Phuong Pham | type=INBOX | seen=true | last_sent_by=(rỗng=khách nhắn cuối) 
+| updated=2026-06-27T16:51:48.000000 | -> VÀO 'Cần xử lý' | id=1468690110033030_6394346307338466
+  .pm2\logs\bot-out.log:167766:  [THEO DÕI] Phuong Pham | type=INBOX | seen=true | last_sent_by=Public API | 
+updated=2026-06-28T03:14:41.023000 | -> RỚT (seen=true & shop/bot nhắn cuối) | id=615738195133683_26833644479620881
+> .pm2\logs\bot-out.log:167767:      [THEO DÕI/tin] 615738195133683_26833644479620881: KHÁCH-inbox=50 | 
+KHÁCH-comment=0 | tin cuối khách @2026-06-28T03:14:41.023000 -> ❗ CÓ tin INBOX của khách -> BOT PHẢI TRẢ | text:"Váy 
+Giannal giá 890.000đ ạ."  text:"Dạ chị cho em xin chiều cao và cân nặng "
+  .pm2\logs\bot-out.log:167768:  [THEO DÕI] Phuong Pham | type=INBOX | seen=true | last_sent_by=(rỗng=khách nhắn cuối) 
+| updated=2026-06-27T16:51:48.000000 | -> VÀO 'Cần xử lý' | id=1468690110033030_6394346307338466
+  .pm2\logs\bot-out.log:168409:  [THEO DÕI] Phuong Pham | type=INBOX | seen=true | last_sent_by=Public API | 
+updated=2026-06-28T03:14:41.023000 | -> RỚT (seen=true & shop/bot nhắn cuối) | id=615738195133683_26833644479620881
+> .pm2\logs\bot-out.log:168410:      [THEO DÕI/tin] 615738195133683_26833644479620881: KHÁCH-inbox=50 | 
+KHÁCH-comment=0 | tin cuối khách @2026-06-28T03:14:41.023000 -> ❗ CÓ tin INBOX của khách -> BOT PHẢI TRẢ | text:"Váy 
+Giannal giá 890.000đ ạ."  text:"Dạ chị cho em xin chiều cao và cân nặng "
+  .pm2\logs\bot-out.log:168411:  [THEO DÕI] Phuong Pham | type=INBOX | seen=true | last_sent_by=(rỗng=khách nhắn cuối) 
+| updated=2026-06-27T16:51:48.000000 | -> VÀO 'Cần xử lý' | id=1468690110033030_6394346307338466
+  .pm2\logs\bot-out.log:169086:  [THEO DÕI] Phuong Pham | type=INBOX | seen=true | last_sent_by=Public API | 
+updated=2026-06-28T03:14:41.023000 | -> RỚT (seen=true & shop/bot nhắn cuối) | id=615738195133683_26833644479620881
+> .pm2\logs\bot-out.log:169087:      [THEO DÕI/tin] 615738195133683_26833644479620881: KHÁCH-inbox=50 | 
+KHÁCH-comment=0 | tin cuối khách @2026-06-28T03:14:41.023000 -> ❗ CÓ tin INBOX của khách -> BOT PHẢI TRẢ | text:"Váy 
+Giannal giá 890.000đ ạ."  text:"Dạ chị cho em xin chiều cao và cân nặng "
+  .pm2\logs\bot-out.log:169088:  [THEO DÕI] Phuong Pham | type=INBOX | seen=true | last_sent_by=(rỗng=khách nhắn cuối) 
+| updated=2026-06-27T16:51:48.000000 | -> VÀO 'Cần xử lý' | id=1468690110033030_6394346307338466
+  .pm2\logs\bot-out.log:169807:  [THEO DÕI] Phuong Pham | type=INBOX | seen=true | last_sent_by=Public API | 
+updated=2026-06-28T03:14:41.023000 | -> RỚT (seen=true & shop/bot nhắn cuối) | id=615738195133683_26833644479620881
+> .pm2\logs\bot-out.log:169808:      [THEO DÕI/tin] 615738195133683_26833644479620881: KHÁCH-inbox=50 | 
+KHÁCH-comment=0 | tin cuối khách @2026-06-28T03:14:41.023000 -> ❗ CÓ tin INBOX của khách -> BOT PHẢI TRẢ | text:"Váy 
+Giannal giá 890.000đ ạ."  text:"Dạ chị cho em xin chiều cao và cân nặng "
+  .pm2\logs\bot-out.log:169809:  [THEO DÕI] Phuong Pham | type=INBOX | seen=true | last_sent_by=(rỗng=khách nhắn cuối) 
+| updated=2026-06-27T16:51:48.000000 | -> VÀO 'Cần xử lý' | id=1468690110033030_6394346307338466
+  .pm2\logs\bot-out.log:170466:  [THEO DÕI] Phuong Pham | type=INBOX | seen=true | last_sent_by=Public API | 
+updated=2026-06-28T03:14:41.023000 | -> RỚT (seen=true & shop/bot nhắn cuối) | id=615738195133683_26833644479620881
+> .pm2\logs\bot-out.log:170467:      [THEO DÕI/tin] 615738195133683_26833644479620881: KHÁCH-inbox=50 | 
+KHÁCH-comment=0 | tin cuối khách @2026-06-28T03:14:41.023000 -> ❗ CÓ tin INBOX của khách -> BOT PHẢI TRẢ | text:"Váy 
+Giannal giá 890.000đ ạ."  text:"Dạ chị cho em xin chiều cao và cân nặng "
+  .pm2\logs\bot-out.log:170468:  [THEO DÕI] Phuong Pham | type=INBOX | seen=true | last_sent_by=(rỗng=khách nhắn cuối) 
+| updated=2026-06-27T16:51:48.000000 | -> VÀO 'Cần xử lý' | id=1468690110033030_6394346307338466
+  .pm2\logs\bot-out.log:171105:  [THEO DÕI] Phuong Pham | type=INBOX | seen=true | last_sent_by=Public API | 
+updated=2026-06-28T03:14:41.023000 | -> RỚT (seen=true & shop/bot nhắn cuối) | id=615738195133683_26833644479620881
+> .pm2\logs\bot-out.log:171106:      [THEO DÕI/tin] 615738195133683_26833644479620881: KHÁCH-inbox=50 | 
+KHÁCH-comment=0 | tin cuối khách @2026-06-28T03:14:41.023000 -> ❗ CÓ tin INBOX của khách -> BOT PHẢI TRẢ | text:"Váy 
+Giannal giá 890.000đ ạ."  text:"Dạ chị cho em xin chiều cao và cân nặng "
+  .pm2\logs\bot-out.log:171107:  [THEO DÕI] Phuong Pham | type=INBOX | seen=true | last_sent_by=(rỗng=khách nhắn cuối) 
+| updated=2026-06-27T16:51:48.000000 | -> VÀO 'Cần xử lý' | id=1468690110033030_6394346307338466
+  .pm2\logs\bot-out.log:171745:  [THEO DÕI] Phuong Pham | type=INBOX | seen=true | last_sent_by=Public API | 
+updated=2026-06-28T03:14:41.023000 | -> RỚT (seen=true & shop/bot nhắn cuối) | id=615738195133683_26833644479620881
+> .pm2\logs\bot-out.log:171746:      [THEO DÕI/tin] 615738195133683_26833644479620881: KHÁCH-inbox=50 | 
+KHÁCH-comment=0 | tin cuối khách @2026-06-28T03:14:41.023000 -> ❗ CÓ tin INBOX của khách -> BOT PHẢI TRẢ | text:"Váy 
+Giannal giá 890.000đ ạ."  text:"Dạ chị cho em xin chiều cao và cân nặng "
+  .pm2\logs\bot-out.log:171747:  [THEO DÕI] Phuong Pham | type=INBOX | seen=true | last_sent_by=(rỗng=khách nhắn cuối) 
+| updated=2026-06-27T16:51:48.000000 | -> VÀO 'Cần xử lý' | id=1468690110033030_6394346307338466
+  .pm2\logs\bot-out.log:172386:[vision] màu (từ tên file): HỒNG | mã MRKVX6335 | img 1f_bW96fE-pTgAQCnu-gPZ_PJFt6AgYf9
+> .pm2\logs\bot-out.log:172387:VISION: {"ok":true,"code":"MRKVX6335","color":"HỒNG","score":0.9544,"gap":0.0972} | 
+top: MRKVX6335:0.9544 MG0VX6037:0.8573 MGKVX6044:0.851
+  .pm2\logs\bot-out.log:172388:Khách gửi 1 ảnh | nhận diện 1 từ ảnh (màu: HỒNG), 0 từ chữ | trượt 0
+  .pm2\logs\bot-out.log:172455:  [THEO DÕI] Phuong Pham | type=INBOX | seen=true | last_sent_by=Public API | 
+updated=2026-06-28T03:14:41.023000 | -> RỚT (seen=true & shop/bot nhắn cuối) | id=615738195133683_26833644479620881
+> .pm2\logs\bot-out.log:172456:      [THEO DÕI/tin] 615738195133683_26833644479620881: KHÁCH-inbox=50 | 
+KHÁCH-comment=0 | tin cuối khách @2026-06-28T03:14:41.023000 -> ❗ CÓ tin INBOX của khách -> BOT PHẢI TRẢ | text:"Váy 
+Giannal giá 890.000đ ạ."  text:"Dạ chị cho em xin chiều cao và cân nặng "
+  .pm2\logs\bot-out.log:172457:  [THEO DÕI] Phuong Pham | type=INBOX | seen=true | last_sent_by=(rỗng=khách nhắn cuối) 
+| updated=2026-06-27T16:51:48.000000 | -> VÀO 'Cần xử lý' | id=1468690110033030_6394346307338466
+  .pm2\logs\bot-out.log:172467:[vision] màu (từ tên file): HỒNG | mã MRKVX6335 | img 1f_bW96fE-pTgAQCnu-gPZ_PJFt6AgYf9
+> .pm2\logs\bot-out.log:172468:VISION: {"ok":true,"code":"MRKVX6335","color":"HỒNG","score":0.9544,"gap":0.0972} | 
+top: MRKVX6335:0.9544 MG0VX6037:0.8573 MGKVX6044:0.851
+  .pm2\logs\bot-out.log:172469:Khách gửi 1 ảnh | nhận diện 1 từ ảnh (màu: HỒNG), 0 từ chữ | trượt 0
+  .pm2\logs\bot-out.log:173120:  [THEO DÕI] Phuong Pham | type=INBOX | seen=true | last_sent_by=Public API | 
+updated=2026-06-28T03:14:41.023000 | -> RỚT (seen=true & shop/bot nhắn cuối) | id=615738195133683_26833644479620881
+> .pm2\logs\bot-out.log:173121:      [THEO DÕI/tin] 615738195133683_26833644479620881: KHÁCH-inbox=50 | 
+KHÁCH-comment=0 | tin cuối khách @2026-06-28T03:14:41.023000 -> ❗ CÓ tin INBOX của khách -> BOT PHẢI TRẢ | text:"Váy 
+Giannal giá 890.000đ ạ."  text:"Dạ chị cho em xin chiều cao và cân nặng "
+  .pm2\logs\bot-out.log:173122:  [THEO DÕI] Phuong Pham | type=INBOX | seen=true | last_sent_by=(rỗng=khách nhắn cuối) 
+| updated=2026-06-27T16:51:48.000000 | -> VÀO 'Cần xử lý' | id=1468690110033030_6394346307338466
+  .pm2\logs\bot-out.log:173821:  [THEO DÕI] Phuong Pham | type=INBOX | seen=true | last_sent_by=Public API | 
+updated=2026-06-28T03:14:41.023000 | -> RỚT (seen=true & shop/bot nhắn cuối) | id=615738195133683_26833644479620881
+> .pm2\logs\bot-out.log:173822:      [THEO DÕI/tin] 615738195133683_26833644479620881: KHÁCH-inbox=50 | 
+KHÁCH-comment=0 | tin cuối khách @2026-06-28T03:14:41.023000 -> ❗ CÓ tin INBOX của khách -> BOT PHẢI TRẢ | text:"Váy 
+Giannal giá 890.000đ ạ."  text:"Dạ chị cho em xin chiều cao và cân nặng "
+  .pm2\logs\bot-out.log:173823:  [THEO DÕI] Phuong Pham | type=INBOX | seen=true | last_sent_by=(rỗng=khách nhắn cuối) 
+| updated=2026-06-27T16:51:48.000000 | -> VÀO 'Cần xử lý' | id=1468690110033030_6394346307338466
+  .pm2\logs\bot-out.log:174521:  [THEO DÕI] Phuong Pham | type=INBOX | seen=true | last_sent_by=Public API | 
+updated=2026-06-28T03:14:41.023000 | -> RỚT (seen=true & shop/bot nhắn cuối) | id=615738195133683_26833644479620881
+> .pm2\logs\bot-out.log:174522:      [THEO DÕI/tin] 615738195133683_26833644479620881: KHÁCH-inbox=50 | 
+KHÁCH-comment=0 | tin cuối khách @2026-06-28T03:14:41.023000 -> ❗ CÓ tin INBOX của khách -> BOT PHẢI TRẢ | text:"Váy 
+Giannal giá 890.000đ ạ."  text:"Dạ chị cho em xin chiều cao và cân nặng "
+  .pm2\logs\bot-out.log:174523:  [THEO DÕI] Phuong Pham | type=INBOX | seen=true | last_sent_by=(rỗng=khách nhắn cuối) 
+| updated=2026-06-27T16:51:48.000000 | -> VÀO 'Cần xử lý' | id=1468690110033030_6394346307338466
+  .pm2\logs\bot-out.log:175210:  [THEO DÕI] Phuong Pham | type=INBOX | seen=true | last_sent_by=Public API | 
+updated=2026-06-28T03:14:41.023000 | -> RỚT (seen=true & shop/bot nhắn cuối) | id=615738195133683_26833644479620881
+> .pm2\logs\bot-out.log:175211:      [THEO DÕI/tin] 615738195133683_26833644479620881: KHÁCH-inbox=50 | 
+KHÁCH-comment=0 | tin cuối khách @2026-06-28T03:14:41.023000 -> ❗ CÓ tin INBOX của khách -> BOT PHẢI TRẢ | text:"Váy 
+Giannal giá 890.000đ ạ."  text:"Dạ chị cho em xin chiều cao và cân nặng "
+  .pm2\logs\bot-out.log:175212:  [THEO DÕI] Phuong Pham | type=INBOX | seen=true | last_sent_by=(rỗng=khách nhắn cuối) 
+| updated=2026-06-27T16:51:48.000000 | -> VÀO 'Cần xử lý' | id=1468690110033030_6394346307338466
+  .pm2\logs\bot-out.log:175894:  [THEO DÕI] Phuong Pham | type=INBOX | seen=true | last_sent_by=Public API | 
+updated=2026-06-28T03:14:41.023000 | -> RỚT (seen=true & shop/bot nhắn cuối) | id=615738195133683_26833644479620881
+> .pm2\logs\bot-out.log:175895:      [THEO DÕI/tin] 615738195133683_26833644479620881: KHÁCH-inbox=50 | 
+KHÁCH-comment=0 | tin cuối khách @2026-06-28T03:14:41.023000 -> ❗ CÓ tin INBOX của khách -> BOT PHẢI TRẢ | text:"Váy 
+Giannal giá 890.000đ ạ."  text:"Dạ chị cho em xin chiều cao và cân nặng "
+  .pm2\logs\bot-out.log:175896:  [THEO DÕI] Phuong Pham | type=INBOX | seen=true | last_sent_by=(rỗng=khách nhắn cuối) 
+| updated=2026-06-27T16:51:48.000000 | -> VÀO 'Cần xử lý' | id=1468690110033030_6394346307338466
+
+

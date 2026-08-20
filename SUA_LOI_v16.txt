@@ -1,0 +1,71 @@
+================  SỬA LỖI v16  ================
+(cộng dồn trên v15 — chép đè 3 file .js vào C:\AI_HTK_BOT_V5, Ctrl-C, chạy lại node bot_worker_api_v3.js)
+
+FILE THAY ĐỔI:
+  - bot_worker_api_v3.js
+  - ai_intent.js
+  - color_utils.js   (giữ guard "trang" từ phiên trước)
+
+------------------------------------------------------------
+#1  CHAU HA — CAPTION CHỈ NHẬN DIỆN MẪU, KHÔNG NHẬN DIỆN MÀU
+------------------------------------------------------------
+Lỗi: AD "Camellia" caption KHÔNG có chữ "trắng" nhưng log lại báo
+     §13: màu Ở CAPTION = "Trắng" -> chỉ gửi 1 màu, "bung" thiếu màu.
+Nguyên nhân: code đọc MÀU từ CHỮ caption (extractColor) ở 2 chỗ.
+Sửa: TẮT CẢ 2 chỗ đọc màu từ chữ caption:
+     - §13 ensureSourceColorFromCaption (worker ~4143) -> no-op (return).
+     - fallback trong khối AD (worker ~5542) -> bỏ.
+     GIỮ NGUYÊN màu lấy từ VISION ảnh bài AD ("màu Ở BÀI" theo tên-file-ảnh).
+Kết quả: caption chỉ để ra MẪU. Màu nguồn chỉ đến từ: ảnh AD (vision) /
+     ảnh khách gửi / khách tự xin màu. KHÔNG nhận ra màu -> gửi ĐỦ màu.
+
+------------------------------------------------------------
+#2  TRANG ĐẶNG — HỎI SIZE MẪU CHƯA BÁO GIÁ -> PHẢI BÁO GIÁ + ẢNH
+------------------------------------------------------------
+(a) Dạy lại AI (ai_intent.js ~110): khách hỏi THUỘC TÍNH (màu/size/tồn/
+    chất liệu/dáng) của 1 mẫu MÀ "Tin shop ngay trước" CHƯA có giá ->
+    vẫn đặt asks_price=true (để code báo giá + gửi ảnh kèm). Nếu shop đã
+    báo giá mẫu đó rồi thì KHÔNG đặt (chỉ trả đúng thuộc tính khách hỏi).
+(b) Sửa handler size (worker ~7600, [FIX Trang Đặng]): handler asksWhatSize
+    trước đây trả "S/M/L" rồi return TRƯỚC khối báo-giá-kèm-ảnh -> không ra
+    giá/ảnh. Nay: mẫu CHƯA báo giá -> chèn câu giá đầu reply + markPriced +
+    gửi ảnh (đúng pattern [FIX Thanh Tran] của handler chất liệu).
+
+------------------------------------------------------------
+#3  VÂN PHÙNG BÍCH — KHÁCH CHỈ CHÀO "E ơi" KHÔNG ĐƯỢC TỰ BÁO GIÁ
+------------------------------------------------------------
+Lỗi: khách "E ơi" (AI gắn GREETING, price=false) nhưng mẫu Giannal resolve
+     từ vision ảnh bài AD -> _newModelPresented=true -> báo giá luôn.
+Sửa (worker ~9093, [FIX Vân Phùng Bích]): chèn nhánh TRƯỚC khối báo giá:
+     nếu AI=GREETING + KHÔNG hỏi giá + KHÔNG gửi ảnh + mẫu chỉ "hiện" do
+     resolve từ ảnh AD -> CHÀO nhẹ ("Dạ Mys.P nghe chị ạ..."), KHÔNG báo giá.
+     Lượt sau khách hỏi giá / gửi ảnh / gõ tên mẫu -> mới báo giá bình thường.
+     Gate yêu cầu mem._aiOk (AI sập -> tắt gate, giữ hành vi cũ).
+
+------------------------------------------------------------
+#4  THANH NGA (Part A) — GALLERY DANG DỞ KHÔNG ĐƯỢC NUỐT TIN KHÁCH
+------------------------------------------------------------
+Lỗi: "Bắt đầu" -> gallery 10 mẫu; album lỗi gửi lẻ; khách chen "C xin giá"
+     -> gallery NGỪNG ở ảnh 1/10. Lượt sau "C xin giá" bị guard chống-lặp
+     (worker 5647) tưởng "shop đã trả lời" -> BỎ QUA -> người thật phải vào.
+Nguyên nhân: ảnh gallery gửi bằng _sendInboxContentIds KHÔNG được ghi vào
+     botSentIds -> guard không nhận ra đó là ảnh DO BOT gửi.
+Sửa (worker ~3995 & ~4030, [FIX Thanh Nga]): ghi ảnh gallery vào botSentIds
+     (rememberSentId) ở 2 chỗ gửi content_id (album + lẻ). Path URL-lẻ (4035)
+     vốn đã dùng wrapper có rememberSentId.
+Kết quả: "C xin giá" KHÔNG bị nuốt -> lượt sau bot báo giá + ảnh mẫu khách hỏi.
+LƯU Ý: chưa làm Part B (bắn nốt 9 mẫu gallery còn lại) — vì khách đã chuyển
+     sang hỏi giá 1 mẫu, dội thêm 9 mẫu là spam ngược. Để dành nếu cần.
+
+------------------------------------------------------------
+ĐÃ KIỂM:
+  - node --check PASS cả 3 file.
+  - Unit test color_utils: "trang phục trang nhã"->null, "váy màu trắng"->Trắng,
+    "white"->Trắng, "màu hồng"->Hồng. PASS.
+  - Các sửa handler/cổng-AD CHỈ test được cú pháp + logic tĩnh; CẦN chạy
+    traffic thật xác nhận (sandbox không có token Pancake/OpenAI/vision).
+
+CÒN BỎ NGỎ (chờ quyết):
+  - #4 Part B (resume gallery) — không khuyến nghị.
+  - planB gửi ảnh màu (worker ~8870) cũng dùng _sendInboxContentIds thô,
+    chưa ghi botSentIds -> cùng dạng lỗi tiềm ẩn, sửa 1 dòng nếu muốn.

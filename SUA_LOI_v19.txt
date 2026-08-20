@@ -1,0 +1,39 @@
+========================================
+  SUA_LOI_v19 — Mys.P BOT  (tích luỹ từ v17)
+========================================
+Deploy: copy 3 file .js đè vào C:\AI_HTK_BOT_V5 -> Ctrl-C -> node bot_worker_api_v3.js
+FILE THAY ĐỔI: bot_worker_api_v3.js, ai_intent.js, color_utils.js
+LƯU Ý: KHÔNG đè ad_product_map.json (mày tự sửa file đó trên máy shop — xem mục Hong Nhung).
+
+================= MỚI Ở v19 =================
+[1] TÁCH khách CŨ vs MỚI (bot_worker ~9097) — dùng botQuotedPriceInHistory:
+    - Khách CŨ (lịch sử đã có báo giá) chỉ chào trống "em ơi" -> "Dạ Mys.P nghe chị ạ, cần em hỗ trợ gì ạ?"
+      (KHÔNG báo giá đè mã ad đã báo).
+    - Khách MỚI (chưa từng báo giá) + ad -> báo giá mẫu ad (Nga Lê, Bếp Cô Sin).
+    - Khách hỏi GIÁ cụ thể -> vẫn báo giá (gate có !priceAsk).
+
+[2] ai_intent — "bn / bnn / bn em / bnn ak / bao nhiu / nhiu" = HỎI GIÁ (asks_price=true),
+    KỂ CẢ khi kind là FIT_SUITABILITY / GREETING. => Hải Kiên ("Bn em"), Đặng Vân ("Bnn ak") vào đúng luồng báo giá.
+
+[3] Ngoc Lan (bot_worker ~5800) — khách nói MÀU khi đang có ≥2 mẫu -> chọn ĐÚNG mẫu khớp màu
+    ("cho chị bộ hồng" -> Giannal hồng, KHÔNG vớ Delicacy trắng). Mơ hồ (0/≥2 khớp) -> không đoán. (unit-test PASS)
+
+[4] Hải Kiên - GỬI TIN RETRY (bot_worker sendInboxMessage ~166) — gửi fail (Pancake lỗi tạm) trước đây
+    bị nuốt âm thầm (log vẫn báo "đã gửi") -> nay THỬ LẠI 1 LẦN sau 1.2s. Giúp opener báo giá không bị mất.
+
+[5] Đặng Vân - CHỐNG ẢNH LẶP TRONG 1 LƯỢT (bot_worker maybeSendImages) — cùng mã đã gửi ảnh ở lượt này
+    rồi thì KHÔNG gửi lại (kể cả force). Marker theo lượt (_turnCtx._imgSentCodes, reset mỗi lượt) -> lượt sau vẫn gửi bình thường.
+
+================= Hong Nhung — SỬA BẰNG DATA (KHÔNG đổi code) =================
+Khách ấn ad OCELIA, Pancake đọc creative trượt + OCELIA CHƯA có trong ad_product_map.json -> bot không resolve
+được mẫu -> gửi gallery thay vì báo giá. CƠ CHẾ "cụm gần đây / ad mới nhất" + "ảnh khách đè ad" CODE ĐÃ CHẠY SẴN.
+=> Trên máy shop, mở ad_product_map.json THÊM 1 dòng (KHÔNG cần tắt/bật bot):
+     "1568946478120178": "MRKVX6335"
+   (post_id bài OCELIA -> mã Ocelia). Sau đó OCELIA luôn resolve được kể cả khi Pancake trượt.
+   Quy tắc chung: ad nào hay bị rớt gallery -> xem log "[ADS MAP] >>> THÊM vào ad_product_map.json: ..." rồi thêm post_id đó.
+
+================= ĐÃ CÓ TỪ v16/v17 (vẫn còn) =================
+- Chau Ha: caption ad CHỈ nhận diện MẪU, KHÔNG nhận MÀU.
+- Trang Đặng: ai_intent "mẫu chưa báo giá + hỏi thuộc tính -> asks_price"; handler size báo giá+ảnh trước.
+- Thanh Nga: ảnh gallery content_id ghi botSentIds.
+- Tuyết Babie: cổng gallery mở-đầu-trống bám nhãn AI priceAsk (bắt "Xin gia a").

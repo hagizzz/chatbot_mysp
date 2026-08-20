@@ -1,0 +1,5 @@
+Chép geo_probe2.js vào C:\AI_HTK_BOT_V5 (cạnh order_worker.js), rồi:
+    node geo_probe2.js
+Copy TOÀN BỘ output gửi lại. Nó dò xem Pancake để danh sách PHƯỜNG MỚI
+(sau sáp nhập 2025, vd "Phường Nha Trang") ở endpoint nào.
+Chỉ ĐỌC, không đổi gì.

@@ -1,0 +1,33 @@
+========================================
+  SUA_LOI_v21 — Mys.P BOT  (tích luỹ từ v17)
+========================================
+Deploy: copy 3 file .js đè vào C:\AI_HTK_BOT_V5 -> Ctrl-C -> node bot_worker_api_v3.js
+FILE THAY ĐỔI: bot_worker_api_v3.js, ai_intent.js, color_utils.js
+LƯU Ý: KHÔNG đè ad_product_map.json (tự sửa trên máy shop — xem mục Hong Nhung).
+
+================= MỚI Ở v21 =================
+[Duyên Phận + LUẬT SIZE CŨ] (nhánh tư vấn size ~9554) — sửa "tư vấn 1 kiểu chốt 1 kiểu" + ưu tiên size cũ:
+   - LỖI cũ: khách có size cũ tự khai (vd L), cân mới ra M -> bot TƯ VẤN M nhưng KHÔNG cập nhật
+     mem.customerSize -> ĐƠN vẫn lấy L (size cũ) -> tư vấn M chốt L (lệch).
+   - SỬA: 
+     * Cân mới + 2kg (chênh tối đa ~3kg) VẪN ra size cũ -> ƯU TIÊN GIỮ size cũ.
+       VD: 54kg, 54+2=56 -> L == size cũ L => "Dạ với 54kg thì chị mặc size L là chuẩn form nhất ạ..."
+     * Nếu +2kg KHÔNG ra size cũ -> tư vấn theo size MỚI.
+     * Khách KHÔNG có size cũ -> theo code mặc định (vd 54kg -> M).
+     * LUÔN set mem.customerSize = size VỪA TƯ VẤN -> CHỐT đúng size đã tư vấn (hết lệch tư vấn/đơn).
+   - Đã unit-test 7/7 ca (Duyên 54+L->L; 53+L->M; no-old 54->M; ...).
+
+================= CÒN ĐANG CHỜ LOG =================
+[Nguyet Nguyen Minh] CÂU TƯ VẤN SIZE LẶP 2 LẦN -> nghi path báo size (9577) bắn qua 2 vòng quét
+   (khách chен tin / restart). CẦN log đoạn xử Nguyet để chốt đúng chỗ chặn (không đoán bừa vùng size).
+
+================= ĐÃ CÓ TỪ v20 =================
+[Khoai Khoai] COMMENT người thật đã trả lời -> bot ĐỨNG NGOÀI (thêm humanTookOverComment; chỉ áp type=COMMENT,
+   không đụng ad-inbox).
+
+================= ĐÃ CÓ TỪ v19 =================
+[1] Tách khách CŨ/MỚI (botQuotedPriceInHistory). [2] ai_intent "bn/bnn"=hỏi giá.
+[3] Ngoc Lan chọn đúng mẫu theo màu. [4] Hải Kiên retry gửi tin. [5] Đặng Vân chống ảnh lặp trong lượt.
+
+================= Hong Nhung — SỬA BẰNG DATA =================
+Thêm vào ad_product_map.json (máy shop, không cần tắt bot): "1568946478120178": "MRKVX6335"

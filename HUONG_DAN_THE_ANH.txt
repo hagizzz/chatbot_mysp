@@ -1,0 +1,27 @@
+============================================================
+2 THẺ RIÊNG: lỗi ảnh vs chờ thông tin
+============================================================
+2 file - copy ĐÈ vào C:\AI_HTK_BOT_V5, chạy lại bot:
+  - pancake_sender.js     (đè)
+  - bot_worker_api_v3.js  (đè)
+
+## Phân loại thẻ (tự động + chuyển chưa đọc)
+- ẢNH nhận không ra (gửi 5 nhận 4, hoặc gửi ảnh lạ)  -> thẻ "AI- XL ảnh" (id 184)
+- AI báo "chờ kiểm tra" thông tin (không phải ảnh)    -> thẻ "AI - CHỜ XL" (id 183)
+Cả 2 đều tự chuyển hội thoại về CHƯA ĐỌC cho nhân viên xử.
+
+## Khi ảnh nhận không ra
+- Vẫn báo giá + tư vấn các mẫu nhận được.
+- KHÔNG nhắn khách về mẫu thiếu.
+- Âm thầm gắn "AI- XL ảnh" + chưa đọc.
+
+## Log kiểm tra
+  Khách gửi 5 ảnh | nhận diện 4 ... | trượt 1
+  Có 1 ảnh không nhận ra -> gắn thẻ AI- XL ảnh + chưa đọc
+  TAG AI-XL ảnh: {"success":true,...}
+  UNREAD: {"success":true,...}
+-> Pancake: hội thoại có thẻ "AI- XL ảnh" + chưa đọc.
+
+Nếu thẻ báo lỗi/false -> chụp dòng TAG gửi mình.
+
+Chạy lại: bấm đúp start_bot.bat

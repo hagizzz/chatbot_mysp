@@ -1,0 +1,25 @@
+=== BẢN VÁ v39 — ĐƠN GẤP: thêm cột COD + Kết quả đủ trạng thái ===
+
+CHÉP ĐÈ 2 FILE: order_worker.js, urgent_sheet.js  (đổi cũ -> .bak)
+
+CỘT TAB "Đơn gấp" (theo bố cục MỚI có COD):
+  A Mã ID | B page | C Mã SP | D Trạng thái đơn | E Thời gian khách đòi hàng
+  F Thời gian xử lý | G COD | H Kết quả | (I Hình ảnh...)
+
+ĐÃ THÊM/SỬA:
+  1) COD (cột G): ghi COD của đơn khi báo; tự BỔ SUNG COD cho các đơn CŨ (kể cả đã xong).
+  2) Kết quả (cột H) hiện ĐỦ trạng thái, cập nhật theo tiến trình:
+       - "Đã chuyển hàng"  (khi đơn shipped)   -> vẫn theo dõi tiếp
+       - "Đã nhận"         (received/delivered) -> CUỐI
+       - "Hàng hoàn"       (returned/refund)    -> CUỐI
+       - "Đã hủy"          (canceled)           -> CUỐI
+     Trước đây chỉ hiện "Đã hủy" vì code chỉ ghi 3 trạng thái cuối và bỏ "đã chuyển hàng".
+  3) Theo dõi vừa theo state vừa theo SHEET -> đơn cũ vẫn được cập nhật COD/F/H.
+
+LƯU Ý: nhận trạng thái theo TÊN tiếng Anh POS trả. Nếu 1 trạng thái nào đó vẫn
+  không hiện (vd "đã nhận"/"hàng hoàn"), dump giúp mình status_name của đơn đó:
+    node -e "require('dotenv').config();const k=process.env.PANCAKE_POS_API_KEY,s=process.env.PANCAKE_POS_SHOP_ID;fetch('https://pos.pages.fm/api/v1/shops/'+s+'/orders/<MÃ>?api_key='+k).then(r=>r.json()).then(j=>console.log(JSON.stringify({status:j.data.status,status_name:j.data.status_name})))"
+  -> mình bổ sung token cho khớp.
+
+CHÉP NHANH:
+  cd /d C:\AI_HTK_BOT_V5 && for %f in (order_worker.js urgent_sheet.js) do @for /f "delims=" %g in ('dir /s /b "%USERPROFILE%\Downloads\%f" 2^>nul') do @copy /y "%g" .

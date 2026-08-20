@@ -1,0 +1,6 @@
+{
+  "_huong_dan": "ĐỔI TÊN file này thành fb_ads_tokens.json. KEY=pageId, VALUE=token FACEBOOK (EAA...). Chỉ khai page nào cần token RIÊNG; page không khai sẽ dùng FB_ADS_TOKEN chung trong .env.",
+  "615738195133683": "EAA_TOKEN_FACEBOOK_CUA_PHOM",
+  "1405324086167653": "EAA_TOKEN_FACEBOOK_CUA_CUPID",
+  "2058685704152385": "EAA_TOKEN_FACEBOOK_CUA_MARIA"
+}

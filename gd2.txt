@@ -1,0 +1,53 @@
+﻿
+.pm2\logs\bot-out.log:179030:[VÀO XỬ] Hoàng Thu Thủy | seen=true | last_sent_by=(rỗng=khách) | 
+updated=2026-06-28T03:26:51.000000 | id=1468690110033030_6502252569894820
+.pm2\logs\bot-out.log:179031:[Bảo Trâm] Còn thẻ giữ (CHỜ XL/ĐƠN ƯU TIÊN/Hàng đổi/Đang hoàn) -> người thật xử lý, AI 
+đứng ngoài. Conv: 1468690110033030_6502252569894820
+.pm2\logs\bot-out.log:179077:[VÀO XỬ] Hoàng Thu Thủy | seen=true | last_sent_by=(rỗng=khách) | 
+updated=2026-06-28T03:26:51.000000 | id=1468690110033030_6502252569894820
+.pm2\logs\bot-out.log:179121:[VÀO XỬ] Hoàng Thu Thủy | seen=true | last_sent_by=(rỗng=khách) | 
+updated=2026-06-28T03:26:51.000000 | id=1468690110033030_6502252569894820
+.pm2\logs\bot-out.log:179165:[VÀO XỬ] Hoàng Thu Thủy | seen=true | last_sent_by=(rỗng=khách) | 
+updated=2026-06-28T03:26:51.000000 | id=1468690110033030_6502252569894820
+.pm2\logs\bot-out.log:179210:[VÀO XỬ] Hoàng Thu Thủy | seen=true | last_sent_by=(rỗng=khách) | 
+updated=2026-06-28T03:26:51.000000 | id=1468690110033030_6502252569894820
+.pm2\logs\bot-out.log:179254:[VÀO XỬ] Hoàng Thu Thủy | seen=true | last_sent_by=(rỗng=khách) | 
+updated=2026-06-28T03:26:51.000000 | id=1468690110033030_6502252569894820
+.pm2\logs\bot-out.log:179299:[VÀO XỬ] Hoàng Thu Thủy | seen=true | last_sent_by=(rỗng=khách) | 
+updated=2026-06-28T03:26:51.000000 | id=1468690110033030_6502252569894820
+.pm2\logs\bot-out.log:179343:[VÀO XỬ] Hoàng Thu Thủy | seen=true | last_sent_by=(rỗng=khách) | 
+updated=2026-06-28T03:26:51.000000 | id=1468690110033030_6502252569894820
+.pm2\logs\bot-out.log:179387:[VÀO XỬ] Hoàng Thu Thủy | seen=true | last_sent_by=(rỗng=khách) | 
+updated=2026-06-28T03:26:51.000000 | id=1468690110033030_6502252569894820
+.pm2\logs\bot-out.log:179432:[VÀO XỬ] Hoàng Thu Thủy | seen=true | last_sent_by=(rỗng=khách) | 
+updated=2026-06-28T03:26:51.000000 | id=1468690110033030_6502252569894820
+.pm2\logs\bot-out.log:179490:[VÀO XỬ] Hoàng Thu Thủy | seen=true | last_sent_by=(rỗng=khách) | 
+updated=2026-06-28T03:26:51.000000 | id=1468690110033030_6502252569894820
+.pm2\logs\bot-out.log:179535:[VÀO XỬ] Hoàng Thu Thủy | seen=true | last_sent_by=(rỗng=khách) | 
+updated=2026-06-28T03:26:51.000000 | id=1468690110033030_6502252569894820
+.pm2\logs\bot-out.log:179579:[VÀO XỬ] Hoàng Thu Thủy | seen=true | last_sent_by=(rỗng=khách) | 
+updated=2026-06-28T03:26:51.000000 | id=1468690110033030_6502252569894820
+.pm2\logs\bot-out.log:179624:[VÀO XỬ] Hoàng Thu Thủy | seen=true | last_sent_by=(rỗng=khách) | 
+updated=2026-06-28T03:26:51.000000 | id=1468690110033030_6502252569894820
+.pm2\logs\bot-out.log:179668:[VÀO XỬ] Hoàng Thu Thủy | seen=true | last_sent_by=(rỗng=khách) | 
+updated=2026-06-28T03:26:51.000000 | id=1468690110033030_6502252569894820
+.pm2\logs\bot-out.log:179713:[VÀO XỬ] Hoàng Thu Thủy | seen=true | last_sent_by=(rỗng=khách) | 
+updated=2026-06-28T03:26:51.000000 | id=1468690110033030_6502252569894820
+.pm2\logs\bot-out.log:179714:[Bảo Trâm] Còn thẻ giữ (CHỜ XL/ĐƠN ƯU TIÊN/Hàng đổi/Đang hoàn) -> người thật xử lý, AI 
+đứng ngoài. Conv: 1468690110033030_6502252569894820
+.pm2\logs\bot-out.log:179760:[VÀO XỬ] Hoàng Thu Thủy | seen=true | last_sent_by=(rỗng=khách) | 
+updated=2026-06-28T03:26:51.000000 | id=1468690110033030_6502252569894820
+.pm2\logs\bot-out.log:179804:[VÀO XỬ] Hoàng Thu Thủy | seen=true | last_sent_by=(rỗng=khách) | 
+updated=2026-06-28T03:26:51.000000 | id=1468690110033030_6502252569894820
+.pm2\logs\bot-out.log:179849:[VÀO XỬ] Hoàng Thu Thủy | seen=true | last_sent_by=(rỗng=khách) | 
+updated=2026-06-28T03:26:51.000000 | id=1468690110033030_6502252569894820
+.pm2\logs\bot-out.log:179893:[VÀO XỬ] Hoàng Thu Thủy | seen=true | last_sent_by=(rỗng=khách) | 
+updated=2026-06-28T03:26:51.000000 | id=1468690110033030_6502252569894820
+.pm2\logs\bot-out.log:179937:[VÀO XỬ] Hoàng Thu Thủy | seen=true | last_sent_by=(rỗng=khách) | 
+updated=2026-06-28T03:26:51.000000 | id=1468690110033030_6502252569894820
+.pm2\logs\bot-out.log:179982:[VÀO XỬ] Hoàng Thu Thủy | seen=true | last_sent_by=(rỗng=khách) | 
+updated=2026-06-28T03:26:51.000000 | id=1468690110033030_6502252569894820
+.pm2\logs\bot-out.log:180026:[VÀO XỬ] Hoàng Thu Thủy | seen=true | last_sent_by=(rỗng=khách) | 
+updated=2026-06-28T03:26:51.000000 | id=1468690110033030_6502252569894820
+
+

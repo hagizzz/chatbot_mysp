@@ -1,0 +1,88 @@
+============================================================
+HƯỚNG DẪN: LÊN ĐƠN TỰ ĐỘNG TRÊN PANCAKE POS (TÁCH BIỆT TƯ VẤN)
+============================================================
+
+TÓM TẮT: Đây là 1 TIẾN TRÌNH RIÊNG. Hội thoại nào có thẻ "AI chốt" thì nó
+đọc lịch sử + bộ nhớ tư vấn, đối chiếu tin chốt (cod) của Bảo Châu, đủ thông
+tin thì TẠO ĐƠN trên POS (mỗi sản phẩm 1 đơn), rồi đổi thẻ "AI chốt" ->
+"AI- Đã xác nhận". KHÔNG đụng/ghi đè dữ liệu của bot tư vấn.
+
+FILE MỚI (copy vào C:\AI_HTK_BOT_V5):
+  order_config.js        - cấu hình riêng phần lên đơn
+  order_store.js         - DỮ LIỆU RIÊNG (orders_state.json): nhớ SP đã/chưa lên đơn
+  conversation_tags.js   - đọc thẻ + gắn/GỠ thẻ (public_api)
+  pos_client.js          - gọi Pancake POS API: tra mã->biến thể, dò tỉnh, tạo đơn
+  order_extractor.js     - suy ra {mã,màu,size}+sđt+địa chỉ, kiểm tra đủ/thiếu
+  order_worker.js        - tiến trình chính (chạy: node order_worker.js)
+
+------------------------------------------------------------
+BƯỚC 1 — LẤY CREDENTIAL POS (KHÁC token Page đang dùng!)
+------------------------------------------------------------
+Lên đơn dùng API riêng: Pancake POS Open API (https://pos.pages.fm/api/v1).
+1. Đăng nhập https://pos.pages.fm
+2. Setting -> Advance -> Third-party connection -> Webhook/API
+   -> khung "API KEY" -> bấm Create -> copy KEY.
+3. Lấy shop_id: xem trên URL khi đăng nhập, hoặc gọi:
+   curl "https://pos.pages.fm/api/v1/shops?api_key=API_KEY_CUA_BAN"
+   -> trường "id" của shop chính là shop_id.
+
+------------------------------------------------------------
+BƯỚC 2 — LẤY ID THẺ "AI- Đã xác nhận"
+------------------------------------------------------------
+- Vào Pancake, TẠO 1 thẻ tên "AI- Đã xác nhận" (nếu chưa có).
+- Chạy:  node list_tags.js
+  -> tìm dòng tên "AI- Đã xác nhận", lấy số id.
+- (Thẻ "AI chốt" mặc định id 182 đã khớp bot tư vấn; nếu khác thì cũng lấy ở đây.)
+
+------------------------------------------------------------
+BƯỚC 3 — ĐIỀN .env (thêm vào file .env hiện có, KHÔNG xóa cái cũ)
+------------------------------------------------------------
+  PANCAKE_POS_API_KEY=...          (Bước 1)
+  PANCAKE_POS_SHOP_ID=...          (Bước 1)
+  PANCAKE_TAG_AI_DA_XACNHAN=...    (Bước 2 — id thẻ "AI- Đã xác nhận")
+
+  # Tùy chọn:
+  # PANCAKE_TAG_AI_CHOT=182        (nếu thẻ AI chốt của shop khác 182)
+  # PANCAKE_POS_WAREHOUSE_ID=...   (kho xuất; để trống = kho mặc định)
+  # PANCAKE_POS_ORDER_STATUS=0     (0=đơn nháp/chờ xác nhận [mặc định, an toàn]; 1=xác nhận luôn)
+  # ORDER_POLL_MS=15000            (chu kỳ quét, ms)
+  # ORDER_DRY_RUN=true             (CHẠY THỬ: chỉ in payload đơn, KHÔNG gọi POS thật)
+
+------------------------------------------------------------
+BƯỚC 4 — CHẠY THỬ TRƯỚC (KHÔNG tạo đơn thật)
+------------------------------------------------------------
+  set ORDER_DRY_RUN=true   (Windows CMD)   rồi:  node order_worker.js
+- Xem log: nó in payload đơn của từng SP. Kiểm tra mã/màu/size/sđt/địa chỉ đúng chưa.
+- Khi yên tâm: bỏ ORDER_DRY_RUN (hoặc =false) rồi chạy thật.
+
+------------------------------------------------------------
+BƯỚC 5 — CHẠY THẬT
+------------------------------------------------------------
+  node order_worker.js
+- Chạy SONG SONG với bot tư vấn (2 cửa sổ CMD riêng), không xung đột.
+
+============================================================
+LOGIC AN TOÀN (đúng yêu cầu)
+============================================================
+- MỖI SẢN PHẨM = 1 ĐƠN RIÊNG (không gộp).
+- Chỉ lên đơn khi: ĐÃ thấy tin chốt (cod) của Bảo Châu + đủ MÃ + MÀU + SIZE
+  + SĐT hợp lệ + ĐỊA CHỈ rõ ràng.
+- THIẾU bất kỳ thứ gì -> KHÔNG lên đơn -> gắn thẻ "AI- CHỜ XL" cho nhân viên.
+- Chống lên TRÙNG: orders_state.json nhớ dòng (mã|màu|size) đã lên rồi -> bỏ qua.
+- Lên đơn xong hết -> tự đổi thẻ "AI chốt" => "AI- Đã xác nhận".
+
+============================================================
+ĐIỂM CẦN KIỂM CHỨNG VỚI POS THẬT (lần đầu)
+============================================================
+1. MÃ -> SP POS: code khớp theo display_id/custom_id/SKU/barcode/tên. Nếu POS
+   của shop lưu mã ở chỗ khác, chạy DRY_RUN sẽ thấy "KHÔNG tra được biến thể"
+   -> báo tao để chỉnh hàm productCodeCandidates trong pos_client.js.
+2. BIẾN THỂ màu/size: pos_client.pickVariation dò theo fields/tên biến thể. Nếu
+   shop đặt tên biến thể lạ -> chỉnh lại hàm này.
+3. SCHEMA tạo đơn: body theo tài liệu POS (bill_full_name, bill_phone_number,
+   items[product_id,variation_id,quantity], shipping_address, cod, total_price,
+   is_free_shipping, status). Nếu POS đòi thêm trường bắt buộc (vd warehouse_id),
+   điền PANCAKE_POS_WAREHOUSE_ID vào .env.
+4. ĐỊA CHỈ: hiện tạo đơn để full_address dạng text + dò tỉnh (province_id) nếu
+   được. POS/NV tự tách huyện/xã khi xác nhận. Nếu muốn tự tách đủ tỉnh/huyện/xã
+   (để đẩy ship tự động) thì nói, tao thêm dò district/commune qua /geo.

@@ -1,0 +1,52 @@
+﻿
+.pm2\logs\bot-out.log:141763:2026-06-27T23:41:20:       [THEO DÕI/tin] 1468690110033030_6394346307338466: 
+KHÁCH-inbox=20 | KHÁCH-comment=0 | tin cuối khách @2026-06-27T16:35:27.000000 -> ❗ CÓ tin INBOX của khách -> BOT PHẢI 
+TRẢ | text:"."  text:"có video ko"
+.pm2\logs\bot-out.log:141764:2026-06-27T23:41:20: [VÀO XỬ] Phuong Pham | seen=false | last_sent_by=(rỗng=khách) | 
+updated=2026-06-27T16:35:27.000000 | id=1468690110033030_6394346307338466
+.pm2\logs\bot-out.log:141772:2026-06-27T23:41:20: [Bảo Trâm] [đặt thêm] Khách đã có đơn nhưng gửi ẢNH mẫu mới + không 
+hỏi đơn cũ -> KHÔNG giao người thật, cho báo giá mẫu mới. Conv: 1468690110033030_6394346307338466
+.pm2\logs\bot-out.log:141774:2026-06-27T23:41:20: Khách: Phuong Pham | Conv: 1468690110033030_6394346307338466
+.pm2\logs\bot-out.log:141798:2026-06-27T23:41:24:   [THEO DÕI] Phuong Pham | type=INBOX | seen=false | 
+last_sent_by=(rỗng=khách nhắn cuối) | updated=2026-06-27T16:35:27.000000 | -> VÀO 'Cần xử lý' | 
+id=1468690110033030_6394346307338466
+.pm2\logs\bot-out.log:141801:2026-06-27T23:41:24:       [THEO DÕI/tin] 1468690110033030_6394346307338466: 
+KHÁCH-inbox=20 | KHÁCH-comment=0 | tin cuối khách @2026-06-27T16:35:27.000000 -> ❗ CÓ tin INBOX của khách -> BOT PHẢI 
+TRẢ | text:"."  text:"có video ko"
+.pm2\logs\bot-out.log:141802:2026-06-27T23:41:24: [VÀO XỬ] Phuong Pham | seen=false | last_sent_by=(rỗng=khách) | 
+updated=2026-06-27T16:35:27.000000 | id=1468690110033030_6394346307338466
+.pm2\logs\bot-out.log:141809:2026-06-27T23:41:24: [ADS RAW] conv=1468690110033030_6394346307338466 | ad_ids=["120242674
+057290550","120250246448510550","120250189667740550","120254095212250550","120253127355180550","120254334004060550","12
+0254257266250550"] | ads=[{"ad_id":"120242674057290550","inserted_at":"2026-04-18T15:59:45","post_id":"1468690110033030
+_1319563396391822"},{"ad_id":"120250246448510550","inserted_at":"2026-04-29T08:36:48","post_id":"1468690110033030_15154
+06796807480"},{"ad_id":"120250189667740550","inserted_at":"2026-06-16T05:13:17","post_id":"1468690110033030_15145889502
+22598"},{"ad_id":"120254095212250550","inserted_at":"2026-06-21T13:24:53","post_id":"1468690110033030_1559127452435414"
+},{"ad_id":"120253127355180550","inserted_at":"2026-06-21T17:00:28","post_id":"1468690110033030_1494697558878404"},{"ad
+_id":"120254334004060550","ins | post_id=- | readerAdId=120254257266250550
+.pm2\logs\bot-out.log:141811:2026-06-27T23:41:24: [Bảo Trâm] [đặt thêm] Khách đã có đơn nhưng gửi ẢNH mẫu mới + không 
+hỏi đơn cũ -> KHÔNG giao người thật, cho báo giá mẫu mới. Conv: 1468690110033030_6394346307338466
+.pm2\logs\bot-out.log:141813:2026-06-27T23:41:24: Khách: Phuong Pham | Conv: 1468690110033030_6394346307338466
+.pm2\logs\bot-out.log:141838:2026-06-27T23:41:28:   [THEO DÕI] Phuong Pham | type=INBOX | seen=false | 
+last_sent_by=(rỗng=khách nhắn cuối) | updated=2026-06-27T16:35:27.000000 | -> VÀO 'Cần xử lý' | 
+id=1468690110033030_6394346307338466
+.pm2\logs\bot-out.log:141841:2026-06-27T23:41:28:       [THEO DÕI/tin] 1468690110033030_6394346307338466: 
+KHÁCH-inbox=20 | KHÁCH-comment=0 | tin cuối khách @2026-06-27T16:35:27.000000 -> ❗ CÓ tin INBOX của khách -> BOT PHẢI 
+TRẢ | text:"."  text:"có video ko"
+.pm2\logs\bot-out.log:141842:2026-06-27T23:41:28: [VÀO XỬ] Phuong Pham | seen=false | last_sent_by=(rỗng=khách) | 
+updated=2026-06-27T16:35:27.000000 | id=1468690110033030_6394346307338466
+.pm2\logs\bot-out.log:141850:2026-06-27T23:41:28: [Bảo Trâm] [đặt thêm] Khách đã có đơn nhưng gửi ẢNH mẫu mới + không 
+hỏi đơn cũ -> KHÔNG giao người thật, cho báo giá mẫu mới. Conv: 1468690110033030_6394346307338466
+.pm2\logs\bot-out.log:141852:2026-06-27T23:41:28: Khách: Phuong Pham | Conv: 1468690110033030_6394346307338466
+.pm2\logs\bot-out.log:141876:2026-06-27T23:41:32:   [THEO DÕI] Phuong Pham | type=INBOX | seen=false | 
+last_sent_by=(rỗng=khách nhắn cuối) | updated=2026-06-27T16:35:27.000000 | -> VÀO 'Cần xử lý' | 
+id=1468690110033030_6394346307338466
+.pm2\logs\bot-out.log:141879:2026-06-27T23:41:32:       [THEO DÕI/tin] 1468690110033030_6394346307338466: 
+KHÁCH-inbox=20 | KHÁCH-comment=0 | tin cuối khách @2026-06-27T16:35:27.000000 -> ❗ CÓ tin INBOX của khách -> BOT PHẢI 
+TRẢ | text:"."  text:"có video ko"
+.pm2\logs\bot-out.log:141880:2026-06-27T23:41:32: [VÀO XỬ] Phuong Pham | seen=false | last_sent_by=(rỗng=khách) | 
+updated=2026-06-27T16:35:27.000000 | id=1468690110033030_6394346307338466
+.pm2\logs\bot-out.log:141888:2026-06-27T23:41:32: [Bảo Trâm] [đặt thêm] Khách đã có đơn nhưng gửi ẢNH mẫu mới + không 
+hỏi đơn cũ -> KHÔNG giao người thật, cho báo giá mẫu mới. Conv: 1468690110033030_6394346307338466
+.pm2\logs\bot-out.log:141890:2026-06-27T23:41:32: Khách: Phuong Pham | Conv: 1468690110033030_6394346307338466
+
+

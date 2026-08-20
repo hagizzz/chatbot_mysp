@@ -1,0 +1,1477 @@
+================ bot_worker_api_v3.js ================
+--- orig/bot_worker_api_v3.js	2026-06-23 02:39:22.000000000 +0000
++++ work/bot_worker_api_v3.js	2026-06-23 13:09:06.300152466 +0000
+@@ -438,7 +438,7 @@
+ // Khách hỏi TỔNG TIỀN phải thanh toán: "của chị hết mấy", "tổng bao nhiêu", "hết bao nhiêu"...
+ function asksTotalPayment(text) {
+   const t = String(text || "").toLowerCase();
+-  return /(hết (mấy|bao nhiêu|nhiêu)|tổng (hết|bao nhiêu|bao tiền|tiền|cộng|là bao|lại|bill)|tất cả (hết|bao nhiêu|là)|thanh toán (bao nhiêu|hết|mấy|tổng)|của (chị|c|em|mình) hết|all (bao nhiêu|nhiêu)|cộng (lại|hết) (bao nhiêu|là)|bao nhiêu tiền|bao tiền|mấy tiền|nhiêu tiền|tổng bill|tính bill|chốt bill|bill (lại|nhiêu|bao nhiêu))/i.test(t);
++  return /(hết (mấy|bao nhiêu|nhiêu)|tổng (hết|bao nhiêu|bao tiền|tiền|cộng|là bao|lại|bill)|tất cả (hết|bao nhiêu|là)|thanh toán (bao nhiêu|hết|mấy|tổng)|của (chị|c|em|mình) hết|all (bao nhiêu|nhiêu)|cộng (lại|hết) (bao nhiêu|là)|tổng bill|tính bill|chốt bill|bill (lại|nhiêu|bao nhiêu))/i.test(t);
+ }
+ function _fmtMoney(n) { return Number(n).toLocaleString("vi-VN").replace(/,/g, "."); }
+ function _priceNum(p) {
+@@ -565,7 +565,11 @@
+ // Khách KHẲNG ĐỊNH đã gửi thông tin (sđt/địa chỉ) rồi: "trên mình gửi địa chỉ rồi đó", "sđt ở trên", "gửi rồi mà".
+ function claimsAlreadyGaveInfo(text) {
+   const t = String(text || "").toLowerCase();
+-  return /(địa chỉ|đc|sđt|sdt|số điện thoại|số đt|thông tin|info)\s*(của (mình|t|e|em) )?(ở |bên |phía )?(trên|trên kia|bên trên|phía trên|nãy|lúc nãy)|(trên|bên trên|phía trên|nãy|lúc nãy)\s*(mình |t |e |em )?(có )?(gửi|nhắn|cho|ghi|để|đưa)\s*(địa chỉ|đc|sđt|sdt|số điện thoại|thông tin)|(gửi|nhắn|cho|đưa|ghi|để)\s*(địa chỉ|đc|sđt|sdt|số điện thoại|thông tin)\s*(của (mình|t|e|em) )?(rồi|r)\b|(địa chỉ|sđt|sdt|số điện thoại|thông tin)\s*(gửi|nhắn|cho|đưa|ghi)?\s*(rồi|r)\s*(đó|mà|nha|nhé|nhá|kìa)?/i.test(t);
++  if (/(địa chỉ|đc|sđt|sdt|số điện thoại|số đt|thông tin|info)\s*(của (mình|t|e|em) )?(ở |bên |phía )?(trên|trên kia|bên trên|phía trên|nãy|lúc nãy)|(trên|bên trên|phía trên|nãy|lúc nãy)\s*(mình |t |e |em )?(có )?(gửi|nhắn|cho|ghi|để|đưa)\s*(địa chỉ|đc|sđt|sdt|số điện thoại|thông tin)|(gửi|nhắn|cho|đưa|ghi|để)\s*(địa chỉ|đc|sđt|sdt|số điện thoại|thông tin)\s*(của (mình|t|e|em) )?(rồi|r)\b|(địa chỉ|sđt|sdt|số điện thoại|thông tin)\s*(gửi|nhắn|cho|đưa|ghi)?\s*(rồi|r)\s*(đó|mà|nha|nhé|nhá|kìa)?/i.test(t)) return true;
++  // Mở rộng (trong ngữ cảnh đang xin info): nhắc VỊ TRÍ "ở trên/nãy ... rồi", hoặc ĐỘNG TỪ GỬI "(gửi/cho/đưa/cung cấp) ... rồi".
++  if (/(ở |bên |phía )?(trên|trên kia|bên trên|phía trên|nãy|lúc nãy)[^.?!]{0,15}(rồi|\br\b)/i.test(t)) return true;
++  if (/(gửi|nhắn|cho|đưa|ghi|để|cung cấp)[^.?!]{0,12}(rồi|\br\b)\s*(mà|đó|nha|nhé|nhá|kìa|rồi)?\s*$/i.test(t)) return true;
++  return false;
+ }
+ // Khách muốn ship về ĐỊA CHỈ CŨ / như mọi khi (khách quen).
+ function wantsShipOldAddress(text) {
+@@ -620,7 +624,8 @@
+   [/(?<![\p{L}\p{N}])(wa|qá)(?![\p{L}\p{N}])/giu, "quá"],
+ ];
+ function normalizeViet(text) {
+-  let t = String(text || "").toLowerCase();
++  // NFKC trước: gom chữ/số cách điệu (Unicode toán học) về ASCII thường (𝟬->0, 𝘾->C...).
++  let t = String(text || "").normalize("NFKC").toLowerCase();
+   // gộp ký tự CHỮ lặp 3+ lần -> 1 (đẹppp->đẹp, okkk->ok). KHÔNG đụng số (\p{L} loại chữ số).
+   t = t.replace(/([\p{L}])\1{2,}/giu, "$1");
+   for (const [re, full] of _ABBREV_MAP) t = t.replace(re, full);
+@@ -1230,6 +1235,34 @@
+   if ([a, b, c].some(n => n < 55 || n > 135)) return null;   // ngoài khoảng số đo người -> bỏ (tránh nhầm giá/sđt)
+   return [a, b, c];
+ }
++// Đọc số đo CÓ NHÃN từng vòng: "v1 85 eo 68", "vòng 1 85 vòng 2 68", "ngực 85 eo 68 mông 90".
++// Trả {nguc, eo, mong} (vòng nào THIẾU = null). KHÔNG có nhãn nào -> null. Giá trị ngoài 50-135 -> bỏ.
++// Khác parse3V (cần ĐỦ 3 số liền): cái này bắt số đo lẻ có nhãn (bust/waist/hip).
++function parseBodyMeasures(text) {
++  const t = String(text || "").toLowerCase();
++  const _val = (re) => { const m = t.match(re); if (!m) return null; const n = +m[1]; return (n >= 50 && n <= 135) ? n : null; };
++  const nguc = _val(/(?:ngực|nguc|vòng\s*1|vong\s*1|\bv1\b|\bn1\b)\s*[:=]?\s*(\d{2,3})/);
++  const eo   = _val(/(?:\beo\b|vòng\s*2|vong\s*2|\bv2\b)\s*[:=]?\s*(\d{2,3})/);
++  const mong = _val(/(?:mông|mong|vòng\s*3|vong\s*3|\bv3\b)\s*[:=]?\s*(\d{2,3})/);
++  if (nguc == null && eo == null && mong == null) return null;
++  return { nguc, eo, mong };
++}
++// Tư vấn size từ số đo TỪNG PHẦN (có vòng nào xét vòng đó), vote size LỚN NHẤT. Trả {size, over}.
++function resolveSizeByMeasures(measures, availList) {
++  const ord = ["S", "M", "L", "XL", "XXL", "XXXL"];
++  let sizes = (availList && availList.length ? availList : ["S", "M", "L"])
++    .filter(s => SIZE_CHART_3V[s]).sort((a, b) => ord.indexOf(a) - ord.indexOf(b));
++  if (!sizes.length) sizes = ["S", "M", "L"];
++  const votes = [];
++  if (measures.nguc != null) votes.push(_sizeFitOne(measures.nguc, "nguc", sizes));
++  if (measures.eo   != null) votes.push(_sizeFitOne(measures.eo, "eo", sizes));
++  if (measures.mong != null) votes.push(_sizeFitOne(measures.mong, "mong", sizes));
++  if (!votes.length) return { size: null, over: false };
++  if (votes.some(v => v === null)) return { size: null, over: true };   // có vòng vượt size lớn nhất shop có
++  let best = sizes[0];
++  for (const s of votes) if (ord.indexOf(s) > ord.indexOf(best)) best = s;
++  return { size: best, over: false };
++}
+ // Khách hỏi VÌ SAO lại vừa size đó (trong khi thường mặc size khác) -> giải thích bằng số đo từng vòng.
+ function asksWhySize(text) {
+   const t = String(text || "").toLowerCase();
+@@ -1637,7 +1670,17 @@
+   // (2) mẫu CHỈ có đúng 1 màu (không có gì để chọn). TUYỆT ĐỐI KHÔNG đoán theo màu khách "xem"
+   // hay theo màu cũ của mẫu khác (tránh điền sai màu vào đơn).
+   const explicit = mem && mem.orderColorByCode && mem.orderColorByCode[code];
+-  if (explicit) return String(explicit).trim().toLowerCase();
++  if (explicit) {
++    // XÁC MINH THEO SHEET: màu chốt PHẢI nằm trong danh sách màu THẬT của mẫu. Nếu mẫu CÓ liệt kê màu mà
++    // màu chốt KHÔNG khớp màu nào -> nhận định màu SAI (đọc nhầm) -> BỎ, để trống -> bot hỏi lại màu,
++    // TUYỆT ĐỐI không ghi màu sai vào đơn. (vd Giannal chỉ có hồng mà chốt "vàng" -> loại.)
++    const _cols = modelColorList(p);
++    const _okColor = !_cols.length || _cols.some(c =>
++      colorMatches(c, explicit) || colorMatches(explicit, c) || foldVi(c) === foldVi(explicit));
++    if (_okColor) return String(explicit).trim().toLowerCase();
++    try { console.log(`[${BOT_NAME}] Màu chốt "${explicit}" KHÔNG có trong sheet mẫu ${code} (có: ${_cols.join(", ")}) -> BỎ, để trống/hỏi lại màu.`); } catch (_) {}
++    // rơi xuống: nếu mẫu chỉ 1 màu thì lấy màu đó; còn lại -> "" (cần hỏi xác nhận).
++  }
+   const one = _singleColorOfProduct(p);
+   if (one) return String(one).trim().toLowerCase();
+   return "";   // nhiều màu, chưa chốt -> để trống, phải HỎI xác nhận trước khi chốt
+@@ -1823,6 +1866,24 @@
+   if (/hủy|huỷ|hoàn|trả lại|trả hàng|lâu (thế|quá|vậy|rồi|nay)|chưa (có|thấy|nhận|về|giao).{0,10}(hàng|đơn)|sao (giờ|nay|mãi|vẫn|chưa|lâu)|đợi mãi|nãy giờ|mấy ngày (rồi|nay)|chưa nhận|chưa giao|(ko|không) thấy (hàng|đơn)|đơn (đâu|của (mình|c|chị|em))|đã đặt|đặt rồi|bao giờ.{0,10}(có|nhận|giao|hàng)|khi nào.{0,10}(có|nhận|giao|hàng)/i.test(t)) return true;
+   return false;
+ }
++// Khách (đến từ AD) thắc mắc "chưa thấy gửi set/váy/ảnh", "sao chưa gửi", "gửi mẫu chưa" = đòi/CHƯA NHẬN sản phẩm
++// shop hứa gửi. KHÁC adCustTextBlocksQuote (đòi GIAO HÀNG đã mua) -> ca này VẪN báo giá rồi MỚI gắn người thật.
++function asksWhyNotSentYet(text) {
++  const t = String(text || "").toLowerCase();
++  if (!t.trim()) return false;
++  return /chưa\s*(thấy|thay)?\s*gửi|sao\s*chưa\s*gửi|(gửi|gui)\s*(set|váy|vay|đầm|ảnh|anh|hình|hinh|mẫu|sản phẩm)?\s*chưa\b|chưa\s*(thấy|thay)\s*(set|váy|vay|đầm|ảnh|anh|hình|hinh|sản phẩm|mẫu)/i.test(t);
++}
++// Khách nhắc tới NHIỀU mẫu trong 1 tin ("mấy cái này", "mấy mẫu này", "các mẫu", "những bộ", "2 mẫu này"...).
++// Dùng để: khi khách hỏi nhiều mẫu mà bot chỉ gom được 1 (vd cổng ad chỉ có mẫu ad) -> giao NGƯỜI THẬT báo đủ.
++function referencesMultipleModels(text) {
++  const t = String(text || "").toLowerCase();
++  if (!t.trim()) return false;
++  if (/mấy\s*(cái|mẫu|bộ|kiểu|chiếc|con|váy|đầm|set)\s*(này|đó|kia|trên|ấy)/i.test(t)) return true;   // "mấy cái này"
++  if (/(các|những)\s*(mẫu|bộ|cái|kiểu|váy|đầm|set)(?=\s|$|[.,!?;])/i.test(t)) return true;             // "các mẫu" / "những bộ"
++  if (/nhiều\s*(mẫu|bộ|cái|kiểu)(?=\s|$|[.,!?;])/i.test(t)) return true;                                // "nhiều mẫu"
++  if (/(cả\s*)?([2-9]|\d{2,}|hai|ba|bốn|năm)\s*(mẫu|bộ|cái|kiểu|váy|đầm|set)\s*(này|đó|kia)?(?=\s|$|[.,!?;])/i.test(t)) return true; // "2 mẫu này"
++  return false;
++}
+ function asksOrderStatus(text) {
+   const t = String(text || "").toLowerCase();
+   if (asksInspectBeforePay(t)) return false;   // "kiểm tra HÀNG trước khi thanh toán" = kiểm tra SP, KHÔNG phải tra đơn
+@@ -1835,6 +1896,8 @@
+   if (/(sao |mà )?(mãi|vẫn|nãy giờ) (chưa|ko|không) (thấy|nhận|có)[^?]{0,18}(hàng|gọi|ship|giao|ai)/i.test(t)) return true;
+   // "hàng/đơn/kiện/gói ... đến đâu / gửi chưa / giao chưa / sao rồi / đâu rồi" (cho phép chen 'của c', 'em đặt'...)
+   if (/(hàng|đơn|kiện|gói)\b[^?]{0,22}(đến đâu|tới đâu|đi đâu|đi tới đâu|về tới đâu|về chưa|về tới chưa|tới chưa|đến chưa|nhận chưa|gửi chưa|gửi đi chưa|giao chưa|giao tới chưa|ship chưa|đi chưa|sao rồi|thế nào rồi|đâu rồi|tới đâu rồi|ra sao)/i.test(t)) return true;
++  // "(shop) GỬI/GIAO/SHIP đồ/hàng (cho mình) CHƯA" — động từ ĐỨNG TRƯỚC danh từ (ca thật: "shop gửi đồ cho mih chưa").
++  if (/(gửi|gui|giao|ship)\s+(đồ|do|hàng|hang|đơn|don|kiện|kien|gói|goi|cho\s*(mình|mih|minh|chị|chi|em|e\b|t\b|tôi|toi|c\b))[^?]{0,18}(chưa|chua)\b/i.test(t)) return true;
+   // (BỎ pattern "khi nào/bao lâu ... nhận/giao" -> đó là hỏi THỜI LƯỢNG giao chung -> handler trả "5-7 ngày" lo,
+   //  KHÔNG tra đơn/đẩy NV. Chỉ giữ các câu TRA TÌNH TRẠNG đơn thật ở trên/dưới.)
+   if (/(kiểm tra|tra cứu|check|tra|coi|xem)\s*(giúp |dùm |giùm |xem )?(đơn|hàng|vận đơn|đã ship|ship)/i.test(t)) return true;
+@@ -1977,7 +2040,7 @@
+     if (d.startsWith("840") && d.length === 12) d = d.slice(2);            // 840xxxxxxxxx -> 0xxxxxxxxx
+     else if (d.startsWith("84") && d.length === 11) d = "0" + d.slice(2);  // 84xxxxxxxxx  -> 0xxxxxxxxx
+     if (d.length === 10 && d.startsWith("0")) {
+-      mem.phone = d; mem.phoneInvalid = null;                             // SĐT CHUẨN đúng 10 số
++      mem.phone = d; mem.phoneInvalid = null; mem._reaskedPhone = false;  // SĐT CHUẨN đúng 10 số
+     } else {
+       mem.phoneInvalid = d.length;                                        // SAI độ dài (9/11...) -> KHÔNG lưu, đánh dấu để HỎI LẠI
+     }
+@@ -2067,13 +2130,41 @@
+     return false;
+   });
+ }
++// Shop/bot ĐÃ báo giá (mẫu nào đó) trong LỊCH SỬ hội thoại chưa? Đọc TỪ messages (sender="shop") nên SỐNG QUA
++// RESTART (mem mất vẫn biết). Câu báo giá có chữ "giá" + con số tiền (vd "Dạ Váy Giannal giá 890.000đ ạ").
++// Dùng để cổng ADS biết "đã báo rồi" -> KHÔNG báo lại khi khách hỏi tiếp (size/số đo/chất...).
++function botQuotedPriceInHistory(messages) {
++  return (Array.isArray(messages) ? messages : []).some(m => {
++    if (!m || m.sender !== "shop" || m.type !== "text" || !m.text) return false;
++    const t = String(m.text).toLowerCase();
++    if (isAutoGreeting(t)) return false;
++    const hasMoney = /\d{1,3}[.,]\d{3}/.test(t);                   // 890.000 / 1.450.000 / 2.640.000
++    const saysGia  = /gi[áa]/.test(t) || /\d[.,]\d{3}\s*đ/.test(t); // "giá ..." hoặc "...000đ"
++    return hasMoney && saysGia;
++  });
++}
++function botSentImagesInHistory(messages) {
++  // SHOP/bot đã gửi ÍT NHẤT 1 ẢNH trong hội thoại? (đọc từ lịch sử -> sống sót qua RESTART)
++  return (Array.isArray(messages) ? messages : []).some(m => m && m.sender === "shop" && m.type === "image");
++}
+ function getLastCustomerMessages(messages) {
+-  const cust = messages
+-    .filter(m => m.sender === "customer" && m.channel !== "COMMENT")   // CHỈ tin nhắn INBOX, KHÔNG phải comment
+-    .sort((a, b) => new Date(a.insertedAt) - new Date(b.insertedAt));
++  const inbox = (Array.isArray(messages) ? messages : [])
++    .filter(m => m && m.channel !== "COMMENT")   // CHỈ INBOX, bỏ comment
++    .sort((a, b) => parseTime(a.insertedAt) - parseTime(b.insertedAt));
++  // LƯỢT KHÁCH HIỆN TẠI = MỌI tin khách kể từ tin SHOP/bot GẦN NHẤT (KHÔNG cắt theo thời gian).
++  // -> khách gửi album ảnh rồi vài chục giây/phút sau mới gõ chữ ("Mấy cái này"/"Nặng...") vẫn nằm
++  //    CÙNG 1 lượt -> không rơi ảnh. Ảnh ĐÃ được bot trả lời rồi -> nằm TRƯỚC tin bot -> tự loại, không báo trùng.
++  let lastShopIdx = -1;
++  for (let i = inbox.length - 1; i >= 0; i--) {
++    if (inbox[i].sender === "shop") { lastShopIdx = i; break; }
++  }
++  const turn = inbox.slice(lastShopIdx + 1).filter(m => m.sender === "customer");
++  if (turn.length) return turn;
++  // Fallback: shop/bot nhắn cuối (chưa có tin khách mới sau đó) -> cụm khách cuối trong 15s (giữ hành vi cũ).
++  const cust = inbox.filter(m => m.sender === "customer");
+   if (!cust.length) return [];
+-  const lastTime = new Date(cust[cust.length - 1].insertedAt).getTime();
+-  return cust.filter(m => Math.abs(new Date(m.insertedAt).getTime() - lastTime) <= 15000);
++  const lastTime = parseTime(cust[cust.length - 1].insertedAt);
++  return cust.filter(m => Math.abs(parseTime(m.insertedAt) - lastTime) <= 15000);
+ }
+ // Inbox đã mở chưa (có tin INBOX nào chưa) - để biết có gửi DM được không
+ function hasInboxMessage(messages) {
+@@ -2426,7 +2517,7 @@
+   // 1) Từ "gấp" mạnh / cần luôn / hỏa tốc / grab giao trong ngày -> chắc chắn gấp
+   if (/cần gấp|can gap|cần luôn|can luon|cần ngay|can ngay|lấy ngay|lay ngay|lấy luôn|lay luon|gấp lắm|đang gấp|dang gap|\bgấp\b|\bgap\b|cho kịp|kịp không|kịp ko|gấp gáp|sớm nhất|hỏa tốc|hoa toc|\bgrab\b|giao nhanh|ship nhanh|giao trong ngày|giao liền|giao gấp|ship gấp|nhanh nhất/i.test(t)) return true;
+   // 2) Mốc ngày/giờ cụ thể + ngữ cảnh cần nhận hàng
+-  const hasDate = /(ngày mai|ngay mai|hôm nay|hom nay|tối nay|toi nay|sáng mai|sang mai|chiều mai|trưa mai|\bmai\b|thứ\s*[2-7]|thu\s*[2-7]|chủ nhật|chu nhat|trước ngày|truoc ngay|trước \d|đúng ngày|trong hôm nay|trong ngày|trong ngay|nội trong\s*(\d|ngày|ngay|hôm|hom|tuần|tuan|sáng|sang|trưa|trua|chiều|chieu|tối|toi)|noi trong\s*(\d|ngay|hom|tuan|sang|trua|chieu|toi)|ngày \d{1,2}\b|\d{1,2}\s*h\b|\d{1,2}\s*giờ)/i.test(t);
++  const hasDate = /(ngày mai|ngay mai|hôm nay|hom nay|tối nay|toi nay|sáng mai|sang mai|chiều mai|trưa mai|\bmai\b|thứ\s*[2-7]|thu\s*[2-7]|\bt[2-7]\b|chủ nhật|chu nhat|\bcn\b|trước ngày|truoc ngay|trước \d|đúng ngày|trong hôm nay|trong ngày|trong ngay|nội trong\s*(\d|ngày|ngay|hôm|hom|tuần|tuan|sáng|sang|trưa|trua|chiều|chieu|tối|toi)|noi trong\s*(\d|ngay|hom|tuan|sang|trua|chieu|toi)|ngày \d{1,2}\b|\d{1,2}\s*h\b|\d{1,2}\s*giờ)/i.test(t);
+   const hasNeed = /(cần|can|lấy|lay|nhận|nhan|mặc|mac|đi|dùng|dung|kịp|kip|giao|ship|hàng|hang|tiệc|tiec|việc|viec|đám|dam)/i.test(t);
+   if (hasDate && hasNeed) return true;
+   // 3) Dịp có deadline (tiệc, cưới, sự kiện...)
+@@ -2579,19 +2670,27 @@
+   const m = product && String(product.material || "").trim();
+   if (!m || m.length < 2) return null;   // không có dữ liệu -> để CHỜ XL, KHÔNG bịa
+   const cool = /(đũi|lụa|cotton|voan|thô|linen|lanh|kate|tằm|chiffon|phi lụa|đ[uũ]i)/i.test(m);
+-  const tail = cool ? ", mặc lên thoáng mát dễ chịu lắm ạ" : " ạ";
+-  return `Dạ ${productLabel(product)} là chất ${m}${tail}`;
++  if (cool) return `Dạ ${productLabel(product)} là chất ${m} ạ, mặc lên thoáng mát dễ chịu lắm chị nha — hợp thời tiết nóng, đứng lâu hay ngồi cả ngày vẫn thoải mái`;
++  return `Dạ ${productLabel(product)} là chất ${m} ạ`;
+ }
+ // [QUY TẮC THUỘC TÍNH] Trả lời ĐỘ CO GIÃN đọc ĐÚNG cột S (product.stretch), KHÔNG suy từ cột chất liệu.
+ // Cột S ghi "KHÔNG co giãn" / "CÓ CO GIÃN". Trống -> null (để CHỜ XL, không bịa).
+-function stretchReplyFromSheet(product) {
++function stretchReplyFromSheet(product, mem) {
+   const raw = product && String(product.stretch || "").trim();
+   if (!raw || raw.length < 2) return null;
+   // BỎ DẤU THẬT SỰ (normalizeViet KHÔNG bỏ dấu -> "không" giữ nguyên ô -> /khong/ trượt -> "co giãn" lại
+   //  khớp /co/ -> trả NGƯỢC "có co giãn"). Dùng NFD tách dấu rồi xoá -> "không co giãn" -> "khong co gian".
+   const f = String(raw).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d");
+-  if (/khong/.test(f)) return `Dạ ${productLabel(product)} không co giãn chị nha`;   // CÓ "khong" -> không co giãn
+-  if (/co\s*gian|^co\b|\bco\b/.test(f)) return `Dạ ${productLabel(product)} có co giãn, mặc thoải mái dễ chịu chị nha`;
++  const lbl = productLabel(product);
++  const m = mem || {};
++  if (/khong/.test(f)) return _rotLine(m, "_noStretchIdx", [   // CÓ "khong" -> không co giãn
++    `Dạ ${lbl} chất đứng, không co giãn ạ — mấy loại vải đẹp như này thường vậy đó chị. Bù lại mặc lên phom dáng và sang hơn hẳn đồ thun co giãn`,
++    `Dạ ${lbl} không co giãn chị nha, nhưng đó là chủ đích để vải đứng form, lên dáng đẹp và bền lâu không bị dão ạ`,
++  ]);
++  if (/co\s*gian|^co\b|\bco\b/.test(f)) return _rotLine(m, "_stretchIdx", [
++    `Dạ ${lbl} chất co giãn nên rất dễ mặc và ít kén dáng ạ — co giãn theo người nên mình hơi nhỉnh cân một chút vẫn mặc đẹp, thoải mái cả ngày chị ạ.`,
++    `Dạ ${lbl} co giãn tốt nên cử động thoải mái lắm ạ — ngồi, đi lại, vận động cả ngày vẫn dễ chịu, không bị bó hay khó chịu chỗ nào chị ạ.`,
++  ]);
+   return null;
+ }
+ // ===== NGƯỜI MẪU & LO VÁY NGẮN =====
+@@ -2767,14 +2866,13 @@
+   return /(nóng (lắm|quá|không|ko|nực|à|thế|vậy)?|sợ nóng|mặc nóng|chất nóng|thích (chất )?mát|chất mát|vải nóng|bí (quá|lắm)?|không thoáng|ko thoáng|hầm (quá|lắm)?|oi bức|bí bách|nực)/i.test(t);
+ }
+ const _HEAT_PERSUADE = [
+-  "Dạ không nóng đâu chị, chất vừa phải không dày, mặc thoáng lắm ạ",
+-  "Dạ chất này có độ đứng nên giữ phom đẹp, mặc vẫn thoáng nha chị",
+-  "Dạ mẫu này có lớp lót mịn nên mặc dễ chịu, nhiều khách mặc hè vẫn ổn đó chị",
+-  "Dạ chất mỏng vừa, có độ rũ nên mặc khá mát chị nhe",
++  "Dạ không nóng đâu chị ơi, {m} chất vừa phải, không dày, mặc thoáng và dễ chịu lắm ạ",
++  "Dạ chị cứ yên tâm, {m} mặc thoáng mát không bí đâu ạ. Mà bên em cho kiểm hàng trước khi thanh toán nữa — chị nhận hàng có thể trực tiếp cảm nhận ạ.",
+ ];
+-function buildHeatPersuade(mem) {
++function buildHeatPersuade(mem, product) {
++  const lbl = product ? productLabel(product) : "mẫu này";
+   mem.heatIdx = ((mem.heatIdx || 0) + 1) % _HEAT_PERSUADE.length;
+-  return _HEAT_PERSUADE[mem.heatIdx];
++  return _HEAT_PERSUADE[mem.heatIdx].replace("{m}", lbl);
+ }
+ 
+ // Khách hỏi SỐ ĐO / CHIỀU DÀI cụ thể (quần/áo/váy/tay dài bao nhiêu, đến đâu, mấy cm...).
+@@ -2876,10 +2974,63 @@
+     || /(thanh toán|thanh toan|trả tiền|tra tien)\s*(khi|lúc|luc)\s*(nhận|nhan|giao)/i.test(t);
+ }
+ // Câu HỎI CHÍNH SÁCH (có được hoàn/đổi không, nếu không ưng...) -> trả lời theo kịch bản, KHÔNG phải 185
++// Khách nói chuyện ĐỔI SIZE/ĐỔI HÀNG kèm LOGISTICS hậu mua (thu hàng về / nhận lại / gửi lại / ship sz mới /
++// "có con nhỏ không đi gửi được" / "không có thời gian") -> hậu mãi thật -> NGƯỜI THẬT. Bền viết tắt: sz/r/dc/k/laii.
++// CẦN CẢ 2: hành động đổi + tín hiệu logistics (để KHÔNG bắt nhầm câu HỎI chính sách "đổi size được không").
++function talksPostSaleExchange(text) {
++  const t = String(text || "").toLowerCase();
++  if (!t.trim()) return false;
++  const _exch = /(đổi|doi)\s*(sz|size|hàng|hang|mẫu|mau|lại|lai)\b/.test(t);
++  if (!_exch) return false;
++  const _logi = /(thu|nhận|nhan|lấy|lay)\s*(hàng|hang|lại|lai|laii)\s*(về|ve|lại|lai)?/.test(t)
++    || /gửi\s*(lại|laii|lai)\b/.test(t)
++    || /ship\s*(sz|size)\s*mới/.test(t)
++    || /(con nhỏ|con nho|không có thời gian|k có thời gian|ko có thời gian|k đi gửi|ko đi gửi|không đi gửi|k đi ship|ko đi ship)/.test(t);
++  return _logi;
++}
++// Khách nói ĐÃ chốt/lên đơn TỪ TRƯỚC ("hôm trước ok lên đơn rồi mà", "chốt đơn rồi mà sao...") = THẮC MẮC tình
++// trạng ĐƠN ĐÃ CÓ -> KHÔNG báo giá/đòi info lại, NHƯỜNG NGƯỜI THẬT. KHÔNG bắt nhầm ý ĐỊNH lên đơn mới ("em muốn lên đơn").
++function saysOrderAlreadyPlaced(text) {
++  const t = String(text || "").toLowerCase();
++  if (!t.trim()) return false;
++  const _past = /(hôm|bữa|bua|h[ôo]m)\s*(tr(ư|u)?(ớc|oc)?|qua|kia|nọ|no)/.test(t);   // hôm trước/bữa trước/hôm qua/kia/nọ
++  const _ord  = /(lên đơn|len don|chốt đơn|chot don|chốt|chot|đặt hàng|dat hang)/.test(t);
++  const _ok   = /(^|\s)(ok|oke|okê|okie|đồng ý|dong y|nhất trí|nhat tri)(\s|$)/.test(t);
++  const _doneMa = /(rồi|roi|xong)\s*(mà|ma|đó|do|đấy|day)/.test(t);
++  if (_past && (_ord || _ok)) return true;     // "hôm trước ... ok / lên đơn"
++  if (_ord && _doneMa) return true;            // "lên đơn / chốt ... rồi mà"
++  return false;
++}
+ function isPolicyQuestion(text) {
+   const t = String(text || "").toLowerCase();
+   return /(có được|co duoc|được .*(không|ko|hong)|duoc .*(khong|ko)|đổi được|có cho|co cho|có nhận|chính sách|chinh sach|quy định|quy dinh|có hỗ trợ|co ho tro|không ưng|ko ưng|hông ưng|không thích|ko thích|nếu .*(ưng|thích|lỗi))/i.test(t);
+ }
++// ===== NGỮ CẢNH HẬU MÃI: đơn ĐÃ mua đang GIAO LẠI / HOÀN (người thật đang xử) =====
++// Quét ~10 tin gần nhất CỦA KHÁCH + NGƯỜI THẬT (LOẠI tin BOT), bắt cụm RÕ -> nhường người thật, KHÔNG bán.
++//   DELIV: giao lại / ship báo-gọi / không nghe máy / nhận đơn giúp / hàng giao từ [ngày] / hẹn giao.
++//   RFEE : "phí ship hoàn" (KHÔNG bắt "phí ship" chung = pre-sale, đã có quy định riêng).
++//   + đã/đang hoàn-trả (statedReturnAction) hoặc ĐÒI hoàn/trả (isReturnRefund) KHÔNG phải hỏi chính sách.
++function postSaleContext(messages) {
++  const recent = (Array.isArray(messages) ? messages : []).slice(-5);
++  const DELIV = /(giao lại|giao lan|giao lần\s*\d|lần\s*\d\s*giao|ship[^.]{0,20}(báo|gọi|goi)|(không|khong|ko|k)\s*nghe máy|nhận đơn giúp|nhan don giup|hàng giao từ|hang giao tu|hẹn giao|hen giao|shipper[^.]{0,15}(giao|gọi|goi))/i;
++  const RFEE  = /(phí ship hoàn|phi ship hoan|phí[^.]{0,12}hoàn hàng|phi[^.]{0,12}hoan hang|hỗ trợ[^.]{0,20}phí[^.]{0,12}hoàn|ho tro[^.]{0,20}phi[^.]{0,12}hoan)/i;
++  // Part B - THREAD ĐANG CHỜ GIAO (đơn đã đặt, đang hối giao). Câu CHỜ-GIAO của shop/bot (KỂ CẢ tin bot, vì
++  // chính bot auto-trả "chờ thêm" ở lượt trước) -> từ lượt sau coi là hậu mãi, KHÔNG quay ra báo giá mẫu mới.
++  // (Lượt ĐẦU khách hỏi "đã giao chưa" chưa có câu này -> vẫn để handler order-status auto trả như cũ.)
++  const WAIT  = /(chờ thêm|cho them|gấp rút hoàn thiện|gap rut hoan thien|quá tải|qua tai|cố gắng nhanh nhất|co gang nhanh nhat|đang chuẩn bị để gửi|dang chuan bi de gui|ưu tiên gửi|uu tien gui|cố gắng giao|co gang giao)/i;
++  for (const m of recent) {
++    if (!m) continue;
++    const t = String(m.text || "");
++    if (!t) continue;
++    if (WAIT.test(t)) return true;                            // câu chờ-giao (của shop/bot) -> thread đang chờ giao
++    if (m.messageId && botSentIds.has(String(m.messageId))) continue;   // còn lại: chỉ xét tin KHÁCH+NGƯỜI THẬT
++    if (DELIV.test(t) || RFEE.test(t)) return true;            // giao lại / phí ship hoàn -> hậu mãi
++    if (statedReturnAction(t)) return true;                    // đã/đang hoàn-trả
++    if (isReturnRefund(t) && !isPolicyQuestion(t)) return true; // đòi hoàn/trả (KHÔNG phải hỏi chính sách)
++    if (talksPostSaleExchange(t) && !isPolicyQuestion(t)) return true; // đổi size + logistics hậu mua (thu/nhận/gửi lại, con nhỏ) -> hậu mãi
++  }
++  return false;
++}
+ // Gộp các ca cần gắn thẻ AI-ĐƠN ƯU TIÊN (185)
+ function isPriorityOrder(text) {
+   if (isUrgentSpecificDate(text)) return true;
+@@ -2928,6 +3079,47 @@
+   if (/(đắt|mắc|cao|chát)\s*(vậy|thế|quá|ghê|gớm|đấy|v)\b/.test(t)) return true;
+   return false;
+ }
++
++// ===== [BỔ SUNG] TÌNH HUỐNG THƯỜNG GẶP — câu chuẩn (đuôi chốt động dùng _closeTail) =====
++// (3) Khách hỏi BẦU / SAU SINH / cho con bú mặc được không -> KHÔNG tự khẳng định, HỎI mấy tháng + nhường người.
++function asksPregnancyFit(text) {
++  const t = String(text || "").toLowerCase();
++  return /(bầu|mang thai|mang bầu|có thai|co thai|sau sinh|mới sinh|cho con bú|cho con bu|cho bú|bỉm sữa|bim sua|đang bầu)/i.test(t);
++}
++// (5) Khách hỏi BAO GIỜ CÓ HÀNG/MÀU/SIZE LẠI (restock).
++function asksRestock(text) {
++  const t = String(text || "").toLowerCase();
++  return /((bao giờ|khi nào|lúc nào|chừng nào|hôm nào|ngày nào)\s*(có|về|nhập|còn)\s*(hàng|lại|màu|size)|(về|nhập)\s*(hàng |màu |size )?lại\s*(không|ko|chưa)|restock|nhập lại|về hàng lại|có (hàng |màu |size )?lại\s*(không|ko|chưa))/i.test(t);
++}
++// (8) Khách lo UY TÍN / sợ BOM / sợ lừa / hàng giả hình -> trấn an COD (kiểm tra trước khi trả tiền).
++function fearsTrustOrScam(text) {
++  const t = String(text || "").toLowerCase();
++  return /(uy tín|uy tin|lừa đảo|lua dao|sợ lừa|bom hàng|bom hang|sợ bom|\blừa\b|scam|giả hình|gia hinh|khác hình|khac hinh|sợ không giống|có đảm bảo|đảm bảo (không|ko)|tin tưởng (được )?(không|ko)|sợ mất tiền|có (ship )?cod (không|ko)|được kiểm (tra )?(hàng )?(không|ko)|kiểm hàng (không|ko)|có thật không shop)/i.test(t);
++}
++// (4) Khách hỏi HÀNG CÓ SẴN HAY phải ĐẶT TRƯỚC / order (KHÁC "còn hàng" và "bao lâu nhận").
++function asksInStockOrPreorder(text) {
++  const t = String(text || "").toLowerCase();
++  return /((có sẵn|sẵn hàng|hàng sẵn).*(hay|đặt|order|hay phải))|((hay phải |có phải )(đặt|order))|(\b(đặt|order|pre.?order)\s*(trước|hàng)\b)|hàng order|đặt mới (có|làm)|làm xong mới (gửi|giao)/i.test(t);
++}
++// Câu chuẩn (xoay vòng cho đỡ lặp). Freeship áp dụng đơn trên 500k.
++const _PRICE_VALUE_LINES = [
++  "Dạ mức giá này bên em đã là tốt nhất cho chất vải và form may kỹ rồi ạ. Bù lại đơn trên 500k em freeship, lại cho chị kiểm tra hàng trước khi thanh toán nên chị cứ yên tâm lấy nha.",
++  "Dạ mức giá này bên em để sát rồi ạ, vì đi với chất vải mát và form may kỹ, tự lên rập riêng. Bù lại đơn trên 500k em freeship, cho chị kiểm tra hàng tận tay rồi mới thanh toán — chị cứ yên tâm lấy nha.",
++  "Dạ mẫu này đang được rất nhiều khách bên em thích và phản hồi tốt ạ, chị có thể xem review thật bên page nhà em nha. Đông khách quay lại là vì chất lượng xứng với giá đó ạ.",
++];
++const _PRICE_COMPARE_LINES = [
++  "Dạ mỗi thương hiệu một định vị ạ. Bên em tập trung vào chất vải và form thiết kế nên không chạy theo giá rẻ. Cái chị trả thêm là cho độ hoàn thiện và sự an tâm khi mua từ một shop có thương hiệu, chính sách rõ ràng, sản phẩm mặc lên tôn dáng và sang ạ.",
++  "Dạ bên em là dòng thiết kế nên không làm hàng đại trà giá rẻ ạ. Chị chọn brand bên em là chọn một món có form, có chất, mặc lên tôn dáng và sang — em nghĩ chị xứng đáng với điều đó.",
++  "Dạ em hiểu chị phân vân ạ, mua online ai cũng sợ không đúng ý. Nên bên em có chính sách cho khách kiểm tra hàng tận tay rồi mới thanh toán, đảm bảo hàng đúng với những gì em tư vấn ạ.",
++];
++const _TRUST_LINES = [
++  "Dạ shop em cho kiểm tra hàng trước khi thanh toán (COD) nên chị yên tâm hoàn toàn nha.",
++  "Dạ chị nhận hàng, mở ra xem tận tay rồi mới trả tiền nha. Bên em để chị kiểm trước vì tụi em tự tin vào sản phẩm của mình ạ.",
++];
++function _rotLine(mem, key, arr) {
++  mem[key] = ((mem[key] || 0) + 1) % arr.length;
++  return arr[mem[key]];
++}
+ // Khách HỎI có bán trên SÀN SHOPEE không (shopee/shoppe/shope/sopi...). Shop CHỈ bán Facebook + TikTok.
+ function asksSellOnShopee(text) {
+   const t = String(text || "").toLowerCase();
+@@ -3197,6 +3389,14 @@
+ // Gửi ảnh 1 mã - chỉ gửi nếu CHƯA gửi bao giờ, hoặc khách yêu cầu xem.
+ // leadText (tùy chọn): GỬI KÈM CHỮ trong CÙNG message với album (chống #551 ở lead comment/ads).
+ async function maybeSendImages(conversationId, code, mem, force, leadText) {
++  const _imgT0 = Date.now();   // mốc thời gian: gửi ảnh chậm (>4s, vd gửi TỪNG tấm) -> khách dễ chen tin -> ép xử lại lượt sau
++  // CHỐNG LOẠN ẢNH: đã gửi ảnh trong hội thoại rồi (kể cả trước RESTART) + KHÔNG phải báo giá/khách-xin-ảnh/khách-vừa-gửi-ảnh
++  //  -> KHÔNG tự gửi lại. (Khách hỏi size/form/màu/chất... -> chỉ trả CHỮ, không dump ảnh.) Chặn TRƯỚC mọi force.
++  if (mem && mem._imgShownBefore && !mem._imgAllowSend) {
++    console.log(`IMG ${code}: ĐÃ gửi ảnh trong hội thoại -> KHÔNG gửi lại (không phải báo giá/khách xin ảnh).`);
++    if (leadText) { try { await _sendInboxMessage(conversationId, leadText); } catch (_) {} }
++    return;
++  }
+   if (!force && mem.sentImageCodes.includes(code)) {
+     console.log(`IMG ${code}: đã gửi trước đó -> bỏ qua`);
+     if (leadText) { try { await _sendInboxMessage(conversationId, leadText); } catch (_) {} }
+@@ -3296,6 +3496,37 @@
+   } else {
+     sres = await sendImages3(conversationId, items3, leadText);
+   }
++  // ===== BÙ ẢNH: gửi THIẾU (vd ảnh GHIM chiến dịch chết cả content_id lẫn URL) -> lấy ảnh CÙNG MÀU
++  // khác bù cho ĐỦ, KHÔNG bỏ trống. Chỉ áp dụng luồng 1-màu (items3); luồng ĐỦ MÀU đã gửi nhiều ảnh.
++  if (!_allColorItems && !(sres && sres.notAvailable)) {
++    const _want = Math.min(3, (items3 && items3.length) || 0);
++    let _have = (sres && sres.n) ? sres.n : 0;
++    if (_have < _want && _want > 0) {
++      const _used = new Set((items3 || []).map(i => i.contentId || i.url).filter(Boolean));
++      const _spare = [];
++      try {
++        // ƯU TIÊN bù ĐÚNG MÀU đang gửi (vd hồng). Lấy rộng ra rồi loại các tấm ĐÃ thử (ghim chết).
++        for (const it of (imageItemsByColor(C, color, 10, /*colorFallback*/ false) || [])) {
++          const key = it && (it.contentId || it.url);
++          if (key && !_used.has(key) && !_spare.some(s => (s.contentId || s.url) === key)) _spare.push(it);
++        }
++      } catch (_) {}
++      const _snap = (typeof conversationId === "string" && lastCustomerMsgAt.get(conversationId)) || 0;
++      const _spoke = () => _snap > 0 && (lastCustomerMsgAt.get(conversationId) || 0) > _snap;
++      for (const sp of _spare) {
++        if (_have >= _want) break;
++        if (_spoke()) { try { forceRecheckConvs.add(String(conversationId)); } catch (_) {} break; }   // khách chen tin -> dừng bù
++        const r = await sendImages3(conversationId, [sp], null);
++        const _n = (r && r.n) ? r.n : 0;
++        if (_n > 0) {
++          _have += _n; _used.add(sp.contentId || sp.url);
++          try { console.log(`  [ảnh BÙ] 1 tấm lỗi -> thay bằng ảnh ${color || "cùng mẫu"} khác (đủ ${_have}/${_want}).`); } catch (_) {}
++        }
++        try { await delay(250); } catch (_) {}
++      }
++      if (sres) { sres.n = _have; if (_have > 0) sres.ok = true; }
++    }
++  }
+   // GỬI ĐƯỢC ÍT NHẤT 1 TẤM = coi như thành công (khách đã có ảnh) -> gỡ thẻ + trả true,
+   // tránh ADS/§13 gắn lại AI-XL ảnh dù khách đã nhận được ảnh.
+   const ok = sres.ok || (sres.n || 0) > 0;
+@@ -3318,6 +3549,10 @@
+       try { const rc = color || representativeColor(C); if (rc) { mem.lastSentImageColor = rc; mem.lastSentColorByCode = Object.assign({}, mem.lastSentColorByCode || {}, { [C]: rc }); } } catch (_) {}
+     }
+     console.log(`IMG ${C}: gửi ảnh -> OK (màu: ${_allColorItems ? "ĐỦ MÀU" : (color || "-")}, khớp: ${matchedId ? "có" : "-"}). ĐÍCH: ${conversationId}`);
++    // Gửi ảnh CHẬM (>4s, vd content_id lỗi -> gửi TỪNG tấm): khách có thể đã chen tin TEXT trong lúc gửi mà
++    // bot không poll kịp -> ép xử lại 1 lượt. Vòng sau batchNew (lọc theo messageId) sẽ trả nốt tin chưa xử;
++    // không có tin mới -> vô hại (1 lần đọc thừa, cờ tự xoá ở đầu processOneConversation).
++    try { if (Date.now() - _imgT0 > 4000) forceRecheckConvs.add(String(conversationId)); } catch (_) {}
+   } else {
+     console.log(`IMG ${C}: GỬI ẢNH LỖI (cả content_id lẫn URL) -> ĐÍCH: ${conversationId} | PHẢN HỒI:`, JSON.stringify(r0));
+   }
+@@ -3758,7 +3993,8 @@
+       || /chưa có size phù hợp|không có size vừa|chưa có size .*(của (chị|mình)|rồi ạ)|lựa mẫu khác|tham khảo (thêm )?mẫu khác|chưa có .*(của (chị|mình)) rồi/i.test(reply)
+       // Mẫu NÀY đã nằm trong đơn ĐÃ CHỐT -> tuyệt đối KHÔNG follow "em lên đơn size" nữa (đơn xong rồi, khách chỉ hỏi thêm).
+       || (mem && mem.orderedByCode && product && mem.orderedByCode[_up((product && product.code) || "")])
+-      || (mem && mem.orderClosed)) {
++      || (mem && mem.orderClosed)
++      || (mem && mem.botHandoffAt)) {   // lượt này ĐÃ nhường người thật (gắn AI-CHỜ XL / chờ kiểm tra...) -> KHÔNG hẹn follow-up
+     pendingFollowups.delete(String(convId));
+     return;
+   }
+@@ -3783,7 +4019,7 @@
+     pendingFollowups.delete(cid);
+     try {
+       const _m0 = getConversationState(cid);
+-      if (_m0 && _m0.aiStandsOut) {   // còn thẻ giữ (CHỜ XL/ĐƠN ƯU TIÊN) -> AI đứng ngoài -> KHÔNG follow-up
++      if (_m0 && (_m0.aiStandsOut || _m0.botHandoffAt)) {   // còn thẻ giữ HOẶC bot vừa nhường người (gắn AI-CHỜ XL giữa lượt) -> AI đứng ngoài -> KHÔNG follow-up
+         console.log(`[${BOT_NAME}] Bỏ follow-up: hội thoại đang giữ người thật (AI đứng ngoài). Conv: ${cid}`);
+         continue;
+       }
+@@ -3849,6 +4085,26 @@
+ 
+   const data = await readConversation(conversationId, conversation);
+ 
++  // ===== HẬU MÃI: đơn ĐÃ mua đang GIAO LẠI / HOÀN (người thật đang lo) -> NHƯỜNG NGƯỜI THẬT, KHÔNG bán =====
++  // Tín hiệu hậu mãi nằm trong tin KHÁCH/NGƯỜI THẬT (giao lại / hoàn / phí ship hoàn...). Bắt SỚM, TRƯỚC cổng ad
++  // + trước size/ảnh, để bot KHÔNG báo giá / hỏi size / gửi ảnh đè lên việc người thật đang xử giao-hoàn.
++  // (Đơn đã chốt qua bot thì bỏ qua: luồng sau-chốt có xử riêng.)
++  try {
++    // CHỈ nhường-người-thật khi khách THỰC SỰ vừa nhắn (shop/NV CHƯA trả lời sau tin khách cuối).
++    // Nếu shop/NV/bot nhắn cuối (khách im) -> KHÔNG gắn thẻ (tránh gắn lặp vô hạn khi khách không nhắn gì,
++    // vd shop tự nhắn follow-up giao hàng trên đơn đã chốt -> detector bắt từ khoá -> gắn -> NV gỡ -> bot gắn lại).
++    const _psBatch = getLastCustomerMessages(data.messages) || [];
++    const _psText = _psBatch.filter(m => m && m.type === "text").map(m => m.text || "").join(" ");
++    if (!mem.orderClosed && _psBatch.length && !shopRepliedAfterLastCustomer(data.messages)
++        && (postSaleContext(data.messages) || saysOrderAlreadyPlaced(_psText))) {
++      await tagChoXuLyVaUnread(conversationId);
++      mem.lastBotReply = HUMAN_CHECK_REPLY; mem.botHandoffAt = Date.now();
++      console.log(`[${BOT_NAME}] HẬU MÃI/ĐƠN ĐÃ CÓ (giao lại/hoàn/"hôm trước lên đơn rồi") -> gắn người thật, AI đứng ngoài. Conv: ${conversationId}`);
++      updateConversationState(conversationId, mem); markProcessed(_psBatch);
++      return true;
++    }
++  } catch (_) {}
++
+   // Mốc thời điểm tin KHÁCH (inbox) cuối lúc bắt đầu lượt -> sendGallery dùng để biết khách có chen tin MỚI
+   // trong lúc đang gửi loạt ảnh (thì NGỪNG bắn tiếp, tránh đè/trôi tin khách).
+   try {
+@@ -3940,7 +4196,8 @@
+       const _postRes = await resolveProductFromPost(data.postCaption, data.postImages);
+       const product = _postRes && _postRes.product ? _postRes.product : null;
+       const _postColor = _postRes && _postRes.color ? _postRes.color : "";
+-      const opener = buildCommentOpener(product, mem);
++      // QUY TẮC 1 MẪU / 1 LẦN GIÁ / 24h: nếu mẫu này đã báo giá ở luồng ad/inbox trong 24h -> chỉ dẫn dắt, KHÔNG lặp giá.
++      const opener = openerOrLead(product, mem);
+       console.log(
+         "COMMENT chuẩn bị nhắn riêng | post:", data.postId,
+         "| inboxId:", inboxId, "| privateReplyId:", data.privateReplyId,
+@@ -4008,7 +4265,10 @@
+           }
+         } catch (_) {}
+         // 3 ẢNH của mẫu - gửi RIÊNG vào cùng đích DM, SAU tin chữ (chờ FB mở thread cho media).
+-        if (ok && !mem.sentImageCodes.includes(k)) {
++        // CHỈ gửi ảnh khi CỬA SỔ 24h ĐÃ MỞ (khách đã nhắn inbox). Comment-only -> FB chỉ cho 1 tin
++        // private-reply (đã dùng cho chữ); gửi thêm ảnh sẽ dính #10 "ngoài khoảng thời gian".
++        let _commentImgSent = false;   // chỉ true khi ảnh THỰC SỰ gửi được -> mới đánh dấu đã-gửi bên inbox
++        if (ok && windowOpen && !mem.sentImageCodes.includes(k)) {
+           let _imgOk = false;
+           try {
+             await delay(2200);   // khách comment-only: chờ FB MỞ thread inbox cho media (800ms chưa kịp -> "Something went wrong")
+@@ -4016,6 +4276,7 @@
+           } catch (e) {
+             console.log("COMMENT->INBOX ảnh: LỖI", e.message);
+           }
++          _commentImgSent = !!_imgOk;
+           // KHÔNG gửi được ảnh sau báo giá (mẫu thiếu ảnh / lỗi gửi) -> GẮN THẺ AI-XL ảnh để người thật bổ sung ảnh.
+           if (!_imgOk) {
+             try { await tagXuLyAnhVaUnread(effTarget); } catch (_) {}
+@@ -4023,6 +4284,14 @@
+             mem.botHandoffAt = Date.now();
+             console.log(`[${BOT_NAME}] COMMENT: KHÔNG gửi được ảnh mẫu ${k} sau báo giá -> gắn thẻ AI-XL ảnh (người thật bổ sung ảnh).`);
+           }
++        } else if (ok && !windowOpen && !mem.sentImageCodes.includes(k)) {
++          // CỬA SỔ CHƯA MỞ (khách MỚI bình luận, chưa nhắn inbox) -> KHÔNG gửi ảnh ngay (sẽ dính #10).
++          // GẮN THẺ AI-XL ảnh để NV thấy ĐANG NỢ ẢNH. Mẫu đã lưu sang state inbox -> khi khách NHẮN INBOX
++          // (cửa sổ mở) bot gửi ảnh -> thẻ TỰ GỠ ở luồng gửi ảnh (untagXuLyAnh khi gửi thành công).
++          try { await tagXuLyAnhVaUnread(effTarget); } catch (_) {}
++          if (inboxId && inboxId !== effTarget) { try { await tagXuLyAnhVaUnread(inboxId); } catch (_) {} }
++          mem.botHandoffAt = Date.now();
++          console.log(`[${BOT_NAME}] COMMENT: cửa sổ 24h CHƯA mở -> HOÃN gửi ảnh mẫu ${k}, GẮN thẻ AI-XL ảnh (đang nợ ảnh; khách nhắn inbox sẽ gửi + TỰ GỠ thẻ).`);
+         }
+         // LƯU mẫu sang hội thoại INBOX -> khi khách trả lời tiếp trong tin nhắn, bot bám đúng mẫu.
+         if (inboxId && inboxId !== conversationId) {
+@@ -4032,7 +4301,14 @@
+             im.commentPostProduct = product;
+             im.quotedProducts = [product];
+             im.pricedCodes = Array.from(new Set([...(im.pricedCodes || []), k].filter(Boolean)));
+-            im.sentImageCodes = Array.from(new Set([...(im.sentImageCodes || []), k].filter(Boolean)));
++            // CHỈ đánh dấu đã-gửi-ảnh khi THỰC SỰ gửi được. Nếu HOÃN (cửa sổ chưa mở) -> KHÔNG thêm k
++            // -> khi khách NHẮN INBOX (cửa sổ mở), luồng inbox sẽ gửi ảnh mẫu này.
++            if (_commentImgSent) im.sentImageCodes = Array.from(new Set([...(im.sentImageCodes || []), k].filter(Boolean)));
++            // QUAN TRỌNG cho quy tắc 24h: chép cả MỐC GIỜ báo giá (pricedAt). Thiếu nó -> quotedRecently
++            // bên inbox = false -> báo giá LẠI mẫu này khi khách chuyển từ comment sang nhắn tin (lỗi 24h).
++            im.pricedAt = Object.assign({}, im.pricedAt || {}, mem.pricedAt || {});
++            // Chép MÀU BÀI để gửi lại ảnh đúng màu khi khách nhắn tiếp bên inbox.
++            if (mem.sourceColorByCode) im.sourceColorByCode = Object.assign({}, im.sourceColorByCode || {}, mem.sourceColorByCode);
+             updateConversationState(inboxId, im);
+           } catch (_) {}
+         }
+@@ -4069,22 +4345,53 @@
+   // Tin khách LƯỢT NÀY (text). Nếu là CÂU HỎI TIẾP về mẫu (khai cân nặng + hỏi size, hỏi size, bảng size,
+   // chất, địa chỉ) MÀ đã từng báo giá mẫu trong hội thoại -> khách ĐANG được tư vấn, KHÔNG phải bấm AD MỚI.
+   const _adCustNow = getLastCustomerMessages(data.messages).filter(m => m && m.type === "text").map(m => m.text || "").join(" ");
++  // CÂU HỎI THUỘC TÍNH MẪU (lót/quần trong, đệm ngực, co giãn, mỏng/hở, sợ ngắn, màu khác, còn hàng).
++  // Đây là khách HỎI SÂU về mẫu đang xem -> KHÔNG phải bấm ad mới -> TUYỆT ĐỐI không báo giá lại,
++  // phải để handler thuộc tính (vd "có quần/lót bên trong" ~dòng 6225) trả lời / hoặc giao người thật.
++  // (Lỗi gốc: "Có quần trong k shop" rơi vào cổng ADS -> buildCommentOpener -> báo giá lại, nuốt câu hỏi.)
++  const _adAttrQ = asksInnerLining(_adCustNow) || asksBreastPad(_adCustNow) || asksStretch(_adCustNow)
++    || isSheerConcern(_adCustNow) || worriesGarmentShort(_adCustNow)
++    || asksSkirtOrSet(_adCustNow) || asksCategory(_adCustNow)   // liền hay rời / áo hay váy hay set -> ĐỂ HANDLER trả lời, không báo giá đè
++    || asksOtherColors(_adCustNow) || asksInStock(_adCustNow);
+   const _adFollowupQ = asksWeightForSize(_adCustNow) || !!parseWeightKg(_adCustNow)        // "50 ký mặc size nào"
+     || !!extractStatedSize(_adCustNow) || asksWhichSizeAdvice(_adCustNow) || asksWhatSize(_adCustNow)
+-    || asksSizeChart(_adCustNow) || asksMaterial(_adCustNow) || asksShopAddress(_adCustNow);
++    || asksSizeChart(_adCustNow) || asksMaterial(_adCustNow) || asksShopAddress(_adCustNow)
++    || _adAttrQ;   // BỔ SUNG: câu hỏi thuộc tính cũng là HỎI TIẾP về mẫu (không báo giá lại)
+   // ĐÃ từng báo giá mẫu trong hội thoại này (lock có thể bị xoá nhưng pricedCodes vẫn còn) -> không phải khách mới.
+-  const _adHadModel = !!(mem.currentProduct || (mem.pricedCodes && mem.pricedCodes.length));
+-  const _adSkipForFollowup = _adFollowupQ && _adHadModel;
+-  // BỎ QUA vì khách hỏi tiếp NHƯNG lock đã bị xoá ở lượt trước -> KHÔI PHỤC khoá mẫu từ pricedCodes
+-  // (để FOCUS = text_confirm switch=false -> handler size/chất trả lời, KHÔNG rơi vào "Hỏi giá mẫu mới").
+-  if (_adSkipForFollowup && !mem.currentProduct && mem.pricedCodes && mem.pricedCodes.length) {
++  // ĐỌC THÊM LỊCH SỬ TIN (botQuotedPriceInHistory): sau RESTART mem mất sạch -> vẫn biết "đã báo giá rồi"
++  // -> mọi câu HỎI TIẾP (size/số đo/chất/màu...) KHÔNG bị cổng ADS báo giá LẠI. (Yêu cầu shop: cổng ADS phải nhớ.)
++  const _adHadModel = !!(mem.currentProduct || (mem.pricedCodes && mem.pricedCodes.length)
++    || botQuotedPriceInHistory(data.messages));
++  // Khách KHAI cân nặng/số đo (không phải mua hộ) = đang TRẢ LỜI câu hỏi size -> CHẮC CHẮN mẫu đã được
++  // bàn từ trước (không ai tự khai cân nặng khi chưa xem mẫu). Sau RESTART mem mất sạch -> _adHadModel=false
++  // -> cổng ADS tưởng "ad mới" báo giá LẠI, nuốt câu cao/nặng. Cờ này buộc cổng ADS NHƯỜNG handler tính size,
++  // và buộc KHÔI PHỤC mẫu (từ adId->mã) dù pricedCodes rỗng. (Giống guard _givesBodyInfo ở đường Hỏi-giá.)
++  const _adGivesBody = (!!parseWeightKg(_adCustNow) || !!parse3V(_adCustNow) || !!parseBodyMeasures(_adCustNow)) && !isGiftContext(_adCustNow);
++  const _adSkipForFollowup = (_adFollowupQ && _adHadModel) || _adGivesBody;
++  // KHÔI PHỤC khoá mẫu khi khách hỏi tiếp NHƯNG lock đã bị xoá / mất state (log: lock= trống).
++  // Chạy cho cả _adSkipForFollowup LẪN _adAttrQ (kể cả khi pricedCodes rỗng) -> đảm bảo productInfo có
++  // để handler thuộc tính (lót/đệm/co giãn/size...) trả lời, KHÔNG rơi vào "Hỏi giá mẫu mới".
++  if ((_adSkipForFollowup || _adAttrQ) && !mem.currentProduct) {
+     try {
+-      const _lastCode = String(mem.pricedCodes[mem.pricedCodes.length - 1] || "").toUpperCase();
+       const _c = await ensureCatalog();
+-      const _p = _c.byCode.get(_lastCode);
++      let _p = null;
++      // (a) Từ pricedCodes (mẫu vừa báo giá trong hội thoại này).
++      if (mem.pricedCodes && mem.pricedCodes.length) {
++        const _lastCode = String(mem.pricedCodes[mem.pricedCodes.length - 1] || "").toUpperCase();
++        _p = _c.byCode.get(_lastCode) || null;
++      }
++      // (b) Mất sạch state -> resolve lại mẫu từ ADS: map adId/postId -> mã, hoặc mã nằm trong tên ad.
++      if (!_p && _adId) {
++        const _mc = lookupAdProduct(_adId) || (data.adPostId && lookupAdProduct(data.adPostId)) || (data.postId && lookupAdProduct(data.postId));
++        if (_mc) _p = _c.byCode.get(String(_mc).toUpperCase()) || ((await findInText(String(_mc))) || [])[0] || null;
++        if (!_p && data.adTitle) {
++          const _toks = String(data.adTitle).toUpperCase().match(/[A-Z0-9]{6,}/g) || [];
++          for (const tk of _toks) { const _q = _c.byCode.get(tk); if (_q) { _p = _q; break; } }
++        }
++      }
+       if (_p) {
+         mem.currentProduct = _p; mem.quotedProducts = [_p];
+-        console.log(`[${BOT_NAME}] Ads follow-up (khách hỏi "${_adCustNow.slice(0, 30)}") -> KHÔI PHỤC khoá mẫu ${_p.code} từ pricedCodes để trả lời (size/chất...).`);
++        console.log(`[${BOT_NAME}] Ads follow-up/thuộc-tính (khách hỏi "${_adCustNow.slice(0, 30)}") -> KHÔI PHỤC khoá mẫu ${_p.code} để handler trả lời (lót/đệm/co giãn/size...).`);
+       }
+     } catch (_) {}
+   }
+@@ -4130,10 +4437,41 @@
+       console.log(`[${BOT_NAME}] ADS (adId=${_adId}) chưa resolve được mẫu + khách gửi ẢNH mẫu khác -> KHOÁ cổng ADS (chống đè focus), tư vấn theo ảnh khách.`);
+     }
+   }
+-  const _adTextBlocks = adCustTextBlocksQuote(_adCustNow) || isSensitiveHandoff(_adCustNow) || isPriorityOrder(_adCustNow) || asksOrderStatus(_adCustNow);
+-  if (data.fromAd && _adId && !isCommentOrigin && !mem.commentOpenerSent
+-      && !mem.orderClosed && !_adTurnHasImage && !_adTextBlocks
+-      && !_adSkipForFollowup        // khách HỎI TIẾP về mẫu đã khoá -> để handler thường (size/chất...) trả lời, KHÔNG báo giá lại
++  const _adTextBlocks = adCustTextBlocksQuote(_adCustNow) || isSensitiveHandoff(_adCustNow) || isPriorityOrder(_adCustNow) || asksOrderStatus(_adCustNow)
++    || customerGaveContact(_adCustNow) || mem._addrJustGiven;   // khách CHO sđt/địa chỉ (SẴN SÀNG CHỐT) -> KHÔNG báo giá lại + hỏi size, để LUỒNG CHỐT lo
++  // Tin khách CHỈ là 👍 / ok / ừ / cảm ơn (hoặc STICKER rỗng khi ĐANG có người thật) -> KHÔNG phải "bấm ad hỏi mẫu"
++  // -> ĐỪNG báo giá đè (ca thật: thread khiếu nại giao hàng đơn đã hoàn, người thật đang xử, khách thả 👍 -> bot chen báo giá).
++  // Tin khách CHỈ là 👍 / ok / ừ / cảm ơn / sticker rỗng -> KHÔNG phải "bấm ad hỏi mẫu" -> ĐỪNG báo giá đè.
++  // (ca thật: thread đơn đã HOÀN, NV xử lý từ lâu, khách thả 👍 -> bot chen báo giá. KHÔNG dựa vào humanInbox vì NV có thể xử đã lâu.)
++  const _adHasHistory = (Array.isArray(data.messages) && data.messages.length >= 3)
++    || _alreadyQuotedAd || mem.adQuotedFor || mem.commentOpenerSent
++    || (Array.isArray(mem.quotedProducts) && mem.quotedProducts.length) || mem.orderClosed;
++  const _adAck = isBareAck(_adCustNow) || isAffirmation(_adCustNow) || isFriendlyRemark(_adCustNow) || isPostOrderChitChat(_adCustNow)
++    || (!String(_adCustNow).trim() && _adHasHistory);
++  // LẦN ĐẦU TỪ AD (chưa từng báo giá mẫu nào trong hội thoại) -> LUÔN báo giá DÙ KHÁCH GÕ GÌ
++  // (size, "còn hàng", "mẫu đẹp"...). Opener sẽ BÁM size/đưa câu hành động (xem (b) bên dưới).
++  // VẪN chặn ca xấu: huỷ/hoàn/đã-đặt + CHO sđt-địa-chỉ (đi CHỐT, trong _adTextBlocks) + 👍/ack (_adAck).
++  const _adFirstAd = !mem.adQuotedFor && !mem.commentProductSent && !(Array.isArray(mem.quotedProducts) && mem.quotedProducts.length)
++    && !botQuotedPriceInHistory(data.messages);   // LỊCH SỬ đã có báo giá -> KHÔNG phải "ad lần đầu" (sau restart mem trống vẫn biết)
++  // ĐÃ có lịch sử (bấm ad mới giữa chừng) -> GIỮ chặn hỏi-thuộc-tính / hỏi-tiếp để KHÔNG báo giá LẠI (giữ FIX A).
++  // Câu hỏi THUỘC TÍNH/LOẠI (lót/đệm/co giãn/mỏng/ngắn/màu/còn hàng/liền-rời/áo-váy-set) -> LUÔN nhường
++  // handler trả lời (kể cả lần đầu từ ad) thay vì báo giá đè câu hỏi. Còn hỏi-tiếp khác (size/chất...) chỉ
++  // nhường khi ĐÃ có lịch sử (lần đầu vẫn báo giá + bám size theo FIX M).
++  const _adDontOpen = _adTextBlocks || _adAck || _adAttrQ || _adGivesBody || (!_adFirstAd && _adSkipForFollowup);
++  const _adWantsQuote = _adFirstAd || isPriceAsk(_adCustNow, mem.lastIntent)
++    || (!String(_adCustNow).trim() && !botQuotedPriceInHistory(data.messages));   // tin trống -> chỉ báo giá nếu hội thoại CHƯA có báo giá nào
++  // CA NGOAN: khách nhắc NHIỀU mẫu ("mấy cái này"/"các mẫu") + lượt này KHÔNG có ảnh để bot gom đủ
++  // -> cổng ad chỉ có 1 mẫu (mẫu ad) -> KHÔNG báo giá thiếu 1 mẫu -> NGƯỜI THẬT báo đủ (nguyên tắc "thiếu mẫu -> người thật").
++  if (data.fromAd && _adId && referencesMultipleModels(_adCustNow) && !_adTurnHasImage && !mem.orderClosed
++      && !shopRepliedAfterLastCustomer(data.messages)) {
++    try { await tagChoXuLyVaUnread(conversationId); } catch (_) {}
++    mem.botHandoffAt = Date.now();
++    console.log(`[${BOT_NAME}] Khách nhắc NHIỀU mẫu (mấy cái này...) + không ảnh lượt này -> bot không gom đủ -> NGƯỜI THẬT. Conv: ${conversationId}`);
++    mem.lastBotReply = HUMAN_CHECK_REPLY; markProcessed(getLastCustomerMessages(data.messages));
++    updateConversationState(conversationId, mem); return true;
++  }
++  if (data.fromAd && _adId && !isCommentOrigin && !mem.commentOpenerSent && _adWantsQuote && !_adDontOpen
++      && !mem.orderClosed && !_adTurnHasImage
+       && !_alreadyQuotedAd && _adTries < 8
+       && !shopRepliedAfterLastCustomer(data.messages)) {   // CHỐNG LẶP/chen ngang: NV/bot vừa trả lời SAU tin khách thì thôi
+     // (BỎ chặn humanInbox: khách CŨ từng được NV tư vấn vẫn được báo giá khi BẤM AD MỚI — đúng ý: ad click -> báo mẫu của ad.
+@@ -4200,8 +4538,8 @@
+       }
+     }
+     // 4) MAP TAY theo Ad ID HOẶC post_id (lưới đỡ: token lỗi/ad lạ/creative rỗng).
++    let _mapped = null, _mapKey = "";   // KHAI BÁO SCOPE NGOÀI -> còn dùng ở "if (_adId && !_mapped)" cuối (sửa crash: _mapped is not defined)
+     if (!product) {
+-      let _mapped = null, _mapKey = "";
+       const _mapCands = (data.adCandidates && data.adCandidates.length)
+         ? data.adCandidates
+         : [{ adId: _adId, postId: data.adPostId || null }];
+@@ -4223,7 +4561,13 @@
+       console.log(`[${BOT_NAME}] QUẢNG CÁO adId=${_adId} | caps=${_capSources.length} imgs=${adImgs.length} | lead="${(_leadNames[0] || "").slice(0, 30)}" cap0="${(_capSources[0] || "").slice(0, 45)}" -> ${product ? `RA ${product.code} (${product.name}) qua ${_how}` : "CHƯA RA MẪU"}`);
+     } catch (_) {}
+     if (product) {
+-      const opener = buildCommentOpener(product, mem);   // "Dạ <mẫu> giá ...đ ạ." + dẫn dắt size
++      // BÁM size khách VỪA cho ở tin này (vd "cho c size s") TRƯỚC khi dựng opener -> sizeTailForProduct
++      // sẽ ra CÂU HÀNH ĐỘNG (lên đơn size X) thay vì hỏi lại size. KHÔNG ép FREESIZE, không ghi đè size đã có.
++      if (!mem.customerSize) { try { const _sz = extractStatedSize(_adCustNow); if (_sz && _sz !== "FREESIZE") { mem.customerSize = _sz; mem.sizeFromCustomer = true; console.log(`[${BOT_NAME}] AD: bám size khách vừa cho = ${_sz} -> opener xác nhận size + câu chốt.`); } } catch (_) {} }
++      // QUY TẮC 1 MẪU / 1 LẦN GIÁ / 24h: openerOrLead -> mẫu CHƯA báo giá 24h thì opener đầy đủ (có giá);
++      // ĐÃ báo giá (qua ad khác / comment / inbox) thì chỉ câu dẫn dắt, KHÔNG lặp giá. (buildCommentOpener
++      // cũ luôn kèm giá + chỉ chặn theo từng adId -> bấm ad MỚI cùng mẫu vẫn báo giá lại trong 24h.)
++      const opener = openerOrLead(product, mem);
+       await sendInboxMessage(conversationId, opener);
+       mem.currentProduct = product;
+       mem.commentPostProduct = product;
+@@ -4290,6 +4634,22 @@
+       try { await maybeSendSizeChart(conversationId, _adCustNow, product, mem); } catch (_) {}
+       scheduleFollowup(conversationId, mem, product, opener);   // ad-khách cũng được NHẮC như luồng thường (trước đây thiếu -> ad ko follow)
+       console.log(`[${BOT_NAME}] Tin từ QUẢNG CÁO -> báo giá mẫu ${product.code} (${product.name}) | adId=${_adId} | title="${(data.adTitle || data.postCaption || "").slice(0, 40)}".`);
++      // CHẶN GỐC LẶP BÁO GIÁ: đánh dấu tin opener ĐÃ XỬ -> vòng quét sau KHÔNG xử lại -> không sinh báo giá lần 2.
++      // CẨN THẬN: nếu opener còn hỏi GIAO/SHIP (cái quote CHƯA trả) -> KHÔNG đánh dấu, để handler giao trả nốt lượt sau.
++      // (Hỏi thuộc tính/màu/chất/tồn/tra-đơn -> đã bị _adDontOpen chặn không vào đây; bảng size -> maybeSendSizeChart đã gửi.)
++      if (!isDeliveryTimeQuestion(_adCustNow) && !isDeliveryConcern(_adCustNow)) {
++        try { markProcessed(getLastCustomerMessages(data.messages)); } catch (_) {}
++        console.log(`[${BOT_NAME}] -> đã đánh dấu opener xử xong (chống lặp gốc).`);
++      } else {
++        console.log(`[${BOT_NAME}] -> opener còn hỏi GIAO/SHIP -> KHÔNG đánh dấu, để handler giao trả nốt.`);
++      }
++      // Khách từ ad thắc mắc "chưa thấy gửi set váy / sao chưa gửi" -> ĐÃ báo giá + gửi ảnh ở trên -> GẮN người
++      // thật xử tiếp (theo yêu cầu shop: hỏi hàng từ ad mà thắc mắc chưa nhận -> báo giá XONG rồi gắn người thật).
++      if (asksWhyNotSentYet(_adCustNow)) {
++        try { await tagChoXuLyVaUnread(conversationId); } catch (_) {}
++        mem.botHandoffAt = Date.now();
++        console.log(`[${BOT_NAME}] Ad: khách thắc mắc "chưa thấy gửi/chưa gửi" ("${String(_adCustNow).slice(0, 30)}") -> báo giá xong -> GẮN người thật.`);
++      }
+       updateConversationState(conversationId, mem);
+       return true;
+     }
+@@ -4370,7 +4730,9 @@
+ 
+     updateMemoryFromBatch(mem, batch);
+ 
+-    const latestTextRaw = batch.filter(x => x.type === "text").map(x => x.text || "").join(" ");
++    // NFKC: chữ/số CÁCH ĐIỆU (Unicode toán học in đậm/nghiêng: 𝟬𝟵𝟴𝟵.. , 𝘾𝙝𝙞..) -> ASCII thường,
++    // để regex SĐT/địa chỉ bắt được. An toàn cho tiếng Việt (giữ dấu), emoji không đổi.
++    const latestTextRaw = batch.filter(x => x.type === "text").map(x => (x.text || "").normalize("NFKC")).join(" ");
+     const latestText = normalizeViet(latestTextRaw);   // dò ý trên bản CHUẨN HOÁ (viết tắt/lặp -> chuẩn)
+     if (_turnCtx) _turnCtx.customerText = latestText;   // để scheduleFollowup biết khách vừa HỎI gì
+     let askImages = wantsImages(latestText);
+@@ -4407,6 +4769,10 @@
+     }
+ 
+     const imageCount = batch.filter(x => x.type === "image" && x.imageUrl).length;
++    // CHỐNG LẶP ẢNH: bot đã gửi ảnh trong hội thoại (đọc lịch sử -> sống sót RESTART) thì KHÔNG tự gửi lại,
++    // TRỪ: khách VỪA gửi ảnh lượt này / khách XIN xem ảnh / báo giá §13 (set cờ riêng tại chỗ đó).
++    mem._imgShownBefore = botSentImagesInHistory(data.messages);
++    mem._imgAllowSend = (imageCount > 0) || askImages;
+     // Khách gửi ẢNH MẪU MỚI = bắt đầu đợt tư vấn mới -> cho phép mời lên đơn lại 1 lần (reset chống-lặp).
+     if (imageCount > 0) { mem.orderInvited = false; mem.lastCtaSent = null; mem.priceObjectionHandled = false; mem.priceComparisonHandled = false; mem.saidBestSeller = false; mem.ctaIdx = 0; }
+     const fromImages = await getProductsFromImages(batch);
+@@ -4539,16 +4905,55 @@
+             console.log(`[AI-READ] -> set size khách = ${_lab.size} (code đã trượt).`);
+           }
+           // (2) ĐỊA CHỈ giao: AI nhận ra mà code trượt -> đánh dấu ĐANG CHO ĐỊA CHỈ (=> luồng chốt, KHÔNG báo giá lại).
+-          if (_lab.is_address && !mem._addrJustGiven && !asksShopAddress(latestText)) {
++          //     AI CHỈ phất cờ "đây là địa chỉ"; CHUỖI địa chỉ thật vẫn do code bóc (cleanAddress), KHÔNG để AI bịa.
++          if ((_lab.is_address || _lab.kind === "ADDRESS") && !mem._addrJustGiven && !asksShopAddress(latestText)) {
+             mem._addrJustGiven = true; mem._reaskedAddr = false;
+             if (!mem.address) { try { mem.address = cleanAddress(latestTextRaw || latestText); } catch (_) {} }
+             console.log(`[AI-READ] -> coi là ĐỊA CHỈ giao / đang chốt (code đã trượt).`);
+           }
++          // (3) SĐT: AI phất cờ có sđt mà code chưa bắt -> để code bóc SỐ thật từ chữ (regex), KHÔNG để AI bịa số.
++          if ((_lab.has_phone || _lab.kind === "PHONE") && !mem.phone) {
++            try { const _ph = ((latestTextRaw || latestText || "").match(/(?:\+?84|0)(?:\d[\s.\-]?){8,10}\d/) || [])[0] || null; if (_ph) { mem.phone = _ph.replace(/[\s.\-]/g, ""); console.log(`[AI-READ] -> bóc SĐT (code regex) = ${mem.phone}.`); } } catch (_) {}
++          }
+         }
+       } catch (_) { /* AI lỗi -> bỏ qua, chạy thuần code */ }
+     }
++    // ===== AI-FIRST DISPATCH (lưới hiểu-cả-câu) =====
++    // _ai("X") = AI gắn nhãn X. Dùng để OR vào điều kiện nhánh sẵn có -> bắt được khi TỪ-KHOÁ TRƯỢT.
++    // Code vẫn DUYỆT trong từng handler (sheet/POS/catalog). AI timeout/OTHER -> _ai luôn false -> chạy thuần từ-khoá.
++    const _ai = (k) => mem._aiIntent === k;
++    // AI hay nhầm "giá"/"lấy giá" -> DISCOUNT. Chỉ cho nhãn DISCOUNT kích nhánh giảm giá khi câu THỰC SỰ
++    // có từ giảm/sale/bớt... -> tránh nuốt câu HỎI GIÁ (vd "Let giá s ak") thành câu "ít khi giảm giá".
++    const _aiDiscount = _ai("DISCOUNT") && /giảm|bớt|sale|\bkm\b|khuyến m[ãa]i|ưu đãi|deal|fix giá|rẻ hơn|mềm giá|giá tốt/i.test(String(latestText || "").toLowerCase());
++    // (C) NHÃN CẦN NGƯỜI THẬT: AI nhận ra mà từ-khoá có thể trượt -> giao người, KHÔNG tự trả.
++    //     Gác: KHÔNG cướp lượt nếu đang rõ ràng là chốt đơn/hỏi giá (để luồng tiền/đơn của code lo).
++    // + Code tự bắt ngữ cảnh THANH TOÁN (đã ck / nhận tiền chưa / bên c nhận chưa / báo thành công) -> người thật,
++    //   KHÔNG để AI-REPLY tự soạn (vd nhại "hệ thống lỗi"). Việc tiền nong = người thật xác minh.
++    const _paymentSentAsk = /đã ck|đã chuyển khoản|chuyển khoản rồi|\bck rồi\b|chuyển tiền rồi|báo thành công|nhận được tiền|nhận tiền chưa|nhận (tiền )?chưa|bên (c|e|chị|shop|mình) nhận (tiền )?chưa/i.test(String(latestText || ""));
++    if ((_ai("COMPLAINT") || _ai("PAYMENT_CONFIRM") || _ai("CANCEL_ORDER") || _paymentSentAsk)
++        && !isPriceAsk(latestText, mem.lastIntent) && !customerWantsToOrder(latestText, mem.lastIntent)
++        && !customerGaveContact(latestText)) {
++      const _why = _ai("COMPLAINT") ? "khách bức xúc/khiếu nại" : (_ai("PAYMENT_CONFIRM") ? "xác nhận đã chuyển tiền" : (_ai("CANCEL_ORDER") ? "muốn huỷ đơn" : "hỏi/nhắc chuyển khoản-nhận tiền (code bắt)"));
++      const reply = "Dạ em ghi nhận rồi ạ, chị chờ em kiểm tra và phản hồi lại cho mình ngay nha ạ";
++      await sendInboxMessage(conversationId, reply);
++      try { await tagChoXuLyVaUnread(conversationId); } catch (_) {}
++      mem.botHandoffAt = Date.now();
++      console.log(`[DISPATCH] AI=${mem._aiIntent} (${_why}) + từ-khoá tiền/đơn KHÔNG khớp -> GIAO NGƯỜI THẬT.`);
++      mem.lastBotReply = reply; updateConversationState(conversationId, mem); markProcessed(batch); return true;
++    }
+ 
+-    // Khách NHẮC MÀU trong tin ("màu kem", "Giannal màu Hồng", "xin ảnh màu kem") -> nhớ theo LƯỢT
++    // (C2) KHẨN / DEADLINE: AI=URGENT, hoặc code bắt MỐC NGÀY cụ thể (mai/T4/trước thứ 5/đi tiệc) khi KHÔNG phải
++    //      đang hỏi giá / chốt / cho contact -> ĐƠN ƯU TIÊN, người thật. (AI chỉ phân nhánh; câu trả do code.)
++    if (_ai("URGENT")
++        || (isUrgentSpecificDate(latestText) && !isPriceAsk(latestText, mem.lastIntent)
++            && !customerWantsToOrder(latestText, mem.lastIntent) && !customerGaveContact(latestText))) {
++      const reply = "Dạ em ghi nhận mình đang cần gấp ạ, em chuyển bộ phận phụ trách kiểm tra và phản hồi cho mình sớm nhất nha ạ.";
++      await sendInboxMessage(conversationId, reply);
++      try { await tagDonUuTienVaUnread(conversationId); } catch (_) {}
++      mem.botHandoffAt = Date.now();
++      console.log(`[DISPATCH] URGENT (deadline/gấp - ${_ai("URGENT") ? "AI" : "code mốc ngày"}) -> ĐƠN ƯU TIÊN, người thật.`);
++      mem.lastBotReply = reply; updateConversationState(conversationId, mem); markProcessed(batch); return true;
++    }
+     // để MỌI lần gửi ảnh lượt này (kể cả luồng báo giá/AI) đều ưu tiên ĐÚNG màu đó.
+     // (Trước đây chỉ nhớ khi khách XIN ẢNH -> câu "tư vấn ... màu Hồng" bị bỏ màu. Nay nhắc màu là nhớ.)
+     {
+@@ -4570,7 +4975,17 @@
+       mem.lastBotReply = reply; updateConversationState(conversationId, mem); markProcessed(batch); return true;
+     }
+ 
+-    // ===== KHÁCH GỬI ĐỊA CHỈ BẰNG ẢNH trong lúc BOT ĐANG XIN ĐỊA CHỈ -> KHÔNG TỰ ĐIỀN, GẮN NGƯỜI THẬT =====
++    // ===== STATE GUARD: ĐƠN ĐÃ CHỐT + lượt này KHÔNG đưa mẫu mới + tin MƠ HỒ (AI=OTHER) -> hậu mãi đơn cũ =====
++    // Khách đã chốt đơn, giờ nhắn 1 câu mơ hồ ("ui e ơi", "alo", "đó") mà KHÔNG đưa ảnh/tên mẫu mới
++    // -> KHÔNG vớ mẫu từ ad/CLIP để báo giá lại; nhường người thật. (Đưa mẫu mới / nhãn rõ -> giữ handler riêng.)
++    if (mem.orderClosed && _ai("OTHER")
++        && !fromImages.length && !fromText.length
++        && !customerGaveContact(latestText) && !isPriceAsk(latestText, mem.lastIntent)) {
++      await tagChoXuLyVaUnread(conversationId);
++      mem.botHandoffAt = Date.now();
++      console.log(`[${BOT_NAME}] ĐƠN ĐÃ CHỐT + tin mơ hồ + không mẫu mới -> hậu mãi đơn cũ, nhường người thật. Conv: ${conversationId}`);
++      mem.lastBotReply = HUMAN_CHECK_REPLY; updateConversationState(conversationId, mem); markProcessed(batch); return true;
++    }
+     // OCR ảnh hay đọc RÁC (ảnh giày dép/card SP -> "Mã/Giá/màu" thành địa chỉ) -> chốt bậy. Theo yêu cầu shop:
+     // ảnh địa chỉ thì NGƯỜI THẬT kiểm tra, bot KHÔNG tự nhận diện điền vào đơn.
+     const _recentShop = (data.messages || []).filter(m => m && m.sender === "shop" && m.type === "text")
+@@ -4608,7 +5023,9 @@
+     // Khách gửi NHIỀU ảnh, CHỈ nhận ra 1 mẫu (còn mẫu CHƯA nhận ra) -> BÁO GIÁ mẫu nhận ra trước,
+     // SAU ĐÓ gắn AI-CHỜ XL cho mã còn lại (người thật bổ sung). KHÔNG bỏ hết.
+     if (imageCount >= 2 && unresolved > 0 && thisTurn.length === 1) {
+-      const _pi = productInfo || thisTurn[0];
++      // (TDZ FIX) tại đây `productInfo` CHƯA khai báo (mãi dòng ~5013) -> đọc nó gây crash
++      // "Cannot access 'productInfo' before initialization" -> rớt hẳn hội thoại. Mẫu vừa nhận ra = thisTurn[0].
++      const _pi = thisTurn[0];
+       const k = String((_pi && _pi.code) || "").toUpperCase();
+       const pl = _pi && priceLine(_pi);
+       if (pl) {
+@@ -4635,13 +5052,13 @@
+     // xác nhận lại ĐƠN TỔNG về ĐỊA CHỈ CŨ. TUYỆT ĐỐI không đòi lại địa chỉ, không tư vấn lại từ đầu.
+     {
+       const _addIntent = /lấy thêm|lên đơn thêm|đặt thêm|thêm mẫu|mẫu này nữa|thêm \d+ mẫu|lấy luôn cả/i.test(latestText)
+-        || routeBatch(batch.filter(x => x.type === "text").map(x => x.text || "")).some(r => r.intent === "THEM_MAU_VAO_DON");
+-      // Sau khi ĐÃ CHỐT mà khách GỬI MẪU MỚI (không hỏi gì, không xin xem ảnh) = muốn THÊM vào đơn.
+-      const _newModelAfterClose = _wasOrderClosed && thisTurn.length >= 1
+-        && !looksLikeQuestion(latestText) && !wantsImages(latestText)
+-        && !isShipFeeQuestion(latestText) && !asksTotalPayment(latestText) && !asksMaterial(latestText);
++        || routeBatch(batch.filter(x => x.type === "text").map(x => x.text || "")).some(r => r.intent === "THEM_MAU_VAO_DON")
++        || _ai("ADD_TO_ORDER");
++      // GỬI ẢNH MẪU ≠ ĐỒNG Ý CHỐT. Khách từng chốt 1 đơn, lần sau gửi ảnh mẫu khác có thể chỉ ĐANG XEM/HỎI.
++      // -> TUYỆT ĐỐI không tự nhét mẫu vào đơn cũ. Chỉ thêm vào đơn khi khách NÓI RÕ ("lấy thêm/chốt thêm" = _addIntent).
++      // Mẫu mới gửi tới -> để luồng dưới BÁO GIÁ (§13/sendBlocks), KHÔNG auto-chốt.
+       const _hadClosedOrder = _wasOrderClosed && mem.phone && mem.address && (mem.quotedProducts || []).length >= 1;
+-      if (_hadClosedOrder && (_addIntent || _newModelAfterClose)) {
++      if (_hadClosedOrder && _addIntent) {
+         mem.orderState = "DANG_THEM_MAU";
+         if (!thisTurn.length) {
+           const reply = "Dạ chị muốn lấy thêm mẫu nào ạ, chị gửi em ảnh hoặc tên mẫu để em thêm vào đơn cho mình nha";
+@@ -4895,6 +5312,23 @@
+         const _effC = effectiveSize(mem, productInfo);
+         const _haveSizeC = !_needSizeC || !!_effC;
+         const _colsC = (typeof modelColorList === "function") ? (modelColorList(productInfo) || []) : [];
++        // MÀU MẶC ĐỊNH KHI CHỐT (sao y luật 7811): mẫu NHIỀU màu nhưng cả hội thoại bám 1 MÀU
++        // (màu ad/comment/ảnh đã gửi) + khách KHÔNG hỏi màu khác -> coi như khách chốt màu đó,
++        // KHÔNG hỏi "lấy màu nào" (tránh hỏi thừa kiểu Ovelles làm khách rối). Khách hỏi màu khác -> vẫn hỏi.
++        try {
++          const _ccC = String(productInfo.code || "").toUpperCase();
++          if (_colsC.length >= 2 && !(mem.orderColorByCode && mem.orderColorByCode[_ccC])) {
++            if (asksOtherColors(latestText)) mem.multiColorInterest = _ccC;   // khách hỏi màu khác -> PHẢI hỏi
++            const _focusC = mem.askedImageColor || mem.lastSentImageColor
++                         || (mem.sourceColorByCode || {})[_ccC] || (mem.colorByCode || {})[_ccC] || null;
++            const _focusCanonC = _focusC ? (_colsC.find(c => colorMatches(c, _focusC) || colorMatches(_focusC, c)) || null) : null;
++            if (_focusCanonC && mem.multiColorInterest !== _ccC) {
++              mem.orderColorByCode = mem.orderColorByCode || {};
++              mem.orderColorByCode[_ccC] = String(_focusCanonC).toLowerCase();
++              console.log(`[${BOT_NAME}] Chốt-contact: mẫu ${_ccC} nhiều màu nhưng hội thoại bám 1 màu (${_focusCanonC}) -> MẶC ĐỊNH màu đó, KHÔNG hỏi.`);
++            }
++          }
++        } catch (_) {}
+         const _needColorC = _colsC.length >= 2 && !(typeof chosenColorForCode === "function" && chosenColorForCode(mem, productInfo));
+         const _missC = [];
+         // XOÁ địa chỉ RÁC tồn đọng (ký tự lạ / data catalog) để không chốt nhầm về rác.
+@@ -4965,7 +5399,7 @@
+ 
+       // (1b) HỎI ĐỘ CO GIÃN -> đọc ĐÚNG cột S (productInfo.stretch). Chặn TRƯỚC handler giá (chống nhãn ASK_PRICE bậy của bộ cũ).
+       if (_hit("HOI_CO_GIAN") && !_multiAttrQ) {
+-        const _sr = productInfo ? stretchReplyFromSheet(productInfo) : null;
++        const _sr = productInfo ? stretchReplyFromSheet(productInfo, mem) : null;
+         if (_sr) {
+           await sendInboxMessage(conversationId, _sr);
+           console.log(`[${BOT_NAME}] [router] HỎI CO GIÃN -> cột S: "${productInfo.stretch}"`);
+@@ -5116,7 +5550,7 @@
+     if (questionsOrRefusesPrepay(latestText)) {
+       // Khách XIN GIẢM (kể cả "CK trước có được giảm") = CHÊ GIÁ -> THUYẾT PHỤC giá niêm yết + freeship
+       // (shop bán giá niêm yết, KHÔNG đẩy người thật).
+-      if (asksDiscount(latestText)) {
++      if (asksDiscount(latestText) || _aiDiscount) {
+         const reply = productInfo
+           ? buildDiscountReply(productInfo, mem)
+           : "Dạ bên em bán theo giá niêm yết nên ít khi giảm lắm chị ạ, bù lại đơn trên 500k em freeship cho mình nha";
+@@ -5329,7 +5763,8 @@
+     }
+ 
+     // ===== KHÁCH HỎI "CÓ HÀNG SẴN KHÔNG" -> xác nhận có sẵn + CÂU HÀNH ĐỘNG (KHÔNG liệt kê size) =====
+-    if (asksInStock(latestText) && productInfo && !recommend.isOutOfStock(productInfo)
++    if ((asksInStock(latestText) || _ai("STOCK")) && productInfo && !recommend.isOutOfStock(productInfo)
++        && !asksInStockOrPreorder(latestText)
+         && !asksBreastPad(latestText) && !wantsBackView(latestText)) {
+       // Hỏi có sẵn Ở CỬA HÀNG / showroom / cơ sở -> bot KHÔNG nắm tồn tại cửa hàng -> nhường người thật (AI-CHỜ XL).
+       if (/(cửa hàng|cua hang|\bch\b|show ?room|cơ sở|cơ sỡ|co so|chi nhánh|chi nhanh|tại (shop|store)|ở (shop|store))/i.test(latestText)) {
+@@ -5340,16 +5775,22 @@
+       }
+       const needSize = orderNeedsSize(mem, productInfo);
+       const haveSize = mem.customerSize && mem.customerSize !== "FREESIZE";
++      const _askedSize = /\bsize\b|\bsai\b|cỡ\b/i.test(latestText);   // khách hỏi THẲNG về size -> trả lời bám "có size của chị"
+       let reply;
+       // 2+ mẫu đang xét mà khách hỏi "mẫu nào có sẵn" -> xác nhận CẢ N mẫu đều sẵn, KHÔNG đẩy đơn 1 mẫu/size.
+       if (Array.isArray(mem.quotedProducts) && mem.quotedProducts.length >= 2) {
+         const n = mem.quotedProducts.length;
+-        reply = `Dạ cả ${n} mẫu bên em đều có sẵn ạ, chị lấy cả ${n} đúng không ạ?`;
++        if (_askedSize) reply = haveSize
++          ? `Dạ cả ${n} mẫu này đều có sẵn size ${mem.customerSize} của chị đó ạ, chị lấy cả ${n} đúng không ạ?`
++          : `Dạ cả ${n} mẫu này đều có đủ size cho chị đó ạ, chị cho em xin size (hoặc cao/nặng) để em lên đơn cả ${n} cho mình nha`;
++        else reply = `Dạ cả ${n} mẫu bên em đều có sẵn ạ, chị lấy cả ${n} đúng không ạ?`;
+         await sendInboxMessage(conversationId, reply);
+-        console.log(`[${BOT_NAME}] Hỏi có sẵn với ${n} mẫu -> xác nhận CẢ ${n} mẫu sẵn (không đẩy đơn 1 mẫu).`);
++        console.log(`[${BOT_NAME}] Hỏi ${_askedSize ? "có SIZE" : "có sẵn"} với ${n} mẫu -> xác nhận CẢ ${n} mẫu (không đẩy đơn 1 mẫu).`);
+         mem.lastBotReply = reply; updateConversationState(conversationId, mem); markProcessed(batch); return true;
+       }
+       if (_preQuotedNow) reply = "Dạ mẫu này có sẵn ạ";   // vừa báo giá ở trên (đã dẫn size) -> chỉ xác nhận sẵn, không hỏi size lại
++      else if (_askedSize && haveSize) reply = `Dạ mẫu này có sẵn size ${mem.customerSize} của chị ạ, em lên đơn cho mình nha`;
++      else if (_askedSize) reply = "Dạ mẫu này có đủ size cho chị ạ, chị cho em xin size (hoặc cao/nặng) để em lên đơn cho mình nha";
+       else if (!needSize) reply = "Dạ hàng có sẵn chị ạ, em lên đơn cho mình nha";
+       else if (haveSize) reply = `Dạ hàng có sẵn chị ạ, em lên đơn size ${mem.customerSize} cho mình nhe ạ`;
+       else reply = "Dạ hàng có sẵn chị ạ, chị thường mặc size bao nhiêu (hoặc cho em xin cao/nặng) để em lên đơn cho mình nha";
+@@ -5446,7 +5887,7 @@
+ 
+     // ===== KHÁCH HỎI TRẠNG THÁI ĐƠN ("hàng của chị đến đâu rồi") -> TRA POS rồi trả lời =====
+     // Khớp PAGE khách đang nhắn; CHỈ xét trạng thái 1/2/4/5; xử lý TÁCH ĐƠN (khách nhiều đơn).
+-    if (asksOrderStatus(latestText)) {
++    if (asksOrderStatus(latestText) || _ai("ORDER_STATUS")) {
+       const phone = mem.phone || (latestTextRaw.match(/(?:\+?84|0)(?:\d[\s.-]?){8,10}\d/) || [])[0] || null;
+       const handoff = async (logMsg) => {
+         await tagChoXuLyVaUnread(conversationId);
+@@ -5553,6 +5994,15 @@
+           ? `Dạ ${label} là set rời ạ. ${_cta}`
+           : `Dạ ${label} là váy liền ạ. ${_cta}`;
+       }
++      // CHƯA báo giá mẫu này -> BÁO GIÁ + trả lời (chủ shop: "chưa báo giá thì vẫn phải báo giá"). Đã báo rồi -> chỉ trả lời.
++      const _codeUp = String(productInfo.code || "").toUpperCase();
++      const _notQuotedYet = priceIsValid(productInfo.price) && !quotedRecently(mem, productInfo.code)
++        && !(mem.pricedCodes || []).some(c => String(c).toUpperCase() === _codeUp);
++      if (_notQuotedYet) {
++        const _ans = reply.replace(new RegExp("^Dạ\\s*" + label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\s*", "i"), "");
++        reply = `Dạ ${label} giá ${formatPrice(productInfo.price)}, ${_ans}`;
++        markPriced(mem, productInfo.code);
++      }
+       await sendInboxMessage(conversationId, reply);
+       console.log(`Khách hỏi set/liền${asksBuySeparate(latestText) ? "/bán riêng" : ""} -> ${isSet ? "SET" : "VÁY LIỀN"} (mẫu ${productInfo.code}, cat="${cat || "?"}", size=${mem.customerSize || "-"}).`);
+       mem.lastBotReply = reply; scheduleFollowup(conversationId, mem, productInfo, reply);
+@@ -5787,6 +6237,36 @@
+       }
+     }
+ 
++    // ===== KHÁCH CHO SỐ ĐO CÓ NHÃN TỪNG PHẦN ("v1 85 eo 68", "ngực 85 eo 68") -> tư vấn size, KHÔNG báo giá lại =====
++    {
++      const _bm = parse3V(latestText) ? null : parseBodyMeasures(latestText);   // đủ 3 số -> block trên lo; chỉ xử số đo lẻ có nhãn
++      if (_bm && productInfo) {
++        const avail = parseAvailableSizes(productInfo.size);
++        const isFree = avail.size === 1 && avail.has("FREESIZE");
++        const availList = ["S", "M", "L", "XL", "XXL", "XXXL"].filter(s => avail.has(s));
++        const { size, over } = resolveSizeByMeasures(_bm, availList);
++        const soDoTxt = [_bm.nguc != null ? "ngực " + _bm.nguc : "", _bm.eo != null ? "eo " + _bm.eo : "", _bm.mong != null ? "mông " + _bm.mong : ""].filter(Boolean).join(", ");
++        let reply;
++        if (isFree) {
++          reply = `Dạ mẫu này là freesize, với số đo (${soDoTxt}) của chị thì mặc vừa đẹp ạ. Chị ưng em lên đơn cho mình nha`;
++        } else if (size && !over) {
++          mem.customerSize = size; mem.sizeFromCustomer = true;
++          if (mem.noFitForCode === productInfo.code) mem.noFitForCode = null;
++          reply = `Dạ với số đo (${soDoTxt}) thì chị mặc ${sizeLabel(size)} mẫu này bên em là vừa form đó ạ, mình lấy ${sizeLabel(size)} nha chị?`;
++        } else if (over) {
++          mem.noFitForCode = productInfo.code;
++          reply = `Dạ với số đo (${soDoTxt}) thì tiếc quá mẫu này bên em ${availList.length ? "chỉ có size " + availList.join(", ") + ", " : ""}chưa có size vừa cho chị rồi ạ. Chị tham khảo thêm mẫu khác bên em nha ạ`;
++        } else {
++          reply = `Dạ chị cho em xin thêm chiều cao cân nặng (hoặc đủ số đo 3 vòng) để em tư vấn size chuẩn cho mình nha ạ`;
++        }
++        await sendInboxMessage(conversationId, reply);
++        console.log(`[${BOT_NAME}] Số đo có nhãn (${soDoTxt}) -> size ${size || "(chưa đủ/không vừa)"} | mẫu ${productInfo.code} (có: ${availList.join(",") || "freesize"}).`);
++        mem.lastBotReply = reply;
++        scheduleFollowup(conversationId, mem, productInfo, reply);
++        updateConversationState(conversationId, mem); markProcessed(batch); return true;
++      }
++    }
++
+     // ===== KHÁCH TỰ KHAI SIZE CỦA MÌNH ("mình mặc L", "size L số đo 85-67-89") -> tư vấn CÓ/KHÔNG size đó =====
+     {
+       const statedNow = extractStatedSize(latestText);
+@@ -5876,7 +6356,7 @@
+     // gửi kèm bảng size -> không bỏ sót giá lẫn bảng size). (chống "đọc 2 hiểu 1")
+     const _hasNewModelToQuote = Array.isArray(thisTurn) && thisTurn.some(p =>
+       p && p.code && !quotedRecently(mem, String(p.code).toUpperCase()));
+-    if (asksSizeChart(latestText) && !_hasNewModelToQuote) {
++    if ((asksSizeChart(latestText) || _ai("SIZE_CHART")) && !_hasNewModelToQuote) {
+       let sentImg = false;
+       if (SIZE_GUIDE_IMG && (SIZE_GUIDE_IMG.url || SIZE_GUIDE_IMG.contentId)) {
+         await sendInboxMessage(conversationId, "Dạ em gửi chị bảng size để mình tham khảo nha ạ");
+@@ -5913,7 +6393,7 @@
+ 
+     // ===== KHÁCH PHẢN ĐỐI "NÓNG / BÍ / thích chất mát" -> THUYẾT PHỤC LINH HOẠT (xoay câu, không lặp mô tả) =====
+     if (isHeatComfortObjection(latestText) && !isPriceAsk(latestText, mem.lastIntent)) {
+-      const reply = buildHeatPersuade(mem);
++      const reply = buildHeatPersuade(mem, productInfo);
+       await sendInboxMessage(conversationId, reply);
+       console.log(`[${BOT_NAME}] Khách kêu nóng/bí -> thuyết phục linh hoạt (xoay câu), không lặp mô tả.`);
+       mem.lastBotReply = reply;
+@@ -6021,7 +6501,7 @@
+         mem.botHandoffAt = Date.now();
+         updateConversationState(conversationId, mem); markProcessed(batch); return true;
+       }
+-      const reply = "Dạ bên em là đồ thiết kế nên khác đồ may đại trà ở mấy điểm này chị ạ. Vải đẹp, đứng form. Phom được dựng rập chuẩn theo số đo nên mặc lên ôm vừa, tôn dáng. Đường may kỹ, giặt nhiều vẫn giữ form đẹp. Mấy cái này làm nên độ lên dáng và độ bền mà đồ giá rẻ khó có được, nên giá nhỉnh hơn là xứng đáng ạ.";
++      const reply = _rotLine(mem, "_cmpIdx", _PRICE_COMPARE_LINES);
+       await sendInboxMessage(conversationId, reply);
+       mem.priceComparisonHandled = true;   // chỉ giải thích khác biệt 1 lần/đợt
+       console.log(`[${BOT_NAME}] Khách so giá chỗ khác -> nêu khác biệt đồ thiết kế vs đại trà (không báo lại giá).`);
+@@ -6042,7 +6522,7 @@
+         updateConversationState(conversationId, mem); markProcessed(batch); return true;
+       }
+       const _lbl = productLabel(productInfo);
+-      const reply = `Dạ em hiểu mà chị. Nhưng ${_lbl} là đồ thiết kế, mặc lên sang hơn giá tiền á chị — đi làm, đi chơi, đi tiệc đều lên dáng, mua một lần mặc được nhiều dịp nên tính ra rất đáng. Shop freeship cho chị nữa ạ`;
++      const reply = _rotLine(mem, "_pvIdx", _PRICE_VALUE_LINES);
+       await sendInboxMessage(conversationId, reply);
+       mem.priceObjectionHandled = true;   // chỉ thuyết phục giá 1 lần/đợt
+       console.log(`[${BOT_NAME}] Khách phản đối giá -> thuyết phục giá trị + freeship (không báo lại giá).`);
+@@ -6053,6 +6533,45 @@
+       return true;
+     }
+ 
++    // ===== (8) KHÁCH LO UY TÍN / SỢ BOM / SỢ LỪA / hàng giả hình -> trấn an COD (kiểm tra trước khi trả tiền) =====
++    if (fearsTrustOrScam(latestText) && !isPriceAsk(latestText, mem.lastIntent) && !asksOrderStatus(latestText)) {
++      const reply = _rotLine(mem, "_trustIdx", _TRUST_LINES);
++      await sendInboxMessage(conversationId, reply);
++      console.log(`[${BOT_NAME}] Khách lo uy tín/bom hàng -> trấn an COD (kiểm tra trước khi trả tiền).`);
++      mem.lastBotReply = reply;
++      if (productInfo) scheduleFollowup(conversationId, mem, productInfo, reply);
++      updateConversationState(conversationId, mem); markProcessed(batch); return true;
++    }
++
++    // ===== (5) BAO GIỜ CÓ HÀNG/MÀU/SIZE LẠI (restock) -> mẫu hết KHÔNG tái sản xuất =====
++    if (asksRestock(latestText) && !asksOrderStatus(latestText)) {
++      const reply = "Dạ mẫu/size/màu này bên em tạm hết ạ. Các mẫu đã hết thì bên em không tái sản xuất lại nữa, nên chị chốt sớm các mẫu còn lại để khỏi lỡ nha ạ.";
++      await sendInboxMessage(conversationId, reply);
++      console.log(`[${BOT_NAME}] Khách hỏi restock -> mẫu hết không tái sản xuất.`);
++      mem.lastBotReply = reply;
++      updateConversationState(conversationId, mem); markProcessed(batch); return true;
++    }
++
++    // ===== (3) BẦU / SAU SINH mặc được không -> KHÔNG tự khẳng định, HỎI mấy tháng + nhường người thật =====
++    if (asksPregnancyFit(latestText) && !isPriceAsk(latestText, mem.lastIntent)) {
++      const reply = "Dạ chị bầu được mấy tháng rồi ạ? Chị cho em xin để em tư vấn mẫu rộng rãi, thoải mái và đúng size cho mình nha.";
++      await sendInboxMessage(conversationId, reply);
++      await tagChoXuLyVaUnread(conversationId);   // không chắc chắn về mặc-được -> để người thật xác nhận
++      mem.botHandoffAt = Date.now();
++      console.log(`[${BOT_NAME}] Khách hỏi bầu/sau sinh -> hỏi mấy tháng + nhường người thật (không tự khẳng định).`);
++      mem.lastBotReply = reply;
++      updateConversationState(conversationId, mem); markProcessed(batch); return true;
++    }
++
++    // ===== (4) HÀNG CÓ SẴN HAY ĐẶT TRƯỚC -> có sẵn + ưu tiên gửi sớm; đuôi chốt ĐỘNG (có size ko xin size...) =====
++    if (asksInStockOrPreorder(latestText) && productInfo && !asksOrderStatus(latestText)) {
++      const reply = "Dạ hàng bên em có sẵn nha chị. Một ngày bên em có rất nhiều khách đặt nên mẫu có sẵn sẽ ưu tiên gửi cho khách đặt trước, " + _closeTail(mem, productInfo);
++      await sendInboxMessage(conversationId, reply);
++      console.log(`[${BOT_NAME}] Khách hỏi có sẵn/đặt trước -> có sẵn + ưu tiên + đuôi chốt động.`);
++      mem.lastBotReply = reply;
++      updateConversationState(conversationId, mem); markProcessed(batch); return true;
++    }
++
+     // ===== KHÁCH HỎI "NGOÀI ĐỜI CÓ ĐẸP NHƯ HÌNH" -> trấn an NHẸ NHÀNG, KHÔNG nhắc hoàn/hủy =====
+     if (asksLooksLikePhotos(latestText) && !isPriceAsk(latestText, mem.lastIntent)) {
+       const reply = buildLooksReassure(mem);
+@@ -6084,7 +6603,7 @@
+       mem.lastBotReply = reply; updateConversationState(conversationId, mem); markProcessed(batch); return true;
+     }
+ 
+-    if (asksReturnPolicy(latestText)) {
++    if (asksReturnPolicy(latestText) || _ai("RETURN_POLICY")) {
+       const reply = "Dạ bên em hỗ trợ ĐỔI size/mẫu trong 15 ngày chị nha, điều kiện sản phẩm chưa qua sử dụng và còn nguyên tem mác ạ. Bên em chưa hỗ trợ hoàn/trả tiền nha chị";
+       await sendInboxMessage(conversationId, reply);
+       console.log(`[${BOT_NAME}] Khách hỏi chính sách hoàn/hủy/đổi -> trả chính sách (chỉ khi được hỏi).`);
+@@ -6103,7 +6622,7 @@
+ 
+     // ===== KHÁCH HỎI CHẤT LIỆU / VẢI -> trả từ SHEET (KHÔNG bịa, KHÔNG nhả câu hoàn-hủy) =====
+     // ===== KHÁCH XIN ẢNH MẶT SAU / SAU LƯNG -> gửi ảnh có "SAU" trong tên; KHÔNG có -> NHỜ NV (tuyệt đối không bịa) =====
+-    if (wantsBackView(latestText) && productInfo) {
++    if ((wantsBackView(latestText) || _ai("BACK_VIEW")) && productInfo) {
+       const code = String(productInfo.code || "").toUpperCase();
+       const color = mem.askedImageColor || (mem.colorByCode || {})[code] || mem.lastSentImageColor || null;
+       const items = imageItemsBySide(code, "back", color, 3, true);   // ảnh mặt sau, lọc màu nếu biết
+@@ -6199,7 +6718,7 @@
+     }
+ 
+     // ===== KHÁCH HỎI BÁN TRÊN SÀN SHOPEE -> shop CHỈ bán Facebook (TikTok chỉ vài mẫu, nói khi được hỏi) =====
+-    if (asksSellOnShopee(latestText)) {
++    if (asksSellOnShopee(latestText) || _ai("SHOPEE_TIKTOK")) {
+       const _pi = productInfo || (mem.quotedProducts || [])[0] || null;
+       const _tail = _pi ? (" " + _cap(_closeTail(mem, _pi))) : " Chị ưng mẫu nào nhắn em để em tư vấn thêm cho mình nha ạ.";
+       const reply = "Dạ hiện tại shop em không mở bán trên sàn Shopee ạ, các mẫu mới bên em đều cập nhật ở Facebook ạ." + _tail;
+@@ -6210,7 +6729,7 @@
+     }
+ 
+     // ===== KHÁCH HỎI BÁN TRÊN TIKTOK -> CÓ nhưng chỉ vài mẫu; đầy đủ ở Facebook =====
+-    if (asksSellOnTiktok(latestText)) {
++    if (asksSellOnTiktok(latestText) || _ai("SHOPEE_TIKTOK")) {
+       const _pi = productInfo || (mem.quotedProducts || [])[0] || null;
+       const _tail = _pi ? (" " + _cap(_closeTail(mem, _pi))) : " Chị ưng mẫu nào nhắn em để em tư vấn thêm cho mình nha ạ.";
+       const reply = "Dạ bên em có TikTok nhưng chỉ cập nhật một số mẫu thôi ạ, đầy đủ mẫu mới thì chị xem ở Facebook nha." + _tail;
+@@ -6222,11 +6741,25 @@
+ 
+     // ===== KHÁCH HỎI "CÓ QUẦN/LỚP LÓT BÊN TRONG KHÔNG" -> đọc MÔ TẢ; có ghi -> trả lời, KHÔNG có -> NGƯỜI THẬT =====
+     // (KHÔNG tự bịa "có/không" vì là thuộc tính thật của mẫu. Thu Thuỷ Lương: "co quân bên trong ko shop".)
+-    if (asksInnerLining(latestText) && productInfo && !_multiAttrQ) {
++    if ((asksInnerLining(latestText) || mem._aiConcern === "lot") && productInfo && !_multiAttrQ) {
+       const _src = (String(productInfo.description || "") + " " + String(productInfo.material || "") + " " + String(productInfo.padInfo || ""))
+         .toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d");
+       const _hasLining = /(quan trong|quan lot|quan bao ho|quan dui|co quan|lop lot|lot lien|lien quan|vay lot|lot vay|lot ben trong|co lot|2\s*lop|hai\s*lop|02\s*lop)/.test(_src)
+         && !/(khong|ko|chua)\s*(co\s*)?(quan|lot)/.test(_src);
++      // Khách hỏi RÕ "QUẦN trong" (vd "váy có quần trong không") mà mô tả CHỈ ghi "2 lớp/lót" chung chung
++      // (KHÔNG ghi rõ chữ QUẦN) -> KHÔNG khẳng định có/không (vì "2 lớp" có thể là lót VÁY, không phải quần)
++      // -> NGƯỜI THẬT xác nhận. (Theo yêu cầu shop: hỏi chi tiết quần lót thì không được tự nói có/không.)
++      const _asksPants = /quan/.test(String(latestText || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""));
++      const _descSaysPants = /(quan trong|quan lot|quan bao ho|quan dui|co quan|lot quan|quan ben trong|quan\s*2\s*lop)/.test(_src)
++        && !/(khong|ko|chua)\s*(co\s*)?quan/.test(_src);
++      if (_asksPants && !_descSaysPants) {
++        const reply = "Dạ phần quần/lót bên trong của mẫu này em kiểm tra lại cho chính xác rồi báo chị ngay nha ạ.";
++        await sendInboxMessage(conversationId, reply);
++        await tagChoXuLyVaUnread(conversationId);
++        mem.botHandoffAt = Date.now();
++        console.log(`[${BOT_NAME}] Hỏi RÕ "quần trong" nhưng mô tả chỉ ghi "2 lớp/lót" (không rõ QUẦN) -> NGƯỜI THẬT (không bịa).`);
++        mem.lastBotReply = reply; updateConversationState(conversationId, mem); markProcessed(batch); return true;
++      }
+       if (_hasLining) {
+         const reply = "Dạ mẫu này có lớp lót/quần bên trong ạ, chị yên tâm mặc không lo lộ nha.";
+         await sendInboxMessage(conversationId, reply);
+@@ -6244,14 +6777,17 @@
+     }
+ 
+     // ===== KHÁCH HỎI CO GIÃN -> chỉ trả nếu SHEET có thông tin; KHÔNG có -> NGƯỜI THẬT (TUYỆT ĐỐI không báo giá) =====
+-    if (asksBreastPad(latestText) && productInfo && !_multiAttrQ) {
++    if ((asksBreastPad(latestText) || mem._aiConcern === "dem") && productInfo && !_multiAttrQ) {
+       // Cột R (chỉ số 17) -> product.padInfo. Có ghi "đệm/mút/lót ngực" (và không phủ định) -> CÓ đệm.
+       const padRaw = String(productInfo.padInfo || productInfo.breastPad || "").toLowerCase();
+       const padFold = padRaw.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d");
+       const hasPad = /(dem|mut|lot|don)/.test(padFold) && !/(khong|ko|chua|no)\s*(co\s*)?(dem|mut|lot|don)/.test(padFold);
+       let reply;
+       if (hasPad) {
+-        reply = "Dạ mẫu này bên em có đệm ngực ạ";
++        reply = _rotLine(mem, "_padIdx", [
++          "Dạ có sẵn đệm ngực luôn chị nha, mặc lên gọn gàng tôn dáng mà khỏi cần mặc thêm áo trong, tiện lắm ạ",
++          `Dạ ${productLabel(productInfo)} có đệm ngực sẵn nha chị, mặc vào là gọn gàng tôn dáng luôn ạ ❤️`,
++        ]) + ". " + _cap(_closeTail(mem, productInfo));
+       } else {
+         // Cột R TRỐNG / không ghi -> hiểu là KHÔNG có đệm. Xoay 2 câu.
+         const noPad = [
+@@ -6268,8 +6804,8 @@
+       mem.lastBotReply = reply; updateConversationState(conversationId, mem); markProcessed(batch); return true;
+     }
+ 
+-    if (asksStretch(latestText) && productInfo && !_multiAttrQ) {
+-      const _sr = stretchReplyFromSheet(productInfo);   // ĐỌC CỘT S (product.stretch), không suy từ cột chất liệu
++    if ((asksStretch(latestText) || mem._aiConcern === "cogian") && productInfo && !_multiAttrQ) {
++      const _sr = stretchReplyFromSheet(productInfo, mem);   // ĐỌC CỘT S (product.stretch), không suy từ cột chất liệu
+       if (_sr) {
+         await sendInboxMessage(conversationId, _sr);
+         console.log(`[${BOT_NAME}] Hỏi co giãn -> cột S "${productInfo.stretch}" -> trả lời.`);
+@@ -6296,7 +6832,7 @@
+       mem.lastBotReply = wait; updateConversationState(conversationId, mem); markProcessed(batch); return true;
+     }
+ 
+-    if (asksMaterial(latestText) && productInfo && !_multiAttrQ) {
++    if ((asksMaterial(latestText) || _ai("MATERIAL_QA") || mem._aiConcern === "chat") && productInfo && !_multiAttrQ) {
+       const reply = materialReplyFromSheet(productInfo);
+       if (reply) {
+         // THÂN: trả lời xong kèm HÀNH ĐỘNG đẩy về size/chốt. KẾT (đã chốt): CHỈ trả lời, KHÔNG nài lên đơn lại.
+@@ -6454,7 +6990,7 @@
+     // ===== KHÁCH XIN MẪU TƯƠNG TỰ / MẪU KHÁC -> TỰ gửi gallery (CLIP); không ra thì nhờ NV =====
+     // Chạy cả khi khách CHÊ màu rồi xin mẫu tương tự (vd "ko thích hồng tím, gửi mẫu tương tự") -> gửi MẪU KHÁC, KHÔNG gửi lại màu chê.
+     {
+-      const _wantSimilar = asksSimilarModels(latestText) && !asksOtherColors(latestText);
++      const _wantSimilar = (asksSimilarModels(latestText) || _ai("SIMILAR_MODELS")) && !asksOtherColors(latestText);
+       const _wantNew = asksNewCollection(latestText);
+       const _dislikeSimilar = _wantSimilar && dislikesColor(latestText);
+       if (_wantNew || (_wantSimilar && (_dislikeSimilar || (!extractColor(latestText) && !recommend.extractAttributes(latestText).length)))) {
+@@ -6514,7 +7050,7 @@
+       // NHƯỜNG LƯỢT: (lỗi 2) khách hỏi "ảnh đã gửi màu gì" -> để handler riêng phía dưới trả đúng 1 màu;
+       //              (lỗi 4) tin có >=2 cân nặng (tư vấn 2 người) -> để nhánh đa-người xử lý, đừng đi hỏi/gửi màu.
+       const _yieldToOther = asksWhatColorIsImage(latestText) || parseAllWeights(latestText).length >= 2;
+-      if (productInfo && _viewVerb && !_wantsOtherModels && !asksOtherColors(latestText) && !_yieldToOther) {
++      if (productInfo && _viewVerb && !_wantsOtherModels && !asksOtherColors(latestText) && !_yieldToOther && !asksOrderStatus(latestText)) {
+         const code = String(productInfo.code || "").toUpperCase();
+         // Màu thật: hiển thị ưu tiên theo SHEET, khớp gộp cả màu từ TÊN ẢNH.
+         const byKey = new Map();
+@@ -6772,7 +7308,7 @@
+       mem.lastBotReply = reply; updateConversationState(conversationId, mem); markProcessed(batch); return true;
+     }
+ 
+-    if (asksOtherColors(latestText) && productInfo) {
++    if ((asksOtherColors(latestText) || _ai("COLOR_ASK")) && productInfo) {
+       const colors = colorListForModel(productInfo, String(productInfo.code || "").toUpperCase()).map(c => String(c).toLowerCase());
+       let reply;
+       if (colors.length === 0) {
+@@ -6806,7 +7342,7 @@
+     }
+ 
+     // ===== KHÁCH HỎI ĐỊA CHỈ SHOP / SHOWROOM -> trả địa chỉ cơ sở, KHÔNG báo giá =====
+-    if (asksShopAddress(latestText)) {
++    if (asksShopAddress(latestText) || _ai("STORE_ADDRESS")) {
+       const reply = buildShopAddressReply();
+       await sendInboxMessage(conversationId, reply);
+       console.log(`[${BOT_NAME}] Khách hỏi địa chỉ shop -> trả showroom (không báo giá).`);
+@@ -6817,7 +7353,7 @@
+     }
+ 
+     // ===== KHÁCH HỎI GIẢM GIÁ / SALE -> nói rõ có/không ưu đãi, KHÔNG lặp giá gốc =====
+-    if (asksDiscount(latestText) && productInfo) {
++    if ((asksDiscount(latestText) || _aiDiscount) && productInfo) {
+       mem._asksMoreDiscount = asksMoreDiscount(latestText);
+       const reply = buildDiscountReply(productInfo, mem);
+       await sendInboxMessage(conversationId, reply);
+@@ -6829,7 +7365,7 @@
+     }
+ 
+     // ===== KHÁCH HỎI TỔNG TIỀN THANH TOÁN ("của chị hết mấy", "tổng bao nhiêu") =====
+-    if (asksTotalPayment(latestText) && (productInfo || (mem.quotedProducts && mem.quotedProducts.length))) {
++    if ((asksTotalPayment(latestText) || _ai("TOTAL_PAYMENT")) && (productInfo || (mem.quotedProducts && mem.quotedProducts.length))) {
+       const { sum, ship, total, known } = computeOrderTotal(mem, productInfo);
+       let reply;
+       if (known && sum > 0) {
+@@ -6878,12 +7414,20 @@
+       && mem.orderedByCode[String(productInfo.code || "").toUpperCase()]);
+     if ((priceAsk || _newModelPresented) && productInfo && thisTurn.length <= 1 && !_givesClosingInfo && !_alreadyOrdered) {
+       const k = String(productInfo.code || "").toUpperCase();
++      // CHỐNG LẶP BÁO GIÁ (đường Hỏi-giá, giống FIX Y cho đường tư vấn): mẫu này ĐÃ báo giá trong hội thoại
++      // (vd cổng AD vừa báo) + khách vẫn CHỈ hỏi giá -> KHÔNG báo lại, KHÔNG gửi lại 3 ảnh.
++      // (Mẫu MỚI -> chưa quotedRecently -> vẫn báo bình thường. Hỏi ý KHÁC như size/màu/chất -> handler trên đã lo.)
++      if (quotedRecently(mem, k)) {
++        console.log(`[${BOT_NAME}] Hỏi giá nhưng mẫu ${k} ĐÃ báo giá lượt trước -> KHÔNG báo lại / không gửi lại ảnh (chống lặp).`);
++        markProcessed(batch); return true;
++      }
+       const pl = priceLine(productInfo);
+       console.log(`Hỏi giá${_newModelPresented && !priceAsk ? " (mẫu mới gửi)" : ""} | mẫu ${productInfo.name}(${k}) | price="${productInfo.price}" sale="${productInfo.salePrice}" priceText="${productInfo.priceText || ""}" -> "${pl}"`);
+       if (pl) {
+         const reply = buildCommentOpener(productInfo, mem);   // giá (+ưu đãi) + dẫn dắt size
+         await sendInboxMessage(conversationId, reply);
+         markPriced(mem, k);
++        mem._imgAllowSend = true;   // báo giá -> được kèm ảnh (kể cả đã gửi ảnh mẫu khác trước đó)
+         await maybeSendImages(conversationId, k, mem, true);   // §13: báo giá -> BẮT BUỘC kèm 3 ảnh (kể cả đã gửi)
+         // 2 SP: khách bấm ADS mẫu KHÁC -> báo LIỀN mẫu ADS đang ghim (Plena) ngay sau mẫu ảnh khách (Mona).
+         if (mem.pendingAdQuote && String(mem.pendingAdQuote).toUpperCase() !== k) {
+@@ -6938,7 +7482,7 @@
+         markProcessed(batch);
+         return true;
+       }
+-      if (isDeliveryTimeQuestion(latestText) && !isUrgentSpecificDate(latestText)) {
++      if ((isDeliveryTimeQuestion(latestText) || _ai("DELIVERY_QA")) && !isUrgentSpecificDate(latestText)) {
+         // Hỏi chung chung -> 5-7 ngày (đơn đã chốt -> KHÔNG mời lên đơn lại)
+         const dtr = deliveryTimeReply(mem);
+         await sendInboxMessage(conversationId, dtr);
+@@ -6952,7 +7496,23 @@
+       if (isShipFeeQuestion(latestText)) {
+         const prods = quotedProducts.length ? quotedProducts : (productInfo ? [productInfo] : []);
+         if (prods.length) {
+-          const reply = shipReplyText(prods);
++          let reply = shipReplyText(prods);
++          // Tin TRỘN ship + cân nặng (vd "Có mất phí ship k ạ. Mình 1m58 nặng 53kg") -> trả ship + GỘP tư vấn
++          // size luôn. Nếu không gộp ở đây, handler tính size phía dưới KHÔNG chạy (vì đã return) -> bỏ sót size.
++          try {
++            const _wk = parseWeightKg(latestText);
++            const _pi = productInfo || prods[0];
++            if (_wk && !isGiftContext(latestText) && _pi && _pi.size) {
++              const _rec = resolveSizeByWeight(_wk, _pi.size);
++              if (_rec && _rec !== "OVER" && _rec !== "FREESIZE") {
++                mem.weightKg = _wk; mem.customerSize = _rec; mem.sizeFromCustomer = false;
++                reply += ` Dạ với ${_wk}kg chị mặc ${sizeLabel(_rec)} là vừa form rồi ạ.`;
++              } else if (_rec === "FREESIZE") {
++                mem.weightKg = _wk;
++                reply += ` Dạ mẫu này freesize, với ${_wk}kg chị mặc vừa đẹp ạ.`;
++              }
++            }
++          } catch (_) {}
+           await sendInboxMessage(conversationId, reply);
+           console.log("Hỏi phí ship -> trả lời kết quả (không đọc luật, không báo lại giá):", reply);
+           mem.lastBotReply = reply;
+@@ -7356,7 +7916,7 @@
+       return true;
+     }
+     // CA 2: khách MUỐN chuyển khoản / xin thông tin tài khoản -> cung cấp STK theo kịch bản.
+-    if (wantsBankInfo(latestText)) {
++    if (wantsBankInfo(latestText) || _ai("PAYMENT_METHOD")) {
+       const reply = buildBankInfoReply();
+       await sendInboxMessage(conversationId, reply);
+       // Gửi KÈM ảnh mã QR (mặc định) nếu đã cấu hình QR_URL.
+@@ -7410,10 +7970,18 @@
+         console.log(`[${BOT_NAME}] "ship về đấy"/địa chỉ cũ nhưng hệ thống CHƯA có địa chỉ -> XIN LẠI (lần 1).`);
+         mem.lastBotReply = reply; updateConversationState(conversationId, mem); markProcessed(batch); return true;
+       }
+-      // Có địa chỉ nhưng thiếu SĐT -> xin nốt SĐT.
++      // Có địa chỉ nhưng thiếu SĐT -> xin nốt 1 LẦN; khách nói "đã gửi ở trên" mà VẪN không bắt được -> NGƯỜI THẬT (đừng cãi tay đôi).
++      if (mem._reaskedPhone) {
++        await sendInboxMessage(conversationId, "Dạ chị ơi, em chưa đọc được số điện thoại của mình, em nhờ bạn phụ trách hỗ trợ chị lên đơn ngay nha ạ.");
++        await tagChoXuLyVaUnread(conversationId); mem.botHandoffAt = Date.now();
++        console.log(`[${BOT_NAME}] Khách nói SĐT "đã gửi ở trên" nhưng VẪN không bắt được sau khi đã xin -> ĐẨY NGƯỜI THẬT.`);
++        mem.lastBotReply = "[human-no-phone]";
++        updateConversationState(conversationId, mem); markProcessed(batch); return true;
++      }
++      mem._reaskedPhone = true;
+       const reply = "Dạ chị cho em xin số điện thoại để em lên đơn gửi về địa chỉ cho mình nha ạ.";
+       await sendInboxMessage(conversationId, reply);
+-      console.log(`[${BOT_NAME}] "ship về đấy" -> có địa chỉ, thiếu SĐT -> xin SĐT.`);
++      console.log(`[${BOT_NAME}] "ship về đấy" -> có địa chỉ, thiếu SĐT -> xin SĐT (lần 1).`);
+       mem.lastBotReply = reply;
+       updateConversationState(conversationId, mem);
+       markProcessed(batch);
+@@ -7424,6 +7992,12 @@
+     // Có ảnh -> đã được luồng "gửi ảnh -> báo giá" ở trên xử lý; ở đây chỉ lo trường hợp tư vấn bằng CHỮ.
+     if (wantsConsult(latestText) && productInfo && imageCount === 0 && !looksLikeQuestion(latestText)
+         && !customerGaveContact(latestText) && !asksSimilarModels(latestText) && !asksAdviceAmongShown(latestText)) {
++      // CHỐNG BÁO GIÁ 2 LẦN: mẫu này ĐÃ báo giá trong hội thoại (vd cổng AD vừa báo giá + gửi ảnh ngay trước)
++      // -> KHÔNG báo lại / KHÔNG gửi lại 3 ảnh. Im lặng (đã trả ở lượt trước).
++      if (quotedRecently(mem, String(productInfo.code || "").toUpperCase())) {
++        console.log(`[${BOT_NAME}] Khách xin "tư vấn" nhưng mẫu ${productInfo.code} ĐÃ báo giá lượt trước -> KHÔNG báo lại (chống trùng).`);
++        markProcessed(batch); return true;
++      }
+       const label = productLabel(productInfo);
+       const pl = productInfo.priceText && String(productInfo.priceText).trim();
+       const reply = pl
+@@ -7440,7 +8014,7 @@
+ 
+     // ===== KHÁCH MUỐN THAM KHẢO THÊM / CHƯA QUYẾT -> LÙI NHẸ, thuyết phục mềm, (tuỳ) gửi 3 ảnh KHÁC =====
+     // KHÔNG gặng chốt, KHÔNG hỏi màu, KHÔNG vớt đơn. Đúng tinh thần: khách hỏi/được gì thì xử nấy, không ép hành động.
+-    if (wantsToBrowseMore(latestText) && !customerGaveContact(latestText) && !looksLikeQuestion(latestText)) {
++    if ((wantsToBrowseMore(latestText) || _ai("SIMILAR_MODELS")) && !customerGaveContact(latestText) && !looksLikeQuestion(latestText)) {
+       mem.pendingColorConfirm = null;   // huỷ mọi gặng hỏi màu đang treo
+       mem.pendingUpsell = [];           // huỷ vớt đơn đang treo
+       mem.orderClosed = false;
+@@ -7925,7 +8499,7 @@
+     }
+ 
+     // (a3) KHÁCH XIN XEM ẢNH THẬT/ảnh thực tế mẫu đang tư vấn -> GỬI ẢNH luôn (mình CÓ ảnh), KHÔNG chờ.
+-    if (wantsImages(latestText) && productInfo && !isAngryOrSensitive(latestText) && !isSensitiveHandoff(latestText)) {
++    if ((wantsImages(latestText) || _ai("IMAGE_REQ")) && productInfo && !isAngryOrSensitive(latestText) && !isSensitiveHandoff(latestText)) {
+       if (action === "TAG_HUMAN") {
+         action = "NONE";
+         reply = `Dạ em gửi chị xem ảnh ${productLabel(productInfo)} nhe ạ.`;
+@@ -7981,7 +8555,15 @@
+       const _vet = vetAdvisoryReply(reply);
+       if (_aiMode === "on" && _vet.allow && reply && String(reply).trim()
+           && !isAngryOrSensitive(latestText) && !isSensitiveHandoff(latestText)
+-          && !saysBotMistake(latestText) && !asksShopComparison(latestText)) {
++          && !saysBotMistake(latestText) && !asksShopComparison(latestText)
++          // 👍 / ừ / ok / cảm ơn / chào / tán gẫu / "để chị xem" = KHÔNG có câu hỏi -> ĐỪNG để AI tự đẩy size/đẩy đơn.
++          // (Khách thả 👍 sau khi "để chị xem" -> bot KHÔNG được chen "Chị mặc size bao nhiêu". Giống hệt off-mode.)
++          && !isBareAck(latestText) && !isAffirmation(latestText) && !isFriendlyRemark(latestText)
++          && !isPostOrderChitChat(latestText) && !_ai("THANKS") && !_ai("GREETING")
++          // KHÁCH CHO SĐT/ĐỊA CHỈ / muốn CHỐT = việc đụng ĐƠN/TIỀN -> KHÔNG để AI tự soạn lời (dễ ra "size phù hợp",
++          // "em lên đơn..." mà KHÔNG thực sự tạo đơn). Để CODE chốt; mất mẫu/size -> đẩy NGƯỜI THẬT chốt đúng.
++          && !customerGaveContact(latestText) && !mem._addrJustGiven
++          && !_ai("ADDRESS") && !_ai("PHONE") && !_ai("ORDER_CLOSE")) {
+         console.log(`[AI-REPLY on] bộ soi PASS -> để AI tư vấn: "${String(reply).slice(0, 70)}"`);
+         // KHÔNG ép TAG_HUMAN -> câu chảy xuống dây chuyền soi tiếp (7518+) rồi gửi.
+       } else {
+@@ -8104,10 +8686,11 @@
+     await sendInboxMessage(conversationId, reply);
+     console.log("REPLY:", reply);
+ 
+-    // gửi ảnh: khách GỬI ẢNH 1 mẫu lượt này -> LUÔN kèm 3 ảnh (§13). Mẫu dò ra TỪ CHỮ/tin shop (khách
+-    //  không gửi ảnh) -> KHÔNG force gửi lại (maybeSendImages tự bỏ qua nếu mẫu đã gửi ảnh) -> tránh gửi ảnh vô nghĩa.
+-    if (thisTurn.length === 1) {
+-      await maybeSendImages(conversationId, thisTurn[0].code, mem, imageCount > 0);
++    // gửi ảnh: khách GỬI ẢNH 1 mẫu lượt này -> LUÔN kèm 3 ảnh (§13). Mẫu dò ra TỪ CHỮ/tin shop (khách KHÔNG gửi
++    //  ảnh) + chỉ HỎI size/form/chất... -> KHÔNG gửi ảnh (trước đây dựa "đã gửi thì bỏ qua" nhưng sau RESTART mem
++    //  mất -> gửi lại cả loạt ảnh vô nghĩa). Khách XIN xem ảnh -> nhánh askImages bên dưới lo.
++    if (thisTurn.length === 1 && imageCount > 0) {
++      await maybeSendImages(conversationId, thisTurn[0].code, mem, true);
+     } else if (askImages && productInfo) {
+       // không có mẫu mới nhưng khách xin xem ảnh mẫu đang tư vấn
+       await maybeSendImages(conversationId, productInfo.code, mem, true);
+
+================ color_utils.js ================
+--- orig/color_utils.js	2026-06-23 11:34:37.958488033 +0000
++++ work/color_utils.js	2026-06-23 11:28:07.665491181 +0000
+@@ -67,6 +67,9 @@
+       if (v === "do"  && !/đỏ/i.test(raw)) continue;
+       if (v === "den" && !/đen/i.test(raw)) continue;
+       if (v === "cam" && !low.includes("cam")) continue;
++      //  "vang": "vâng"(đồng ý)/"vắng"/"vầng" bỏ dấu ĐỀU ra "vang" -> chỉ nhận màu Vàng khi bản gốc THẬT có
++      //  chữ "vàng" (dấu à). (Lỗi: "Vâng vậy mình lấy size M" -> chốt đơn ghi màu "vàng".)
++      if (v === "vang" && !/vàng/i.test(raw)) continue;
+       return canon;
+     }
+   }
+
+================ ai_intent.js ================
+--- orig/ai_intent.js	2026-06-23 02:30:45.000000000 +0000
++++ work/ai_intent.js	2026-06-23 09:19:32.915778520 +0000
+@@ -21,36 +21,78 @@
+ }
+ 
+ const KINDS = [
+-  "SIZE",        // khách CHO size của mình ("L em", "mình mặc M")
+-  "WEIGHT_HEIGHT", // khách cho cân nặng/chiều cao/số đo ("45kg 1m50")
+-  "ADDRESS",     // khách CHO địa chỉ giao ("21A Lê Thị Kinh Nhà Bè")
+-  "PHONE",       // khách cho số điện thoại
+-  "ORDER_CLOSE", // khách chốt/đồng ý lấy ("lấy mẫu này", "chốt đơn", cho địa chỉ+sđt)
+-  "PRICE_ASK",   // khách HỎI giá ("bao nhiêu", "giá sao")
+-  "SIZE_CHART",  // khách xin BẢNG size / thông số / số đo
+-  "IMAGE_REQ",   // khách xin xem thêm ảnh/màu
+-  "MATERIAL_QA", // hỏi chất liệu/co giãn/form/mặc nóng/nhăn... (tư vấn)
+-  "DELIVERY_QA", // hỏi ship/phí ship/bao lâu/kiểm hàng/COD
+-  "GREETING",    // chào/ping mở đầu ("alo","ib","shop ơi")
+-  "OTHER"        // còn lại
++  // --- KHÁCH CHO DỮ LIỆU ---
++  "SIZE",          // khách CHO size ("L em", "mặc M")
++  "WEIGHT_HEIGHT", // cân nặng/chiều cao/số đo ("45kg 1m50")
++  "ADDRESS",       // khách CHO địa chỉ giao
++  "PHONE",         // khách cho số điện thoại
++  // --- ĐƠN ---
++  "ORDER_CLOSE",   // chốt/đồng ý lấy ("lấy mẫu này", "chốt đơn")
++  "ADD_TO_ORDER",  // lấy THÊM mẫu vào đơn đã có ("lấy thêm cái này nữa")
++  "CANCEL_ORDER",  // huỷ đơn / thôi không lấy nữa
++  "ORDER_STATUS",  // hỏi ĐÃ GỬI HÀNG CHƯA / đơn tới đâu rồi / khi nào nhận (đã đặt)
++  "PAYMENT_CONFIRM", // "ck rồi nhé" / "nhận được tiền chưa" (xác nhận đã trả tiền)
++  // --- TIỀN ---
++  "PRICE_ASK",     // hỏi giá 1 mẫu ("bao nhiêu", "giá sao")
++  "TOTAL_PAYMENT", // hỏi TỔNG bill / tổng tiền tất cả
++  "DISCOUNT",      // hỏi giảm giá / sale / bớt / khuyến mãi
++  "PAYMENT_METHOD",// hỏi cách trả: stk / chuyển khoản / momo / qr
++  // --- HỎI SẢN PHẨM (thông tin) ---
++  "STOCK",         // còn hàng / còn size không
++  "COLOR_ASK",     // hỏi màu / còn màu khác / có mấy màu
++  "SIZE_CHART",    // xin BẢNG size / thông số
++  "SIZE_ADVICE",   // tư vấn nên lấy size nào (theo cân nặng/chiều cao)
++  "IMAGE_REQ",     // xin xem thêm ảnh
++  "BACK_VIEW",     // xin xem ảnh MẶT SAU / mặt lưng
++  "SIMILAR_MODELS",// còn mẫu nào tương tự / mẫu khác
++  "MATERIAL_QA",   // chất liệu/co giãn/form/nóng/nhăn/lót/đệm (tư vấn) — xem thêm concern
++  // --- VẬN CHUYỂN / CHÍNH SÁCH ---
++  "DELIVERY_QA",   // ship/phí ship/bao lâu/kiểm hàng/COD
++  "RETURN_POLICY", // đổi/trả/bảo hành/không vừa đổi được không
++  "STORE_ADDRESS", // shop ở đâu / qua shop / mua trực tiếp
++  "SHOPEE_TIKTOK", // bán trên shopee/tiktok không
++  // --- XÃ GIAO / KHÁC ---
++  "GREETING",      // chào/ping mở đầu ("alo","ib","shop ơi")
++  "THANKS",        // cảm ơn / ok / vâng (ack)
++  "COMPLAINT",     // bực bội / khiếu nại / phàn nàn (cần người thật)
++  "URGENT",        // KHÁCH có DEADLINE/gấp: "mai chị đi", "T4 là đi rồi", "cần gấp", "trước thứ 5", đi tiệc/cưới -> người thật
++  "OTHER"          // còn lại
+ ];
+ 
+ const SYS = `Bạn là BỘ PHÂN LOẠI ý định tin nhắn khách cho 1 shop thời trang nữ (Việt Nam).
+ Nhiệm vụ: đọc TIN MỚI NHẤT của khách và phân loại. CHỈ trả JSON, KHÔNG giải thích, KHÔNG thêm chữ nào ngoài JSON.
+ TUYỆT ĐỐI KHÔNG bịa giá, KHÔNG chốt đơn, KHÔNG soạn câu trả lời. Bạn chỉ GẮN NHÃN.
+ 
+-Hiểu tiếng Việt có dấu/không dấu, viết tắt, teencode. Vài ví dụ quan trọng:
+-- "L em" / "L e oi" / "M ạ" / "lấy size L" -> kind SIZE, size là chữ đó.
++Hiểu tiếng Việt có dấu/không dấu, viết tắt, teencode. Ví dụ quan trọng:
++- "L em" / "M ạ" / "lấy size L" -> SIZE.
+ - "45kg 1m50" / "cao 1m6 nặng 50" -> WEIGHT_HEIGHT.
+-- "21A Lê Thị Kinh Nhà Bè" / "105 bà triệu hà nội" (số nhà + tên đường/khu vực) -> ADDRESS, is_address=true. Đây là DẤU HIỆU KHÁCH MUỐN CHỐT ĐƠN -> wants_order=true.
++- "21A Lê Thị Kinh Nhà Bè" (số nhà + đường/khu vực) -> ADDRESS, is_address=true, wants_order=true.
+ - "0901234567" -> PHONE.
+ - "lấy mẫu này" / "chốt" / "ok đặt 1 cái" -> ORDER_CLOSE, wants_order=true.
+-- "bao nhiêu" / "giá sao" / "nhiêu vậy" -> PRICE_ASK.
++- "lấy thêm cái này nữa" / "thêm mẫu này vào đơn" -> ADD_TO_ORDER.
++- "huỷ đơn" / "thôi ko lấy nữa" -> CANCEL_ORDER.
++- "shop gửi hàng chưa" / "đơn tới đâu rồi" / "bao giờ nhận được" / "đặt mấy ngày rồi chưa thấy" -> ORDER_STATUS.
++- "em ck rồi nhé" / "shop nhận được tiền chưa" -> PAYMENT_CONFIRM.
++- "bao nhiêu" / "giá sao" / "nhiêu vậy" -> PRICE_ASK, asks_price=true.
++- "tổng bao nhiêu" / "tính hết bao nhiêu" / "tổng bill" -> TOTAL_PAYMENT.
++- "giảm giá ko" / "sale ko" / "bớt chút" -> DISCOUNT.
++- "stk" / "số tài khoản" / "chuyển khoản" / "momo" -> PAYMENT_METHOD.
++- "còn hàng ko" / "còn size M ko" -> STOCK.
++- "có mấy màu" / "còn màu nào khác" -> COLOR_ASK.
+ - "cho xin bảng size" / "thông số" -> SIZE_CHART.
+-- "cho xem thêm ảnh" / "còn màu nào" -> IMAGE_REQ.
+-- "vải gì" / "co giãn ko" / "mặc nóng ko" / "có nhăn ko" -> MATERIAL_QA.
+-- "ship bao lâu" / "phí ship" / "kiểm tra hàng được ko" / "ship cod" -> DELIVERY_QA.
++- "nặng 55kg lấy size nào" / "size nào hợp" -> SIZE_ADVICE.
++- "cho xem thêm ảnh" -> IMAGE_REQ.
++- "cho xem mặt sau" / "ảnh mặt lưng" -> BACK_VIEW.
++- "còn mẫu nào tương tự" / "mẫu khác giống vậy" -> SIMILAR_MODELS.
++- "vải gì" / "co giãn ko" / "mặc nóng ko" / "có nhăn ko" / "có quần trong ko" / "có đệm ngực ko" -> MATERIAL_QA (+ điền concern).
++- "ship bao lâu" / "phí ship" / "kiểm tra hàng được ko" / "cod" -> DELIVERY_QA.
++- "đổi trả thế nào" / "ko vừa đổi đc ko" / "bảo hành" -> RETURN_POLICY.
++- "shop ở đâu" / "qua shop xem đc ko" / "mua trực tiếp" -> STORE_ADDRESS.
++- "có bán shopee/tiktok ko" -> SHOPEE_TIKTOK.
+ - "alo" / "ib" / "shop ơi" / "ad ơi" -> GREETING.
++- "cảm ơn" / "ok e" / "vâng ạ" -> THANKS.
++- "lừa đảo à" / "sao lâu thế" / "bực thật" / khiếu nại gay gắt -> COMPLAINT.
++- "mai chị đi rồi" / "T4 là chị đi rồi" / "trước thứ 5 giúp e" / "cần gấp" / "đi tiệc/cưới cuối tuần" / "giao kịp ko" (khách có MỐC NGÀY hoặc GẤP cần nhận) -> URGENT.
+ 
+ NGOÀI kind, nếu khách LO/HỎI về 1 ĐẶC ĐIỂM mẫu, điền "concern" (phân biệt RÕ, đừng lẫn):
+ - "ngắn" (sợ ngắn, thấy ngắn, hơi ngắn, váy cộc) -> concern="ngan".
+@@ -60,7 +102,7 @@
+ - "có lót ko / quần trong / 2 lớp" -> concern="lot".
+ - "có đệm/mút ngực ko" -> concern="dem".
+ LƯU Ý: "ngắn" KHÁC "mỏng" — KHÔNG gộp. Không có đặc điểm nào -> concern=null.
+-Nếu tin có NHIỀU ý, chọn kind theo ý QUAN TRỌNG NHẤT để bán hàng (ưu tiên: ORDER_CLOSE > ADDRESS > PHONE > SIZE > PRICE_ASK > SIZE_CHART > IMAGE_REQ > WEIGHT_HEIGHT > MATERIAL_QA > DELIVERY_QA > GREETING > OTHER), nhưng vẫn điền các cờ phụ (size, is_address, wants_order, asks_size_chart, asks_price, concern) nếu xuất hiện.
++Nếu tin có NHIỀU ý, chọn kind theo ý QUAN TRỌNG NHẤT (ưu tiên: ORDER_CLOSE > ADD_TO_ORDER > CANCEL_ORDER > URGENT > PAYMENT_CONFIRM > ORDER_STATUS > ADDRESS > PHONE > SIZE > TOTAL_PAYMENT > PRICE_ASK > DISCOUNT > PAYMENT_METHOD > STOCK > SIZE_ADVICE > SIZE_CHART > COLOR_ASK > BACK_VIEW > IMAGE_REQ > SIMILAR_MODELS > MATERIAL_QA > RETURN_POLICY > DELIVERY_QA > STORE_ADDRESS > SHOPEE_TIKTOK > WEIGHT_HEIGHT > COMPLAINT > GREETING > THANKS > OTHER), nhưng vẫn điền các cờ phụ (size, is_address, wants_order, asks_size_chart, asks_price, concern) nếu xuất hiện.
+ 
+ Trả JSON đúng khuôn:
+ {"kind":"<MỘT trong: ${KINDS.join("|")}>","size":"S|M|L|XL|XXL|FREESIZE|null","is_address":true/false,"has_phone":true/false,"wants_order":true/false,"asks_price":true/false,"asks_size_chart":true/false,"concern":"ngan|mong|chat|cogian|lot|dem|null"}`;
+
+================ product_images.js ================
+--- orig/product_images.js	2026-06-22 19:34:47.000000000 +0000
++++ work/product_images.js	2026-06-23 04:00:46.688950896 +0000
+@@ -24,6 +24,9 @@
+   s = s.replace(/[\s_]*\d+\s*$/, "");                       // bỏ số cuối còn sót (vd "HỒNG 13")
+   s = s.replace(/^[\s\-_]+/, "").replace(/[\s\-_]+$/, "").trim();
+   if (!s) return "";
++  // CHẶN MÀU RÁC: tên file lỗi (vd "MÃ-KEMMRKVX6310-BE-AI") bóc ra "kemmrkvx6310-be" (CHỨA mã sp).
++  // Màu thật KHÔNG bao giờ có 4+ chữ số liền -> coi như KHÔNG đọc được màu (bỏ qua, đừng đem khoe khách).
++  if (/\d{4,}/.test(s)) return "";
+   s = s.toLowerCase();                                     // "XANH NHẠT" -> "xanh nhạt"
+   return s.charAt(0).toUpperCase() + s.slice(1);           // -> "Xanh nhạt"
+ }

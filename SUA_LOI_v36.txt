@@ -1,0 +1,30 @@
+========================================================
+SUA_LOI_v36 — Thêm nhãn SAME_SHOP_QA (PHOM & Mys.P là 1)
+========================================================
+
+KHÁCH HỎI: "Bên b với misp là 1 hay sao nhỉ" / "Phom với Mỹ P là 1 shop ko"
+=> trước đây rơi vào OTHER, bot không trả đúng.
+
+ĐÃ THÊM (đúng kiến trúc: AI gắn nhãn, CODE trả kịch bản cố định):
+- ai_intent.js:
+   * KIND mới "SAME_SHOP_QA" (cạnh SHOPEE_TIKTOK)
+   * câu dạy AI nhận diện ("PHOM với Mys.P/Misp/Miss P có phải 1 / cùng shop")
+   * thêm vào chuỗi ưu tiên: ... STORE_ADDRESS > SAME_SHOP_QA > SHOPEE_TIKTOK ...
+- bot_worker_api_v3.js:
+   * helper asksSameShop() (fallback regex khi AI chết — bắt khi có tên brand)
+   * handler: if _aiOr(asksSameShop, "SAME_SHOP_QA") ->
+       "Dạ vâng, PHOM và Mys.P là cùng một hệ thống của shop mình ạ, chị yên tâm nha." + câu hành động
+     đặt TRƯỚC block Shopee (đúng ưu tiên).
+
+CƠ CHẾ CHÍNH = nhãn AI (vì khách hay viết "b"/"bên kia" không nêu "phom").
+Regex chỉ là phao dự phòng.
+
+LOG XÁC NHẬN khi chạy:
+   [AI-READ] nhãn=SAME_SHOP_QA
+   [Bảo Trâm]/[BOT] Khách hỏi PHOM & Mys.P -> cùng 1 hệ thống + câu hành động.
+
+DEPLOY (đổi file .js -> PHẢI restart):
+   Copy 2 file: ai_intent.js, bot_worker_api_v3.js  vào C:\AI_HTK_BOT_V5
+   pm2 restart bot
+
+KHÔNG có file token nào trong zip. pages.json / .env giữ nguyên của mày.

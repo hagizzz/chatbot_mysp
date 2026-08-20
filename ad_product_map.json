@@ -1,0 +1,18 @@
+{
+  "_huong_dan": "KEY = post_id (số sau dấu _ trong post_id) HOẶC Ad ID. VALUE = mã mẫu, HOẶC 'mã|Màu' để gửi đúng 1 màu (vd 'MGKVX6310|Hồng'). NÊN dùng post_id: 1 dòng cover MỌI ad trỏ về bài đó. Sửa xong KHÔNG cần tắt/bật bot.",
+  "_vi_du_post": "\"1555383752809784\": \"MGKVX6310|Hồng\"  (mọi ad bài Giannal -> ra mẫu + GỬI ĐÚNG MÀU HỒNG)",
+  "_vi_du_ad": "\"120254117549750550\": \"MR0VX6345\"  (chỉ riêng 1 ad; không có |Màu -> gửi đủ màu)",
+  "1477589957255831": "MRKSQ6035|Kem",
+  "1693785628443867": "MGKVX6310",
+  "1555383752809784": "MGKVX6310|Hồng",
+  "1527307105617449": "MRKSQ6301",
+  "1319563396391822": "MGKSQ6308",
+  "1494697558878404": "MR0SQ6114",
+  "120254117549750550": "MR0VX6345",
+  "120254385713080550": "CELYNE",
+  "120253723945160550": "MGKSV6024",
+  "1551198899894936": "MGKSV6024",
+  "120250511393360236": "MGKVX6310|Hồng",
+  "120250144384760755": "MGKVX6310|Hồng",
+  "1443337454486761": "MGKVX6310|Hồng"
+}

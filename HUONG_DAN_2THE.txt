@@ -1,0 +1,26 @@
+============================================================
+2 THẺ ĐỘC LẬP - đúng trường hợp, dính cả 2 thì gắn cả 2
+============================================================
+2 file - copy ĐÈ vào C:\AI_HTK_BOT_V5, chạy lại bot:
+  - pancake_sender.js     (đè)
+  - bot_worker_api_v3.js  (đè)
+
+## QUY TẮC GẮN THẺ (đã tách bạch, không lẫn lộn)
+1. AI - CHỜ XL (183):
+   Xuất hiện khi bot gửi câu "Dạ chị đợi em kiểm tra lại thông tin mẫu này rồi
+   em báo mình nha" (dù do gửi cứng hay do AI tự trả lời câu mang nghĩa chờ).
+
+2. AI- XL ảnh (184):
+   Xuất hiện khi khách gửi TỪ 2 ẢNH TRỞ LÊN mà nhận diện THIẾU (trượt >=1).
+   -> Bot vẫn tư vấn/báo giá tiếp các mẫu nhận được, KHÔNG báo khách.
+
+3. Dính CẢ 2 -> gắn ĐỦ CẢ 2 thẻ.
+   (Vd: khách gửi 3 ảnh, không nhận ra mẫu nào -> bot báo "đợi em kiểm tra"
+    (thẻ 183) VÀ thiếu ảnh (thẻ 184) -> gắn cả hai.)
+
+## Log kiểm tra
+- Câu chờ:        AI báo chờ -> gắn thẻ AI-CHỜ XL  /  TAG AI-CHỜ XL: {"success":true}
+- Thiếu ảnh:      Có N ảnh không nhận ra -> gắn thẻ AI- XL ảnh  /  TAG AI-XL ảnh: {"success":true}
+- Cả hai:         Ảnh mới không nhận ra -> gắn thẻ AI-CHỜ XL + AI- XL ảnh + chưa đọc
+
+Chạy lại: bấm đúp start_bot.bat

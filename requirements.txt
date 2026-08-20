@@ -1,0 +1,4 @@
+requests
+Pillow
+numpy
+open_clip_torch

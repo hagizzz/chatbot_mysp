@@ -1,0 +1,44 @@
+========================================
+   BOT v6 - GHI CHÚ (2026-06-21)
+========================================
+
+CÓ GÌ TRONG v6 (so với bản tuần trước):
+- KHÔNG còn "tạm nghỉ" khi 429: bot thử lại liên tục mỗi 11s, Pancake nhả là chạy ngay.
+- Reader NHẸ: không quét sâu lúc khởi động, lùi 45 ngày, tối đa 8 trang (đỡ 429).
+- Có BỘ ĐẾM [REQ]: mỗi 10s in số request gọi Pancake + nguồn (để soi khi nghi 429).
+- Đọc tin từ ADS chuẩn hơn: chỉ khớp TÊN dẫn đầu ngắn + đọc ảnh quảng cáo (hết nhận nhầm mẫu).
+  Có lấy nội dung bài viết ads về (fetchPancakePost) khi khách bấm ad gửi "Tư vấn mẫu này".
+- Giữ các fix hội thoại cũ: "không ưng thì sao", "Dạ" sau chốt, bỏ câu "báo chờ", processed_store nhẹ.
+- Có file kiem_tra_token.js: chạy `node kiem_tra_token.js` để biết token .env sống hay chết.
+
+----------------------------------------
+CÁCH CÀI (thư mục C:\AI_HTK_BOT_V5)
+----------------------------------------
+1. Tắt bot (Ctrl-C), đóng hết cmd.
+2. Chép ĐÈ TẤT CẢ file trong zip này vào C:\AI_HTK_BOT_V5 (Replace all).
+3. XOÁ 3 file rác đa-trang (không dùng nữa, gây rối):
+   - pages_config.js
+   - chay_2_page.bat
+   - HUONG_DAN_2_PAGE.md
+4. Kiểm tra .env: đúng 1 cặp page + token KHỚP nhau, mỗi cái 1 dòng, không có dòng _2:
+   PANCAKE_PAGE_ID=<id page>
+   PANCAKE_PAGE_ACCESS_TOKEN=<token dài eyJ... của ĐÚNG page đó>
+5. Kiểm tra token trước:  node kiem_tra_token.js   -> phải thấy "TOKEN OK".
+6. Chạy:  node bot_worker_api_v3.js
+
+----------------------------------------
+DẤU HIỆU ĐÚNG BẢN v6 (xem log)
+----------------------------------------
+- Dòng:  [BUILD] v6 | single-page | no-backoff ...
+- "đã gộp:" <= 800 (KHÔNG còn 1443).
+- Mỗi 10s có:  [REQ] N request Pancake / 10s | nguồn: {...}
+- Nếu 429: in "bot KHÔNG nghỉ, vẫn thử lại mỗi 11s" - KHÔNG còn "tạm nghỉ 22s/44s/176s".
+
+----------------------------------------
+LƯU Ý QUAN TRỌNG VỀ 429
+----------------------------------------
+- 429 = Pancake bóp tải ở cấp TÀI KHOẢN/IP, KHÔNG phải lỗi code (bot chỉ gọi ~5 req/10s).
+- v6 không nghỉ nữa nhưng KHÔNG ép được Pancake nhận khi tài khoản đang bị bóp.
+- Bị bóp do hôm nay xài dồn (restart nhiều + token sai spam + 2 folder + đồng bộ ảnh).
+- Cách hết bóp: NGHỈ 30-60 phút không gọi gì, HOẶC đổi IP (4G / server IP sạch).
+- Sau khi hết bóp: chạy 1 con, ĐỪNG restart vặt, ĐỪNG bấm "Create Token" (giết token cũ).

@@ -1,0 +1,61 @@
+========================================================
+SUA_LOI_v35 — PHOM KHÔNG TRẢ TIN (token PHOM chết)
+========================================================
+
+TÓM TẮT BỆNH
+------------
+Page PHOM (id 615738195133683) bị Pancake từ chối MỖI vòng:
+   getConversations: API từ chối | body:{"message":"Invalid access_token","error_code":102}
+   [FETCH] page 615738195133683(PHOM): API từ chối / lỗi.
+=> Bot KHÔNG kéo được danh sách hội thoại của PHOM
+=> Không một conv PHOM nào lọt vào [VÀO XỬ] (toàn bộ id trong list đều mở đầu 1468... = Mys.P)
+=> Khách PHOM (vd Trần Diễm Phương) bot KHÔNG NHÌN THẤY -> không trả.
+
+KHÔNG PHẢI LỖI CODE. Token PHOM trong pages.json đã hỏng/hết hạn.
+Token Mys.P vẫn sống nên Mys.P trả bình thường.
+
+QUAN TRỌNG: pages.json KHÔNG hot-reload.
+  pageRegistry.init() chỉ chạy 1 lần lúc khởi động (bot_worker dòng ~11331),
+  token nằm cứng trong RAM. SỬA pages.json XONG PHẢI: pm2 restart bot.
+
+CÁCH SỬA (CMD, trong C:\AI_HTK_BOT_V5)
+--------------------------------------
+1) Copy kiem_tra_phom.js vào C:\AI_HTK_BOT_V5, chạy:
+       node kiem_tra_phom.js
+   -> Phải ra: Mys.P TOKEN OK | PHOM TOKEN HỎNG (error_code 102)  (xác nhận đúng bệnh)
+
+2) Vào Pancake lấy TOKEN MỚI của page PHOM
+   (đúng chỗ hồi xưa lấy token Mys.P, nhưng chọn page PHOM).
+
+3) Mở pages.json (C:\AI_HTK_BOT_V5), CHỈ thay token của PHOM (615738195133683),
+   GIỮ NGUYÊN dòng Mys.P. Dán token liền 1 dòng, KHÔNG khoảng trắng/xuống dòng. Lưu.
+   *** ĐỪNG đè cả file bằng template, kẻo mất token Mys.P đang chạy. ***
+
+4) Test token mới TRƯỚC khi restart:
+       node kiem_tra_phom.js
+   -> PHOM phải hiện TOKEN OK! Nếu còn HỎNG: token sai/chưa lưu, sửa lại, KHỎI restart vội.
+
+5) Khi PHOM đã OK mới:
+       pm2 restart bot
+
+6) Soi log xác nhận:
+       pm2 logs bot
+   -> HẾT dòng "[FETCH] page 615738195133683(PHOM): API từ chối"
+   -> Bắt đầu thấy conv id mở đầu 615738... nhảy vào [VÀO XỬ] = PHOM được trả.
+
+GỐC RỄ HƠN (làm sau, khỏi lặp lại token hết hạn)
+------------------------------------------------
+Log có "[pages] account token KHÔNG ra page nào" => account token trong .env cũng chết.
+Nếu bỏ 1 account (user access) token còn sống vào .env (PANCAKE_USER_ACCESS_TOKEN),
+bot tự SINH token cho CẢ 2 page mỗi lần khởi động -> không phải dán tay từng page nữa.
+
+FILE TRONG ZIP
+--------------
+- kiem_tra_phom.js  : MỚI. Đọc pages.json, gọi đúng API bot dùng, in Mys.P/PHOM OK hay HỎNG.
+- pages.MAU.json    : MẪU 2 page (chỉ để tham khảo format, ĐỪNG đè trực tiếp).
+- Còn lại (bot_worker_api_v3.js, ai_intent.js, ...) : y như v34, kèm nếu chưa deploy v34.
+  (v34 đã gồm: showroom AI-primary, STORE_VISIT, MAP màu "MÃ|Màu",
+   sửa starvation tin cũ + FIFO, sửa vòng lặp opener rỗng "....")
+
+LƯU Ý: Sửa token PHOM là việc DỮ LIỆU (pages.json) — không cần đổi file .js nào.
+Nếu trước đó đã deploy v34 rồi thì giờ CHỈ cần: sửa token PHOM -> pm2 restart bot.

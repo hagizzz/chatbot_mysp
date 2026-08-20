@@ -1,0 +1,28 @@
+SUA_LOI_v37 — 2026-07-07 — Lỗi Nhung Cao (conv 1468690110033030_25694660466899117): chốt đơn NHẦM MẪU Giannal thay vì Miretta + hỏi màu thừa
+
+HIỆN TƯỢNG
+- Khách comment ảnh vào bài Miretta (1477589957255831) -> vision nhận đúng MRKSQ6035 màu KEM, báo giá 950k, lock=MRKSQ6035.
+- Các lượt sau khách chỉ nhắn chữ (1m58 55kg / SĐT / "Có mấy màu" / "Kem"): CLIP trượt, bài gốc Pancake không đọc được
+  -> fallback theo metadata ads (adPostId=1555383752809784, map ra MGKVX6310|Hồng) -> log lúc Miretta lúc Giannal.
+- Lượt "Kem": luật "Bấm AD MỚI... lastAdId trống -> AD thắng ảnh cũ, xoá lock" hiểu nhầm ad DÍNH SẴN là ad MỚI BẤM
+  -> xoá lock Miretta -> focus nhảy Giannal -> hỏi "chị lấy màu nào" (thừa) rồi CHỐT ĐƠN MGKVX6310 size M kem 890k (SAI;
+  đúng phải là MRKSQ6035 Kem size M 950k).
+
+SỬA (2 file)
+1) bot_worker_api_v3.js (~5750):
+   - Thêm SỔ mem.seenAdIds: ghi mọi adId đã xuất hiện trong hội thoại. _adIsNewClick = adId CHƯA TỪNG thấy.
+   - Cả 2 luật xoá lock ("Bấm AD MỚI" ad-vs-ad và "AD thắng ảnh cũ") thêm điều kiện _adIsNewClick:
+     ad dính sẵn (thấy từ lượt trước) KHÔNG được xoá lock nữa. Ca GRAVELLE/Celyne (bấm ad mới thật,
+     adId lần đầu xuất hiện) vẫn xoá như cũ -> không hỏng fix cũ.
+   - 2 chỗ KHÔI PHỤC khoá mẫu (lookupAdProduct): đảo ưu tiên postId (bài khách THỰC comment/lượt này)
+     lên trước adPostId (metadata ads, dễ là ad cũ trỏ bài mẫu khác).
+2) ad_product_map.json: thêm "1477589957255831": "MRKSQ6035|Kem" (bài Miretta không đọc được qua Pancake
+   -> map thẳng để fallback resolve đúng; sửa map KHÔNG cần restart bot).
+
+VIỆC LÀM TAY (KHÔNG nằm trong code)
+- Sửa đơn Nhung Cao (0984040907): đổi MGKVX6310 -> MRKSQ6035 Kem size M 950k, nhắn khách xác nhận lại
+  tên mẫu + giá (tin "Cảm ơn chị đã đặt hàng" đã gửi đang ghi Váy Giannal 890k).
+
+TRIỂN KHAI
+- Chép đè 2 file, pm2 restart bot (ad_product_map.json tự nạp lại, nhưng bot_worker cần restart).
+- Đã node --check cú pháp JS + parse JSON OK.

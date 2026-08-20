@@ -1,0 +1,9 @@
+﻿
+> .pm2\logs\bot-out.log:142946:2026-06-27T23:43:36: Khách: Phuong Pham | Conv: 1468690110033030_6394346307338466
+  .pm2\logs\bot-out.log:142947:2026-06-27T23:43:36: Tin: text: cho c giá | image: [Photo] | text: . | text: có video ko
+  .pm2\logs\bot-out.log:142948:2026-06-27T23:43:37: [vision] màu (từ tên file): XANH NHẠT | mã MRAD5171 | img 
+1sG9BfBazKFmiI2YcdIqdATdfvPTnsfLo
+  .pm2\logs\bot-out.log:142949:2026-06-27T23:43:37: VISION: {"ok":true,"code":"MRAD5171","color":"XANH 
+NHẠT","score":0.931,"gap":0.1272} | top: MRAD5171:0.931 MRAD5205:0.8038 MRAD5122:0.7848
+
+

@@ -1,0 +1,1626 @@
+{
+ "rows": [
+  {
+   "name": "Raw Silk",
+   "display": "Raw Silk",
+   "adv": "Dạ chất Raw Silk là tơ tằm thô tự nhiên nên mặc rất mát và thấm hút, lên dáng sang; tơ thật hơi nhăn nhẹ là bình thường nha chị.",
+   "keys": [
+    "raw silk",
+    "lua",
+    "to"
+   ],
+   "fam": "raw"
+  },
+  {
+   "name": "Tussah Silk",
+   "display": "Tussah Silk",
+   "adv": "Dạ chất Tussah Silk là tơ tằm hoang sợi mộc, vừa thoáng vừa bền, mặc lên rất sang và tự nhiên ạ.",
+   "keys": [
+    "tussah silk",
+    "tussah",
+    "lua",
+    "to"
+   ],
+   "fam": "tussah"
+  },
+  {
+   "name": "Slub Silk",
+   "display": "Slub Silk",
+   "adv": "Dạ chất Slub Silk bề mặt có gân tự nhiên rất đẹp, mặc mềm mát mà nhìn mộc sang ạ.",
+   "keys": [
+    "slub silk",
+    "slub",
+    "lua",
+    "to"
+   ],
+   "fam": "slub"
+  },
+  {
+   "name": "Silk Noil",
+   "display": "Silk Noil",
+   "adv": "Dạ chất Silk Noil bề mặt lấm tấm hạt rất mộc và mềm, mặc thoáng mát dễ chịu chị nha.",
+   "keys": [
+    "silk noil",
+    "noil",
+    "lua",
+    "to"
+   ],
+   "fam": "silk"
+  },
+  {
+   "name": "Lumpy Silk",
+   "display": "Lumpy Silk",
+   "adv": "Dạ chất Lumpy Silk bề mặt mộc sần tự nhiên độc đáo, mặc thoáng mà nhìn rất nghệ và sang ạ.",
+   "keys": [
+    "lumpy silk",
+    "lumpy",
+    "lua",
+    "to"
+   ],
+   "fam": "lumpy"
+  },
+  {
+   "name": "Tơ Xốp",
+   "display": "Tơ Xốp",
+   "adv": "Dạ chất Tơ Xốp nhẹ và thoáng, mặc lên bồng nhẹ mềm mại rất nhã ạ.",
+   "keys": [
+    "to xop",
+    "to"
+   ],
+   "fam": "to"
+  },
+  {
+   "name": "Tơ Thêu",
+   "display": "Tơ Thêu",
+   "adv": "Dạ chất Tơ Thêu hoa văn nổi rất tinh xảo, mặc lên sang và nữ tính sẵn nên không cần cầu kỳ phụ kiện ạ.",
+   "keys": [
+    "to theu",
+    "theu",
+    "to"
+   ],
+   "fam": "to"
+  },
+  {
+   "name": "Rough Silk Stripes",
+   "display": "Rough Silk Stripes",
+   "adv": "Dạ chất Rough Silk Stripes bề mặt có sọc nổi tinh tế, mặc thoáng mà nhìn sang và lạ mắt lắm ạ.",
+   "keys": [
+    "rough silk stripes",
+    "stripes",
+    "rough",
+    "lua",
+    "to"
+   ],
+   "fam": "rough"
+  },
+  {
+   "name": "Đũi Linen",
+   "display": "Đũi Linen",
+   "adv": "Dạ chất Đũi Linen mặc mát số 1 mùa nóng; nhăn nhẹ là nét mộc đặc trưng của đũi chứ không phải lỗi vải nha chị.",
+   "keys": [
+    "dui linen",
+    "linen",
+    "lanh",
+    "dui"
+   ],
+   "fam": "linen"
+  },
+  {
+   "name": "Silk Satin",
+   "display": "Silk Satin",
+   "adv": "Dạ chất Silk Satin mặt bóng mượt rủ theo dáng rất sang và quyến rũ, diện tiệc cực tôn dáng ạ.",
+   "keys": [
+    "silk satin",
+    "satin",
+    "lua",
+    "to"
+   ],
+   "fam": "satin"
+  },
+  {
+   "name": "Lụa Tô Châu",
+   "display": "Lụa Tô Châu",
+   "adv": "Dạ chất Lụa Tô Châu là dòng lụa cao cấp, mặt mịn mượt rủ mềm và lên màu rất sang.",
+   "keys": [
+    "lua to chau",
+    "chau",
+    "to"
+   ],
+   "fam": "lua"
+  },
+  {
+   "name": "Japanese Silky",
+   "display": "Japanese Silky",
+   "adv": "Dạ chất Japanese Silky mềm mượt và rủ nhẹ, ít nhăn nên mặc sang ạ",
+   "keys": [
+    "japanese silky",
+    "japanese",
+    "silky"
+   ],
+   "fam": "japanese"
+  },
+  {
+   "name": "Cold Silk",
+   "display": "Cold Silk",
+   "adv": "Dạ chất Cold Silk sờ vào mát tay, mặc rủ và thoáng, mùa nóng diện rất dễ chịu mà vẫn sang ạ.",
+   "keys": [
+    "cold silk",
+    "cold",
+    "lua",
+    "to"
+   ],
+   "fam": "cold"
+  },
+  {
+   "name": "Cotton Silk",
+   "display": "Cotton Silk",
+   "adv": "Dạ chất Cotton Silk vừa mềm rủ vừa thoáng thấm, đỡ nhăn nên đi làm đi chơi đều hợp",
+   "keys": [
+    "cotton silk",
+    "cotton",
+    "lua",
+    "to"
+   ],
+   "fam": "cotton"
+  },
+  {
+   "name": "Silk Blend",
+   "display": "Silk Blend",
+   "adv": "Dạ chất Silk Blend vừa giữ độ rủ mềm sang của lụa vừa bền và dễ chăm hơn, mặc thoải mái chị nha.",
+   "keys": [
+    "silk blend",
+    "lua",
+    "to"
+   ],
+   "fam": "silk"
+  },
+  {
+   "name": "Taffta Silk Crepe",
+   "display": "Taffta Silk Crepe",
+   "adv": "Dạ chất Taffta Silk Crepe mặt mịn nhám, đứng dáng và ít nhăn nên giữ form đẹp, mặc chỉn chu và sang ạ.",
+   "keys": [
+    "taffta silk crepe",
+    "taffta",
+    "crepe",
+    "lua",
+    "to"
+   ],
+   "fam": "taffta"
+  },
+  {
+   "name": "Windbreaker Silk",
+   "display": "Windbreaker Silk",
+   "adv": "Dạ chất Windbreaker Silk bề mặt trơn mượt mà chắn gió nhẹ, khoác ngoài vừa nhẹ vừa sang chị nha.",
+   "keys": [
+    "windbreaker silk",
+    "windbreaker",
+    "lua",
+    "to"
+   ],
+   "fam": "windbreaker"
+  },
+  {
+   "name": "Glossy Silk",
+   "display": "Glossy Silk",
+   "adv": "Dạ chất Glossy Silk mặt óng nhẹ rủ mượt rất sang, diện đi tiệc lên dáng và lên ảnh đẹp lắm ạ.",
+   "keys": [
+    "glossy silk",
+    "glossy",
+    "lua",
+    "to"
+   ],
+   "fam": "glossy"
+  },
+  {
+   "name": "Silk Chiffon",
+   "display": "Silk Chiffon",
+   "adv": "Dạ chất Silk Chiffon mỏng nhẹ bay bổng, mặc lên nữ tính và sang lắm ạ; bên trong có lớp lót nên chị yên tâm nha.",
+   "keys": [
+    "silk chiffon",
+    "chiffon",
+    "voan",
+    "lua",
+    "to"
+   ],
+   "fam": "chiffon"
+  },
+  {
+   "name": "Silk Voile",
+   "display": "Silk Voile",
+   "adv": "Dạ chất Silk Voile mỏng nhẹ và thoáng, rủ thanh thoát mà hơi đứng nên dáng gọn gàng, mặc lên nhẹ nhàng sang ạ.",
+   "keys": [
+    "silk voile",
+    "voile",
+    "voan",
+    "lua",
+    "to"
+   ],
+   "fam": "silk"
+  },
+  {
+   "name": "Crinkle Chiffon",
+   "display": "Crinkle Chiffon",
+   "adv": "Dạ chất Crinkle Chiffon hay ở chỗ mặc và cất đều không lo nhăn, nhẹ thoáng nên đi chơi du lịch tiện cực kỳ chị ạ.",
+   "keys": [
+    "crinkle chiffon",
+    "chiffon",
+    "crinkle",
+    "voan"
+   ],
+   "fam": "chiffon"
+  },
+  {
+   "name": "Sand Chiffon",
+   "display": "Sand Chiffon",
+   "adv": "Dạ chất Sand Chiffon bề mặt mờ mịn rất nhã, rủ mềm mà kín đáo sang trọng, mặc đi làm hay tiệc nhẹ đều hợp ạ.",
+   "keys": [
+    "sand chiffon",
+    "chiffon",
+    "sand",
+    "voan"
+   ],
+   "fam": "chiffon"
+  },
+  {
+   "name": "Pearl Chiffon",
+   "display": "Pearl Chiffon",
+   "adv": "Dạ chất Pearl Chiffon có ánh xà cừ tinh tế, bắt sáng dịu nên lên người và lên ảnh đều sang lắm chị nha.",
+   "keys": [
+    "pearl chiffon",
+    "chiffon",
+    "pearl",
+    "voan"
+   ],
+   "fam": "chiffon"
+  },
+  {
+   "name": "Swiss Dot Chiffon",
+   "display": "Swiss Dot Chiffon",
+   "adv": "Dạ chất Swiss Dot Chiffon chấm bi nổi nhìn trẻ trung và nữ tính lắm ạ, điểm bi duyên dáng nên mặc lên rất xinh chị nha.",
+   "keys": [
+    "swiss dot chiffon",
+    "chiffon",
+    "swiss",
+    "voan"
+   ],
+   "fam": "chiffon"
+  },
+  {
+   "name": "Polka Dot Chiffon",
+   "display": "Polka Dot Chiffon",
+   "adv": "Dạ chất Polka Dot Chiffon chấm bi này cổ điển mà rất duyên, mặc lên trẻ trung nhẹ nhàng đáng yêu ạ.",
+   "keys": [
+    "polka dot chiffon",
+    "chiffon",
+    "polka",
+    "voan"
+   ],
+   "fam": "chiffon"
+  },
+  {
+   "name": "Double Faced Chiffon",
+   "display": "Double Faced Chiffon",
+   "adv": "Dạ chất Double Faced Chiffon dày dặn nên kín đáo và đứng dáng hơn voan thường, mặc vừa thoải mái vừa sang ạ.",
+   "keys": [
+    "double faced chiffon",
+    "chiffon",
+    "double",
+    "faced",
+    "voan"
+   ],
+   "fam": "chiffon"
+  },
+  {
+   "name": "Heavy Chiffon",
+   "display": "Heavy Chiffon",
+   "adv": "Dạ chất Heavy Chiffon kín đáo và đứng dáng hơn, mặc thoải mái mà vẫn giữ độ rủ mềm đẹp chị nha.",
+   "keys": [
+    "heavy chiffon",
+    "chiffon",
+    "heavy",
+    "voan"
+   ],
+   "fam": "chiffon"
+  },
+  {
+   "name": "Sheer Chiffon",
+   "display": "Sheer Chiffon",
+   "adv": "Dạ chất Sheer Chiffon nhẹ và bay, tạo hiệu ứng mỏng manh quyến rũ, bên trong có lót nên chị mặc yên tâm nha.",
+   "keys": [
+    "sheer chiffon",
+    "chiffon",
+    "sheer",
+    "voan"
+   ],
+   "fam": "chiffon"
+  },
+  {
+   "name": "Polyester Chiffon",
+   "display": "Polyester Chiffon",
+   "adv": "Dạ chất Polyester Chiffon nhẹ và lên màu tươi, dễ giặt dễ chăm, bên trong có lớp lót nên mặc thoải mái nha chị.",
+   "keys": [
+    "polyester chiffon",
+    "polyester",
+    "chiffon",
+    "voan"
+   ],
+   "fam": "chiffon"
+  },
+  {
+   "name": "3D Chiffon",
+   "display": "3D Chiffon",
+   "adv": "Dạ chất 3D Chiffon có hoa nổi sống động rất sang và nổi bật, diện đi tiệc lên dáng đẹp lắm chị ạ.",
+   "keys": [
+    "3d chiffon",
+    "chiffon",
+    "voan"
+   ],
+   "fam": "chiffon"
+  },
+  {
+   "name": "Embroidered Chiffon",
+   "display": "Embroidered Chiffon",
+   "adv": "Dạ chất Embroidered Chiffon thêu hoa văn nổi tinh xảo, mặc lên nữ tính và sang sẵn nên không cần cầu kỳ phụ kiện ạ.",
+   "keys": [
+    "embroidered chiffon",
+    "embroidered",
+    "chiffon",
+    "voan"
+   ],
+   "fam": "chiffon"
+  },
+  {
+   "name": "Floral Print Chiffon",
+   "display": "Floral Print Chiffon",
+   "adv": "Dạ chất Floral Print Chiffon in hoa tươi tắn và bay bổng, mặc lên nữ tính trẻ trung, đi chơi hay chụp ảnh đều xinh ạ.",
+   "keys": [
+    "floral print chiffon",
+    "chiffon",
+    "floral",
+    "print",
+    "voan"
+   ],
+   "fam": "chiffon"
+  },
+  {
+   "name": "Soft Floral Chiffon",
+   "display": "Soft Floral Chiffon",
+   "adv": "Dạ chất Soft Floral Chiffon rủ dịu và mềm mịn, mặc lên nhẹ nhàng nữ tính rất duyên chị nha.",
+   "keys": [
+    "soft floral chiffon",
+    "chiffon",
+    "floral",
+    "soft",
+    "voan"
+   ],
+   "fam": "chiffon"
+  },
+  {
+   "name": "Lightweight Airy Chiffon",
+   "display": "Lightweight Airy Chiffon",
+   "adv": "Dạ chất Lightweight Airy Chiffon siêu nhẹ và bay, mặc mát thoáng mùa nóng cực dễ chịu mà vẫn bồng bềnh xinh ạ.",
+   "keys": [
+    "lightweight airy chiffon",
+    "lightweight",
+    "chiffon",
+    "airy",
+    "voan"
+   ],
+   "fam": "chiffon"
+  },
+  {
+   "name": "Glossy Chiffon",
+   "display": "Glossy Chiffon",
+   "adv": "Dạ chất Glossy Chiffon mặt óng nhẹ rất sang, diện đi tiệc lên dáng và lên hình đẹp lắm ạ.",
+   "keys": [
+    "glossy chiffon",
+    "chiffon",
+    "glossy",
+    "voan"
+   ],
+   "fam": "chiffon"
+  },
+  {
+   "name": "Scratched Chiffon",
+   "display": "Scratched Chiffon",
+   "adv": "Dạ chất Scratched Chiffon có hiệu ứng xước mờ rất lạ mắt mà vẫn rủ mềm, mặc lên tinh tế và khác biệt chị nha.",
+   "keys": [
+    "scratched chiffon",
+    "scratched",
+    "chiffon",
+    "voan"
+   ],
+   "fam": "chiffon"
+  },
+  {
+   "name": "Soft Textured Chiffon",
+   "display": "Soft Textured Chiffon",
+   "adv": "Dạ chất Soft Textured Chiffon rủ đẹp mà bề mặt có vân tinh tế hơn voan trơn, mặc lên nhã và sang ạ.",
+   "keys": [
+    "soft textured chiffon",
+    "textured",
+    "chiffon",
+    "soft",
+    "voan"
+   ],
+   "fam": "chiffon"
+  },
+  {
+   "name": "Chiffon Blend",
+   "display": "Chiffon Blend",
+   "adv": "Dạ chất Chiffon Blend vừa rủ mềm vừa bền màu ít nhăn nên mặc thoải mái mà chăm sóc lại dễ chị nha.",
+   "keys": [
+    "chiffon blend",
+    "chiffon",
+    "voan"
+   ],
+   "fam": "chiffon"
+  },
+  {
+   "name": "Striped Chiffon Blend",
+   "display": "Striped Chiffon Blend",
+   "adv": "Dạ chất Striped Chiffon Blend rủ mềm mà có sọc tạo điểm nhấn, mặc lên thanh lịch trẻ trung ạ.",
+   "keys": [
+    "striped chiffon blend",
+    "chiffon",
+    "striped",
+    "voan"
+   ],
+   "fam": "chiffon"
+  },
+  {
+   "name": "Chiffon with Lurex",
+   "display": "Chiffon with Lurex",
+   "adv": "Dạ chất Chiffon with Lurex có sợi kim tuyến lấp lánh nhẹ, diện đi tiệc tối hay lễ Tết thì nổi bật và sang lắm chị ạ.",
+   "keys": [
+    "chiffon with lurex",
+    "chiffon",
+    "lurex",
+    "voan"
+   ],
+   "fam": "chiffon"
+  },
+  {
+   "name": "Lace-overlay Chiffon",
+   "display": "Lace-overlay Chiffon",
+   "adv": "Dạ chất Lace-overlay Chiffon có lớp ren tinh tế trên nền voan rủ, nhìn sang và nữ tính lắm ạ.",
+   "keys": [
+    "lace overlay chiffon",
+    "chiffon",
+    "overlay",
+    "lace",
+    "voan",
+    "ren"
+   ],
+   "fam": "lace"
+  },
+  {
+   "name": "Voan Lông Vũ + Spandex",
+   "display": "Voan Lông Vũ + Spandex",
+   "adv": "Dạ chất Voan Lông Vũ nhẹ và bay như mây, mặc mềm mịn và nữ tính, lên hình bay cực đẹp chị nha.",
+   "keys": [
+    "voan long vu spandex",
+    "spandex",
+    "long",
+    "voan"
+   ],
+   "fam": "voan"
+  },
+  {
+   "name": "Raw Chiffon",
+   "display": "Raw Chiffon",
+   "adv": "Dạ chất Raw Chiffon bề mặt mộc nhẹ, mặc thoáng mát và tự nhiên, nhìn nhã nhặn ạ.",
+   "keys": [
+    "raw chiffon",
+    "chiffon",
+    "voan"
+   ],
+   "fam": "chiffon"
+  },
+  {
+   "name": "Organza",
+   "display": "Organza",
+   "adv": "Dạ chất Organza giữ phom phồng đẹp, mặc bồng bềnh và sang, mấy mẫu tay bồng hay chân váy xòe diện cực tôn dáng ạ.",
+   "keys": [
+    "organza",
+    "to"
+   ],
+   "fam": "organza"
+  },
+  {
+   "name": "Voan Boil",
+   "display": "Voan Boil",
+   "adv": "Dạ chất Voan Boil bề mặt xốp nhẹ nên bồng và thoáng, mặc lên trẻ trung đáng yêu chị nha.",
+   "keys": [
+    "voan boil",
+    "boil",
+    "voan"
+   ],
+   "fam": "voan"
+  },
+  {
+   "name": "Linen / Slub Linen / Textured Linen",
+   "display": "Linen",
+   "adv": "Dạ chất Linen là vải mát  mùa nóng, thấm hút cực tốt; nhăn nhẹ là nét mộc đặc trưng của Linen nha chị.",
+   "keys": [
+    "textured linen",
+    "slub linen",
+    "textured",
+    "linen",
+    "lanh",
+    "slub",
+    "dui"
+   ],
+   "fam": "linen"
+  },
+  {
+   "name": "Embroidered Linen",
+   "display": "Embroidered Linen",
+   "adv": "Dạ chất Embroidered Linen vừa mát vừa có hoa văn thêu duyên dáng, mặc trẻ trung mà vẫn nhẹ nhàng tự nhiên ạ.",
+   "keys": [
+    "embroidered linen",
+    "embroidered",
+    "linen",
+    "lanh",
+    "dui"
+   ],
+   "fam": "linen"
+  },
+  {
+   "name": "Floral Print Linen",
+   "display": "Floral Print Linen",
+   "adv": "Dạ chất Floral Print Linen mát mẻ mà họa tiết tươi xinh, đi chơi đi biển mặc lên rất trẻ trung tự nhiên ạ.",
+   "keys": [
+    "floral print linen",
+    "floral",
+    "linen",
+    "print",
+    "lanh",
+    "dui"
+   ],
+   "fam": "linen"
+  },
+  {
+   "name": "Linen Lace",
+   "display": "Linen Lace",
+   "adv": "Dạ chất Linen Lace mát mẻ mà họa tiết tươi xinh, đi chơi đi biển mặc lên rất trẻ trung tự nhiên ạ.",
+   "keys": [
+    "linen lace",
+    "linen",
+    "lace",
+    "lanh",
+    "dui",
+    "ren"
+   ],
+   "fam": "linen"
+  },
+  {
+   "name": "Cotton Pima",
+   "display": "Cotton Pima",
+   "adv": "Dạ chất Cotton Pima là dòng cao cấp sợi dài nên mềm mịn, thoáng và thấm hút tốt, mặc hằng ngày cực thoải mái ạ.",
+   "keys": [
+    "cotton pima",
+    "cotton",
+    "pima"
+   ],
+   "fam": "cotton"
+  },
+  {
+   "name": "Cotton Elastic",
+   "display": "Cotton Elastic",
+   "adv": "Dạ chất Cotton Elastic ôm vừa người mà thoải mái khi vận động, lại ít nhăn nên mặc cả ngày dễ chịu ạ.",
+   "keys": [
+    "cotton elastic",
+    "elastic",
+    "cotton"
+   ],
+   "fam": "cotton"
+  },
+  {
+   "name": "Cotton Boil",
+   "display": "Cotton Boil",
+   "adv": "Dạ chất Cotton Boil bề mặt xốp nhẹ, mặc thoáng và trẻ trung, dáng bồng nhìn đáng yêu chị nha.",
+   "keys": [
+    "cotton boil",
+    "cotton",
+    "boil"
+   ],
+   "fam": "cotton"
+  },
+  {
+   "name": "Cotton Boil Thêu",
+   "display": "Cotton Boil Thêu",
+   "adv": "Dạ chất Cotton Boil Thêu vừa nhẹ thoáng vừa có hoa thêu duyên, mặc lên trẻ trung mà điệu đà ạ.",
+   "keys": [
+    "cotton boil theu",
+    "cotton",
+    "boil",
+    "theu"
+   ],
+   "fam": "cotton"
+  },
+  {
+   "name": "Slub Cotton",
+   "display": "Slub Cotton",
+   "adv": "Dạ chất Slub Cotton có gân tinh tế, mặc thoáng mát mà nhìn vẫn nhã nhặn ạ.",
+   "keys": [
+    "slub cotton",
+    "cotton",
+    "slub"
+   ],
+   "fam": "cotton"
+  },
+  {
+   "name": "Striped Cotton with Bow Print",
+   "display": "Striped Cotton with Bow Print",
+   "adv": "Dạ chất Striped Cotton with Bow Print nhìn trẻ trung đáng yêu lắm ạ, mặc thoáng mát ạ",
+   "keys": [
+    "striped cotton with bow print",
+    "striped",
+    "cotton",
+    "print"
+   ],
+   "fam": "cotton"
+  },
+  {
+   "name": "Eyelet",
+   "display": "Eyelet",
+   "adv": "Dạ chất Eyelet thêu đục lỗ vừa thoáng vừa nữ tính kiểu vintage rất xinh, mặc lên trẻ trung lắm chị nha.",
+   "keys": [
+    "eyelet"
+   ],
+   "fam": "eyelet"
+  },
+  {
+   "name": "Kate Mỹ",
+   "display": "Kate Mỹ",
+   "adv": "Dạ chất Kate Mỹ mặt vải mịn và đứng dáng, ít nhăn nên mặc đi làm rất chỉn chu mà vẫn thoáng ạ.",
+   "keys": [
+    "kate my",
+    "kate"
+   ],
+   "fam": "kate"
+  },
+  {
+   "name": "Kate",
+   "display": "Kate",
+   "adv": "Dạ chất Kate mặt phẳng đứng form và ít nhăn, mặc gọn gàng dễ phối đồ lắm chị nha.",
+   "keys": [
+    "kate"
+   ],
+   "fam": "kate"
+  },
+  {
+   "name": "Rough Kate",
+   "display": "Rough Kate",
+   "adv": "Dạ chất Rough Kate bề mặt mộc, mặc khô thoáng và giữ form đẹp, nhìn vừa trẻ vừa chỉn chu ạ.",
+   "keys": [
+    "rough kate",
+    "rough",
+    "kate"
+   ],
+   "fam": "kate"
+  },
+  {
+   "name": "Kate Boil",
+   "display": "Kate Boil",
+   "adv": "Dạ chất Kate Boil bề mặt xốp nhẹ, mặc thoáng và trẻ trung mà vẫn gọn gàng chị nha.",
+   "keys": [
+    "kate boil",
+    "boil",
+    "kate"
+   ],
+   "fam": "kate"
+  },
+  {
+   "name": "Printed Kate",
+   "display": "Printed Kate",
+   "adv": "Dạ chất Printed Kate vừa đứng form vừa có họa tiết tươi xinh, mặc lên trẻ trung mà gọn gàng ạ.",
+   "keys": [
+    "printed kate",
+    "printed",
+    "kate"
+   ],
+   "fam": "kate"
+  },
+  {
+   "name": "Suiting Fabric",
+   "display": "Suiting Fabric",
+   "adv": "Dạ chất Suiting đứng form và ít nhăn nên mặc đi làm rất chỉn chu, giữ dáng đẹp cả ngày ạ.",
+   "keys": [
+    "suiting fabric",
+    "suiting"
+   ],
+   "fam": "suiting"
+  },
+  {
+   "name": "Stretch Suiting",
+   "display": "Stretch Suiting",
+   "adv": "Dạ chất Stretch Suiting vừa đứng form vừa thoải mái khi vận động, mặc cả ngày không gò bó mà vẫn gọn ạ.",
+   "keys": [
+    "stretch suiting",
+    "stretch",
+    "suiting"
+   ],
+   "fam": "suiting"
+  },
+  {
+   "name": "Twill Suiting",
+   "display": "Twill Suiting",
+   "adv": "Dạ chất Twill Suiting bền và đứng form, ít nhăn nên may vest hay đầm công sở lên dáng rất chỉn chu ạ.",
+   "keys": [
+    "twill suiting",
+    "suiting",
+    "twill",
+    "cheo"
+   ],
+   "fam": "twill"
+  },
+  {
+   "name": "Peach Skin Suiting",
+   "display": "Peach Skin Suiting",
+   "adv": "Dạ chất Peach Skin Suiting bề mặt mịn mượt như nhung, lì mà sang, mặc rủ nhẹ tôn dáng và rất dễ chịu chị ạ.",
+   "keys": [
+    "peach skin suiting",
+    "suiting",
+    "peach",
+    "skin"
+   ],
+   "fam": "peach"
+  },
+  {
+   "name": "Tuýt Si Spandex",
+   "display": "Tuýt Si Spandex",
+   "adv": "Dạ chất Tuýt Si mặt mịn lì rất sang, đứng form mà vẫn co giãn nhẹ nên mặc vest/đầm công sở lên dáng cực chỉn chu ạ.",
+   "keys": [
+    "tuyt si spandex",
+    "spandex",
+    "tuyt"
+   ],
+   "fam": "tuyt"
+  },
+  {
+   "name": "Kaki",
+   "display": "Kaki",
+   "adv": "Dạ chất Kaki dày dặn đứng form và bền, mặc khỏe khoắn năng động mà vẫn gọn gàng, phối đồ dễ chị nha.",
+   "keys": [
+    "kaki"
+   ],
+   "fam": "kaki"
+  },
+  {
+   "name": "Len Merino",
+   "display": "Len Merino",
+   "adv": "Dạ chất Len Merino mềm mịn không hề ngứa, giữ ấm mà vẫn nhẹ, mùa lạnh mặc cực dễ chịu và sang ạ.",
+   "keys": [
+    "len merino",
+    "merino",
+    "len"
+   ],
+   "fam": "len"
+  },
+  {
+   "name": "Len Cashmere",
+   "display": "Len Cashmere",
+   "adv": "Dạ chất Len Cashmere là dòng len cao cấp, mềm mịn và ấm vượt trội mà vẫn mỏng nhẹ, mặc lên sang lắm chị ạ.",
+   "keys": [
+    "len cashmere",
+    "cashmere",
+    "len"
+   ],
+   "fam": "len"
+  },
+  {
+   "name": "Len Mohair",
+   "display": "Len Mohair",
+   "adv": "Dạ chất Len Mohair có lớp lông tơ bồng bềnh rất xinh và ấm, mặc lên nổi bật mềm mại lắm ạ.",
+   "keys": [
+    "len mohair",
+    "mohair",
+    "len"
+   ],
+   "fam": "len"
+  },
+  {
+   "name": "Len Alpaca",
+   "display": "Len Alpaca",
+   "adv": "Dạ chất Len Alpaca ấm hơn len thường mà mềm và ít ngứa, mùa đông mặc ấm áp dễ chịu chị nha.",
+   "keys": [
+    "len alpaca",
+    "alpaca",
+    "len"
+   ],
+   "fam": "len"
+  },
+  {
+   "name": "Len",
+   "display": "Len",
+   "adv": "Dạ chất Len ấm áp và mềm mại, mùa lạnh mặc vừa ấm vừa trẻ trung dễ chịu chị nha.",
+   "keys": [
+    "len"
+   ],
+   "fam": "len"
+  },
+  {
+   "name": "Dạ / Dạ Mịn",
+   "display": "Dạ",
+   "adv": "Dạ chất Dạ Mịn dày dặn giữ ấm tốt, mặt mịn lì và đứng form nên áo khoác mặc lên rất sang và ấm ạ.",
+   "keys": [
+    "da min",
+    "da"
+   ],
+   "fam": "da"
+  },
+  {
+   "name": "Dạ Mịn Cao Cấp",
+   "display": "Dạ Mịn Cao Cấp",
+   "adv": "Dạ chất Dạ Mịn Cao Cấp mặt vải mịn lì và form sắc nét, khoác lên ấm áp và sang trọng lắm chị ạ.",
+   "keys": [
+    "da min cao cap",
+    "da"
+   ],
+   "fam": "da"
+  },
+  {
+   "name": "Dạ Tweed",
+   "display": "Dạ Tweed",
+   "adv": "Dạ chất Dạ Tweed nhìn cổ điển sang trọng kiểu Chanel, dày ấm và đứng form, diện set vest hay sự kiện thì đẳng cấp ạ.",
+   "keys": [
+    "da tweed",
+    "tweed",
+    "da"
+   ],
+   "fam": "da"
+  },
+  {
+   "name": "Lông Sợi / Dạ Lông",
+   "display": "Lông Sợi",
+   "adv": "Dạ chất Lông này ấm áp và bồng bềnh, khoác lên sang và nổi bật, mùa đông diện vừa ấm vừa sang chảnh ạ.",
+   "keys": [
+    "long soi",
+    "da long",
+    "long",
+    "da"
+   ],
+   "fam": "da"
+  },
+  {
+   "name": "Lông Cao Cấp",
+   "display": "Lông Cao Cấp",
+   "adv": "Dạ chất Lông Cao Cấp sợi mượt và ấm dày, khoác lên sang trọng nổi bật mà ít rụng lông hơn ạ.",
+   "keys": [
+    "long cao cap",
+    "long"
+   ],
+   "fam": "long"
+  },
+  {
+   "name": "Viscose",
+   "display": "Viscose",
+   "adv": "Dạ chất Viscose mềm rủ và mát, lên màu rất đẹp; giặt nhẹ phơi râm là dáng giữ đẹp lâu nha chị.",
+   "keys": [
+    "viscose"
+   ],
+   "fam": "viscose"
+  },
+  {
+   "name": "Voan Rayon",
+   "display": "Voan Rayon",
+   "adv": "Dạ chất Voan Rayon mỏng mát và rủ mềm, mặc mùa nóng rất nhẹ nhàng dễ chịu ạ.",
+   "keys": [
+    "voan rayon",
+    "rayon",
+    "voan"
+   ],
+   "fam": "voan"
+  },
+  {
+   "name": "Tencel / Lyocell",
+   "display": "Tencel",
+   "adv": "Dạ chất Tencel mềm mát thấm hút như cotton mà rủ đẹp hơn, lại thân thiện môi trường, mặc cao cấp ạ.",
+   "keys": [
+    "lyocell",
+    "tencel"
+   ],
+   "fam": "tencel"
+  },
+  {
+   "name": "Bamboo",
+   "display": "Bamboo",
+   "adv": "Dạ chất Bamboo mềm mát và kháng khuẩn tự nhiên, rất lành tính với da nên mặc mùa nóng thoải mái ạ.",
+   "keys": [
+    "bamboo"
+   ],
+   "fam": "bamboo"
+  },
+  {
+   "name": "Poly-Viscose",
+   "display": "Poly-Viscose",
+   "adv": "Dạ chất Poly-Viscose vừa mềm rủ vừa ít nhăn bền màu, mặc đi làm đi chơi đều hợp mà chăm sóc dễ chị nha.",
+   "keys": [
+    "poly viscose",
+    "viscose",
+    "poly"
+   ],
+   "fam": "viscose"
+  },
+  {
+   "name": "Polyester–Rayon Blend",
+   "display": "Polyester–Rayon Blend",
+   "adv": "Dạ chất Polyester–Rayon Blend rủ mềm mà bền màu ít nhăn, mặc thoải mái ạ",
+   "keys": [
+    "polyester rayon blend",
+    "polyester",
+    "rayon"
+   ],
+   "fam": "rayon"
+  },
+  {
+   "name": "Lace",
+   "display": "Lace",
+   "adv": "Dạ chất Lace hoa văn tinh xảo, mặc lên nữ tính và sang lắm ạ, bên trong có lót nên chị mặc thoải mái nha.",
+   "keys": [
+    "lace",
+    "ren"
+   ],
+   "fam": "lace"
+  },
+  {
+   "name": "Floral Lace",
+   "display": "Floral Lace",
+   "adv": "Dạ chất Floral Lace nhìn lãng mạn và nữ tính lắm ạ, mặc lên điệu đà mà vẫn sang trọng nha chị.",
+   "keys": [
+    "floral lace",
+    "floral",
+    "lace",
+    "ren"
+   ],
+   "fam": "lace"
+  },
+  {
+   "name": "Embroidered Lace",
+   "display": "Embroidered Lace",
+   "adv": "Dạ chất Embroidered Lace thêu hoa văn nổi rất sắc nét và sang, diện sự kiện hay cưới hỏi thì đẹp đẳng cấp ạ.",
+   "keys": [
+    "embroidered lace",
+    "embroidered",
+    "lace",
+    "ren"
+   ],
+   "fam": "lace"
+  },
+  {
+   "name": "Needle Lace",
+   "display": "Needle Lace",
+   "adv": "Dạ chất Needle Lace hoa văn nổi tinh xảo và đẳng cấp, diện dịp trọng đại lên dáng sang lắm chị ạ.",
+   "keys": [
+    "needle lace",
+    "needle",
+    "lace",
+    "ren"
+   ],
+   "fam": "lace"
+  },
+  {
+   "name": "Corded Lace",
+   "display": "Corded Lace",
+   "adv": "Dạ chất Corded Lace có hoa văn viền nổi sắc nét, mặc lên sang và đứng nét rất đẹp ạ.",
+   "keys": [
+    "corded lace",
+    "corded",
+    "lace",
+    "ren"
+   ],
+   "fam": "lace"
+  },
+  {
+   "name": "Chantilly Lace",
+   "display": "Chantilly Lace",
+   "adv": "Dạ chất Chantilly Lace là dòng ren cao cấp của Pháp, hoa văn mảnh mai sang và lãng mạn, diện dịp trọng đại đẹp đẳng cấp ạ.",
+   "keys": [
+    "chantilly lace",
+    "chantilly",
+    "lace",
+    "ren"
+   ],
+   "fam": "lace"
+  },
+  {
+   "name": "Cotton Lace",
+   "display": "Cotton Lace",
+   "adv": "Dạ chất Cotton Lace dày dặn thoáng hơn ren thường nên mặc trẻ trung mà vẫn nữ tính, lại đỡ bí mùa nóng ạ.",
+   "keys": [
+    "cotton lace",
+    "cotton",
+    "lace",
+    "ren"
+   ],
+   "fam": "cotton"
+  },
+  {
+   "name": "Mesh Lace",
+   "display": "Mesh Lace",
+   "adv": "Dạ chất Mesh Lace nhẹ và thoáng, tạo hiệu ứng xuyên thấu rất duyên, mặc lên điệu mà không bí ạ.",
+   "keys": [
+    "mesh lace",
+    "lace",
+    "luoi",
+    "mesh",
+    "ren"
+   ],
+   "fam": "mesh"
+  },
+  {
+   "name": "Ren Boil Thêu",
+   "display": "Ren Boil Thêu",
+   "adv": "Dạ chất Ren Boil Thêu vừa có nét bồng xốp vừa có ren thêu tinh xảo, nhìn rất sang và khác biệt chị nha.",
+   "keys": [
+    "ren boil theu",
+    "boil",
+    "theu",
+    "ren"
+   ],
+   "fam": "ren"
+  },
+  {
+   "name": "Lace mix Japanese Silky",
+   "display": "Lace mix Japanese Silky",
+   "adv": "Dạ mẫu Lace mix Japanese Silky vừa có ren tinh xảo vừa có lụa mịn rủ, nhìn sang và cao cấp lắm ạ.",
+   "keys": [
+    "lace mix japanese silky",
+    "japanese",
+    "silky",
+    "lace",
+    "ren"
+   ],
+   "fam": "lace"
+  },
+  {
+   "name": "Satin",
+   "display": "Satin",
+   "adv": "Dạ chất Satin mặt bóng mượt rủ theo dáng rất sang và quyến rũ, diện tiệc thì nổi bật ạ.",
+   "keys": [
+    "satin"
+   ],
+   "fam": "satin"
+  },
+  {
+   "name": "Taffta Satin",
+   "display": "Taffta Satin",
+   "adv": "Dạ chất Taffta Satin giữ phom rất đẹp lại óng ánh sang trọng, mấy mẫu đầm xòe/phồng diện lên lộng lẫy ạ.",
+   "keys": [
+    "taffta satin",
+    "taffta",
+    "satin"
+   ],
+   "fam": "satin"
+  },
+  {
+   "name": "Jacquard",
+   "display": "Jacquard",
+   "adv": "Dạ chất Jacquard có hoa văn dệt nổi rất sang và đứng form, diện đi tiệc hay lễ Tết sang trọng lắm chị ạ.",
+   "keys": [
+    "jacquard"
+   ],
+   "fam": "jacquard"
+  },
+  {
+   "name": "Gấm Tô Châu",
+   "display": "Gấm Tô Châu",
+   "adv": "Dạ chất Gấm Tô Châu hoa văn nổi truyền thống rất sang và đứng form, may áo dài hay đầm tiệc dịp Tết đẹp đẳng cấp ạ.",
+   "keys": [
+    "gam to chau",
+    "chau",
+    "gam",
+    "to"
+   ],
+   "fam": "gam"
+  },
+  {
+   "name": "Gấm Tencel",
+   "display": "Gấm Tencel",
+   "adv": "Dạ chất Gấm Tencel có hoa văn nổi sang mà chất mềm mát nhẹ hơn gấm thường, mặc vừa đẹp vừa dễ chịu chị nha.",
+   "keys": [
+    "gam tencel",
+    "tencel",
+    "gam"
+   ],
+   "fam": "gam"
+  },
+  {
+   "name": "Kim Sa",
+   "display": "Kim Sa",
+   "adv": "Dạ chất Kim Sa lấp lánh cực nổi bật và lộng lẫy, diện đi tiệc tối hay dạ hội thì chị là tâm điểm luôn ạ.",
+   "keys": [
+    "kim sa",
+    "kim"
+   ],
+   "fam": "kim"
+  },
+  {
+   "name": "Lưới Kim Tuyến",
+   "display": "Lưới Kim Tuyến",
+   "adv": "Dạ chất Lưới Kim Tuyến lung linh nhẹ nhàng, thường làm lớp phối hay tay áo tạo điểm nhấn lấp lánh sang cho mẫu ạ.",
+   "keys": [
+    "luoi kim tuyen",
+    "tuyen",
+    "luoi",
+    "kim"
+   ],
+   "fam": "luoi"
+  },
+  {
+   "name": "Denim",
+   "display": "Denim",
+   "adv": "Dạ chất Denim khỏe khoắn và bền, dễ phối đồ và mặc được nhiều dịp lắm chị nha.",
+   "keys": [
+    "denim",
+    "jean"
+   ],
+   "fam": "denim"
+  },
+  {
+   "name": "Lightweight Denim",
+   "display": "Lightweight Denim",
+   "adv": "Dạ chất Lightweight Denim khỏe khoắn mà không bị nóng, dễ phối đồ và mặc nhiều dịp lắm chị nha.",
+   "keys": [
+    "lightweight denim",
+    "lightweight",
+    "denim",
+    "jean"
+   ],
+   "fam": "denim"
+  },
+  {
+   "name": "Spandex Denim",
+   "display": "Spandex Denim",
+   "adv": "Dạ chất Spandex Denim ôm tôn dáng mà vận động vẫn thoải mái, mặc khỏe khoắn trẻ trung và rất bền ạ.",
+   "keys": [
+    "spandex denim",
+    "spandex",
+    "denim",
+    "jean"
+   ],
+   "fam": "denim"
+  },
+  {
+   "name": "Camellia Denim",
+   "display": "Camellia Denim",
+   "adv": "Dạ chất Camellia Denim mềm mịn hơn denim thường nên mặc dễ chịu mà vẫn khỏe khoắn tôn dáng chị nha.",
+   "keys": [
+    "camellia denim",
+    "camellia",
+    "denim",
+    "jean"
+   ],
+   "fam": "denim"
+  },
+  {
+   "name": "Raw Denim",
+   "display": "Raw Denim",
+   "adv": "Dạ chất Raw Denim phom đứng và màu đậm chuẩn rất cá tính, càng mặc càng vào dáng.",
+   "keys": [
+    "raw denim",
+    "denim",
+    "jean"
+   ],
+   "fam": "denim"
+  },
+  {
+   "name": "Denim Xước Vân",
+   "display": "Denim Xước Vân",
+   "adv": "Dạ chất Denim Xước Vân hiệu ứng bề mặt rất cá tính bụi bặm, mặc lên chất và trẻ trung lắm ạ.",
+   "keys": [
+    "denim xuoc van",
+    "denim",
+    "jean",
+    "xuoc"
+   ],
+   "fam": "denim"
+  },
+  {
+   "name": "Denim Vân Chéo",
+   "display": "Denim Vân Chéo",
+   "adv": "Dạ chất Denim Vân Chéo chắc và đứng form, đường chéo nhìn rất chất, mặc bền đẹp dễ phối ạ.",
+   "keys": [
+    "denim van cheo",
+    "denim",
+    "cheo",
+    "jean"
+   ],
+   "fam": "denim"
+  },
+  {
+   "name": "Crushed Denim",
+   "display": "Crushed Denim",
+   "adv": "Dạ chất Crushed Denim hiệu ứng vò nhăn rất cá tính và bụi, mặc lên chất ngầu mà vẫn trẻ trung chị nha.",
+   "keys": [
+    "crushed denim",
+    "crushed",
+    "denim",
+    "jean"
+   ],
+   "fam": "denim"
+  },
+  {
+   "name": "Jersey",
+   "display": "Jersey",
+   "adv": "Dạ chất Jersey co giãn mềm mại, ôm nhẹ tôn dáng mà mặc cực thoải mái và ít nhăn ạ.",
+   "keys": [
+    "jersey",
+    "thun"
+   ],
+   "fam": "jersey"
+  },
+  {
+   "name": "Cloud Knit",
+   "display": "Cloud Knit",
+   "adv": "Dạ chất Cloud Knit mềm mịn xốp nhẹ như mây, mặc ôm dịu và ấm nhẹ rất dễ chịu chị nha.",
+   "keys": [
+    "cloud knit",
+    "det kim",
+    "cloud",
+    "knit"
+   ],
+   "fam": "knit"
+  },
+  {
+   "name": "Knit Fabric",
+   "display": "Knit Fabric",
+   "adv": "Dạ chất Knit co giãn thoải mái, ôm vừa tôn dáng mà mặc dễ chịu cả ngày ạ.",
+   "keys": [
+    "knit fabric",
+    "det kim",
+    "knit"
+   ],
+   "fam": "knit"
+  },
+  {
+   "name": "Twill Knit",
+   "display": "Twill Knit",
+   "adv": "Dạ chất Twill Knit vừa co giãn vừa chắc form hơn knit thường, mặc gọn gàng mà thoải mái chị nha.",
+   "keys": [
+    "twill knit",
+    "det kim",
+    "twill",
+    "cheo",
+    "knit"
+   ],
+   "fam": "twill"
+  },
+  {
+   "name": "Ribbed / Fine Rib Knit",
+   "display": "Ribbed",
+   "adv": "Dạ chất Ribbed Knit ôm tôn dáng và co giãn tốt, mặc lên gọn gàng trẻ trung mà rất thoải mái ạ.",
+   "keys": [
+    "fine rib knit",
+    "det kim",
+    "ribbed",
+    "fine",
+    "knit"
+   ],
+   "fam": "knit"
+  },
+  {
+   "name": "Waffle Knit",
+   "display": "Waffle Knit",
+   "adv": "Dạ chất Waffle Knit bề mặt ô nổi như tổ ong rất trẻ trung và có texture xinh, mặc thoáng nhẹ mà vẫn ấm vừa chị nha.",
+   "keys": [
+    "waffle knit",
+    "det kim",
+    "waffle",
+    "knit"
+   ],
+   "fam": "knit"
+  },
+  {
+   "name": "Thun Spandex",
+   "display": "Thun Spandex",
+   "adv": "Dạ chất Thun Spandex co giãn ôm tôn dáng mà vận động cực thoải mái, mặc lên gọn gàng tôn body ạ.",
+   "keys": [
+    "thun spandex",
+    "spandex",
+    "thun"
+   ],
+   "fam": "thun"
+  },
+  {
+   "name": "Thun Ánh",
+   "display": "Thun Ánh",
+   "adv": "Dạ chất Thun Ánh vừa ôm tôn dáng vừa lấp lánh nhẹ, diện đi tiệc lên dáng nổi bật mà vẫn thoải mái ạ.",
+   "keys": [
+    "thun anh",
+    "thun"
+   ],
+   "fam": "thun"
+  },
+  {
+   "name": "Thun Chéo Lông Thỏ",
+   "display": "Thun Chéo Lông Thỏ",
+   "adv": "Dạ chất Thun Chéo Lông Thỏ mềm mịn và ấm, mặc mùa lạnh vừa ấm vừa sang mà rất dễ chịu chị nha.",
+   "keys": [
+    "thun cheo long tho",
+    "cheo",
+    "long",
+    "thun"
+   ],
+   "fam": "thun"
+  },
+  {
+   "name": "Twill / Korean Twill (Chéo Hàn)",
+   "display": "Twill",
+   "adv": "Dạ chất Twill (Chéo Hàn) chắc và đứng form, ít nhăn nên mặc đi làm gọn gàng và bền đẹp ạ.",
+   "keys": [
+    "korean twill",
+    "cheo han",
+    "korean",
+    "twill",
+    "cheo"
+   ],
+   "fam": "twill"
+  },
+  {
+   "name": "Raw Twill",
+   "display": "Raw Twill",
+   "adv": "Dạ chất Raw Twill chắc và đứng form, nhìn mộc khỏe khoắn mà vẫn gọn gàng chị nha.",
+   "keys": [
+    "raw twill",
+    "twill",
+    "cheo"
+   ],
+   "fam": "twill"
+  },
+  {
+   "name": "Scuba",
+   "display": "Scuba",
+   "adv": "Dạ chất Scuba dày dặn co giãn nên ôm gọn, giữ form và che khuyết điểm rất tốt, mặc lên dáng cực đẹp ạ.",
+   "keys": [
+    "scuba"
+   ],
+   "fam": "scuba"
+  },
+  {
+   "name": "Ribbed fabric",
+   "display": "Ribbed fabric",
+   "adv": "Dạ chất Ribbed fabric dệt gân co giãn nên ôm tôn dáng, mặc gọn gàng mà thoải mái chị nha.",
+   "keys": [
+    "ribbed fabric",
+    "ribbed"
+   ],
+   "fam": "ribbed"
+  },
+  {
+   "name": "Da Simili / Da Faux",
+   "display": "Da Simili",
+   "adv": "Dạ chất Da Simili bề mặt giống da thật, cá tính và sang, chống nước dễ lau, diện mùa lạnh lên chất lắm chị ạ.",
+   "keys": [
+    "da simili",
+    "da faux",
+    "simili",
+    "da"
+   ],
+   "fam": "da"
+  },
+  {
+   "name": "Da Bycast Denim",
+   "display": "Da Bycast Denim",
+   "adv": "Dạ chất Da Bycast Denim là lớp da phủ trên nền vải nên mặc mềm và dễ chịu hơn da cứng, vẫn giữ vẻ cá tính sang ạ.",
+   "keys": [
+    "da bycast denim",
+    "bycast",
+    "denim",
+    "jean",
+    "da"
+   ],
+   "fam": "da"
+  },
+  {
+   "name": "Da Lộn",
+   "display": "Da Lộn",
+   "adv": "Dạ chất Da Lộn sờ êm và mềm mịn, mặc ấm và sang lắm ạ; mình tránh dính nước và phủi bụi nhẹ là giữ đẹp lâu nha chị.",
+   "keys": [
+    "da lon",
+    "da"
+   ],
+   "fam": "da"
+  },
+  {
+   "name": "Da Mặt Nhung",
+   "display": "Da Mặt Nhung",
+   "adv": "Dạ chất Da Mặt Nhung sờ êm mịn và ấm, khoác lên sang trọng mà rất dễ chịu chị nha.",
+   "keys": [
+    "da mat nhung",
+    "nhung",
+    "da"
+   ],
+   "fam": "da"
+  },
+  {
+   "name": "Da Nhăn",
+   "display": "Da Nhăn",
+   "adv": "Dạ chất Da Nhăn hiệu ứng bề mặt rất cá tính hiện đại, diện lên chất ngầu và nổi bật lắm ạ.",
+   "keys": [
+    "da nhan",
+    "nhan",
+    "da"
+   ],
+   "fam": "da"
+  },
+  {
+   "name": "Tulle",
+   "display": "Tulle",
+   "adv": "Dạ chất Tulle nhẹ và bồng bềnh mơ màng, mấy mẫu chân váy xòe hay tay phồng diện lên xinh như công chúa ạ.",
+   "keys": [
+    "tulle",
+    "tuyn"
+   ],
+   "fam": "tulle"
+  },
+  {
+   "name": "Hologram Mesh",
+   "display": "Hologram Mesh",
+   "adv": "Dạ chất Hologram Mesh ánh đổi màu rất hiện đại và nổi bật, mặc lên trẻ trung cá tính lắm chị nha.",
+   "keys": [
+    "hologram mesh",
+    "hologram",
+    "luoi",
+    "mesh"
+   ],
+   "fam": "mesh"
+  },
+  {
+   "name": "Stretch Mesh / Soft Mesh",
+   "display": "Stretch Mesh",
+   "adv": "Dạ chất Stretch Mesh nhẹ co giãn tạo điểm nhấn xuyên thấu mềm mại, thường có lót nên chị mặc yên tâm ạ.",
+   "keys": [
+    "stretch mesh",
+    "soft mesh",
+    "stretch",
+    "luoi",
+    "mesh",
+    "soft"
+   ],
+   "fam": "mesh"
+  },
+  {
+   "name": "Striped Fabric",
+   "display": "Striped Fabric",
+   "adv": "Dạ chất Striped Fabric nhìn thanh lịch trẻ trung mà còn kéo dáng nữa, mặc lên gọn gàng dễ phối đồ chị nha.",
+   "keys": [
+    "striped fabric",
+    "striped"
+   ],
+   "fam": "striped"
+  },
+  {
+   "name": "Crinkle Chiffon + Taffta Silk (phối)",
+   "display": "Crinkle Chiffon + Taffta Silk",
+   "adv": "Dạ mẫu này phối Crinkle Chiffon rủ mềm với Taffta Silk đứng phom nên vừa bay bổng vừa giữ dáng, lên người rất đẹp ạ.",
+   "keys": [
+    "crinkle chiffon taffta silk",
+    "chiffon",
+    "crinkle",
+    "taffta",
+    "voan",
+    "lua",
+    "to"
+   ],
+   "fam": "chiffon"
+  },
+  {
+   "name": "Slub Cotton + Floral Lace (phối)",
+   "display": "Slub Cotton + Floral Lace",
+   "adv": "Dạ mẫu này phối Slub Cotton thoáng mát với Floral Lace nữ tính, nhìn vừa trẻ trung vừa điệu đà chị nha.",
+   "keys": [
+    "slub cotton floral lace",
+    "cotton",
+    "floral",
+    "lace",
+    "slub",
+    "ren"
+   ],
+   "fam": "cotton"
+  },
+  {
+   "name": "Misa Foam Elastic (tên thương mại)",
+   "display": "Misa Foam Elastic",
+   "adv": "Dạ chất Misa Foam Elastic có độ đàn hồi định hình nên ôm gọn và nâng dáng đẹp, mặc lên đẹp lăm ạ",
+   "keys": [
+    "misa foam elastic",
+    "ten thuong mai",
+    "elastic",
+    "foam",
+    "misa"
+   ],
+   "fam": "misa"
+  },
+  {
+   "name": "Piela (tên thương mại - cần xác minh)",
+   "display": "Piela",
+   "adv": "Dạ chất Piela mặc lên rất thoải mái ạ",
+   "keys": [
+    "ten thuong mai can xac minh",
+    "piela"
+   ],
+   "fam": "piela"
+  },
+  {
+   "name": "Soft and Silky (mô tả chung - cần ghi rõ tên)",
+   "display": "Soft and Silky",
+   "adv": "Dạ chất này mềm mượt tay và rủ dễ chịu, mặc lên nhẹ nhàng thoải mái ạ.",
+   "keys": [
+    "mo ta chung can ghi ro ten",
+    "soft and silky",
+    "silky",
+    "soft"
+   ],
+   "fam": "soft"
+  }
+ ],
+ "famDefault": {
+  "lua": 0,
+  "to": 5,
+  "voan": 18,
+  "chiffon": 18,
+  "organza": 43,
+  "linen": 45,
+  "lanh": 45,
+  "cotton": 49,
+  "kate": 57,
+  "suiting": 61,
+  "kaki": 66,
+  "len": 71,
+  "da": 72,
+  "tweed": 74,
+  "tuyt": 65,
+  "viscose": 77,
+  "rayon": 82,
+  "tencel": 79,
+  "lyocell": 79,
+  "bamboo": 80,
+  "ren": 83,
+  "lace": 83,
+  "satin": 93,
+  "jacquard": 95,
+  "gam": 96,
+  "kim": 98,
+  "denim": 100,
+  "jean": 100,
+  "jersey": 108,
+  "knit": 109,
+  "thun": 108,
+  "twill": 118,
+  "cheo": 118,
+  "scuba": 119,
+  "nhung": 64,
+  "tulle": 126,
+  "luoi": 99,
+  "mesh": 90,
+  "peach": 64,
+  "doi": 8,
+  "dui": 8
+ },
+ "single": {
+  "lua": 0,
+  "to": 5,
+  "voan": 18,
+  "chiffon": 18,
+  "cotton": 49,
+  "kate": 57,
+  "denim": 100,
+  "jean": 100,
+  "len": 71,
+  "da": 72,
+  "nhung": 64,
+  "ren": 83,
+  "lace": 83,
+  "satin": 93,
+  "gam": 96,
+  "thun": 108,
+  "dui": 8,
+  "doi": 8,
+  "lanh": 45,
+  "linen": 45,
+  "tweed": 74
+ }
+}

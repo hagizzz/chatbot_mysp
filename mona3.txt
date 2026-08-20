@@ -1,0 +1,80 @@
+﻿
+  .pm2\logs\bot-out.log:30819:2026-06-27T19:55:23:   [LỌC RỚT] Thanh Lam Trần | type=INBOX | seen=true | 
+last_sent_by=Public API | updated=2026-06-27T12:33:47.777000 | -> seen=true & SHOP/bot nhắn cuối (list coi như đã trả) 
+| id=1468690110033030_27296721503330094
+  .pm2\logs\bot-out.log:30820:2026-06-27T19:55:23:   [LỌC RỚT] Hana Bùi | type=INBOX | seen=true | last_sent_by=Public 
+API | updated=2026-06-27T12:31:32.023000 | -> seen=true & SHOP/bot nhắn cuối (list coi như đã trả) | 
+id=1468690110033030_26370959475890689
+  .pm2\logs\bot-out.log:30821:2026-06-27T19:55:23:   [LỌC RỚT] Linh Linh | type=INBOX | seen=true | last_sent_by=Công 
+Nguyễn | updated=2026-06-27T12:27:37.188000 | -> seen=true & SHOP/bot nhắn cuối (list coi như đã trả) | 
+id=1468690110033030_36562282710082529
+  .pm2\logs\bot-out.log:30822:2026-06-27T19:55:23:   [LỌC RỚT] Hồng Thắm | type=INBOX | seen=true | 
+last_sent_by=Nguyễn Thành Như | updated=2026-06-27T12:25:32.013000 | -> seen=true & SHOP/bot nhắn cuối (list coi như 
+đã trả) | id=1468690110033030_27337010179326466
+  .pm2\logs\bot-out.log:30823:2026-06-27T19:55:23:   [LỌC RỚT] Nguyễn Ngọc | type=INBOX | seen=true | 
+last_sent_by=Public API | updated=2026-06-27T12:25:05.763000 | -> seen=true & SHOP/bot nhắn cuối (list coi như đã trả) 
+| id=1468690110033030_27623216617290806
+  .pm2\logs\bot-out.log:30824:2026-06-27T19:55:23:   [LỌC RỚT] Thanh Stubborn | type=INBOX | seen=true | 
+last_sent_by=Public API | updated=2026-06-27T12:22:58.459000 | -> seen=true & SHOP/bot nhắn cuối (list coi như đã trả) 
+| id=1468690110033030_27404806759187254
+  .pm2\logs\bot-out.log:30825:2026-06-27T19:55:23:   [LỌC RỚT] Nguyen Thi Thanh Xuan | type=INBOX | seen=true | 
+last_sent_by=Công Nguyễn | updated=2026-06-27T12:21:46.287000 | -> seen=true & SHOP/bot nhắn cuối (list coi như đã 
+trả) | id=1468690110033030_36268464139465404
+  .pm2\logs\bot-out.log:30826:2026-06-27T19:55:23:   [LỌC RỚT] Dung Phạm | type=INBOX | seen=true | 
+last_sent_by=Public API | updated=2026-06-27T12:17:50.427000 | -> seen=true & SHOP/bot nhắn cuối (list coi như đã trả) 
+| id=1468690110033030_36649078021374037
+  .pm2\logs\bot-out.log:30827:2026-06-27T19:55:23:   [LỌC RỚT] Thảo Hana | type=INBOX | seen=true | last_sent_by=Công 
+Nguyễn | updated=2026-06-27T12:15:48.493000 | -> seen=true & SHOP/bot nhắn cuối (list coi như đã trả) | 
+id=1468690110033030_27817100531216242
+  .pm2\logs\bot-out.log:30828:2026-06-27T19:55:23:   [THEO DÕI] tên "pham phuong": KHÔNG có trong 180 hội thoại lấy về.
+  .pm2\logs\bot-out.log:30829:2026-06-27T19:55:23:   [THEO DÕI] tên "tham tran": KHÔNG có trong 180 hội thoại lấy về.
+  .pm2\logs\bot-out.log:30830:2026-06-27T19:55:23:   [THEO DÕI] tên "nguyen thanh nhu": KHÔNG có trong 180 hội thoại 
+lấy về.
+  .pm2\logs\bot-out.log:30831:2026-06-27T19:55:23:   [THEO DÕI] Phuong Pham | type=INBOX | seen=true | 
+last_sent_by=(rỗng=khách nhắn cuối) | updated=2026-06-27T08:47:00.000000 | -> VÀO 'Cần xử lý' | 
+id=1468690110033030_6394346307338466
+  .pm2\logs\bot-out.log:30832:2026-06-27T19:55:23: [reader] tin TRẢ LỜI: bóc 3 ảnh từ replied_message -> đưa vào nhận 
+diện. id=m_Kz83DzayeK0lq-r_a92dLZIYVf8PYGxU3sjgu_Uw-nsXbrOiYvHcEqHRQMZtWhoGm7wzycpZp9MOb-Pfonx4sA
+  .pm2\logs\bot-out.log:30833:2026-06-27T19:55:23: [reader] tin TRẢ LỜI: bóc 3 ảnh từ replied_message -> đưa vào nhận 
+diện. id=m_8-XzUYbpZ0PPumkySC5W3ZIYVf8PYGxU3sjgu_Uw-ntbrWR53k7n-_0qiCq7kULi87NGtlDZDHsB71Vyac8eRw
+  .pm2\logs\bot-out.log:30834:2026-06-27T19:55:23:       [THEO DÕI/tin] 1468690110033030_6394346307338466: 
+KHÁCH-inbox=20 | KHÁCH-comment=0 | tin cuối khách @2026-06-27T08:47:00.000000 -> ❗ CÓ tin INBOX của khách -> BOT PHẢI 
+TRẢ | text:"cho c giá"  image:"[Photo]"
+  .pm2\logs\bot-out.log:30835:2026-06-27T19:55:23: [VÀO XỬ] (webhook) | seen=false | last_sent_by=(không có) | 
+updated=2026-06-27T12:55:23.922Z | id=1468690110033030_34409702685342704
+  .pm2\logs\bot-out.log:30836:2026-06-27T19:55:24: [AD IMG] thẻ ad: 0 ảnh + 1 caption (tổng ảnh=2) | cap0="𝐌𝐎𝐍𝐀 
+𝐂𝐋𝐀𝐒𝐒𝐘 - Đ𝐀́𝐍𝐇 𝐓𝐇𝐔̛" | img0=https://content.pancake.vn/2-2602/2026/2/25/1576970900f
+  .pm2\logs\bot-out.log:30837:2026-06-27T19:55:24: [AD SRC] adId=1555383752809784 | ad_clicks=0 sug_posts=0 
+sug_prods=0 | adPostId=1555383752809784 repliedId=- capCands=5 titleLen=0 imgs=2 photo=có
+  .pm2\logs\bot-out.log:30838:2026-06-27T19:55:24: [ADS GATE] fromAd=true adId=1555383752809784 | commentOrigin=false 
+commentOpener=false human=true orderClosed=false turnImg=false alreadyQuoted=false tries=0 shopReplied=false | 
+lock=MGKVX6310 cap=""
+  .pm2\logs\bot-out.log:30839:2026-06-27T19:55:24: [ADS API] đọc ad 1555383752809784 LỖI: (#12) singular statuses API 
+is deprecated for versions v2.4 and higher
+  .pm2\logs\bot-out.log:30840:2026-06-27T19:55:24: [Bảo Trâm] QUẢNG CÁO adId=1555383752809784 | caps=5 imgs=3 | 
+lead="𝐌𝐎𝐍𝐀 𝐂𝐋𝐀𝐒𝐒𝐘" cap0="𝐌𝐎𝐍𝐀 𝐂𝐋𝐀𝐒𝐒𝐘 - Đ𝐀́𝐍𝐇 𝐓𝐇𝐔̛́𝐂 �" -> RA MRKVX6032 (Mona) qua tên dẫn 
+đầu (caption)
+  .pm2\logs\bot-out.log:30841:2026-06-27T19:55:24: [vision] màu (từ tên file): ĐỎ | mã MRKVX6032 | img 
+1ZvC_mZkMOSuKjHWkCiRGmVddcI1SI7fP
+  .pm2\logs\bot-out.log:30842:2026-06-27T19:55:24: [Bảo Trâm] Ad: màu nguồn = "ĐỎ" (mẫu MRKVX6032) -> gửi lại ảnh đúng 
+màu ad (khách chưa xin màu).
+  .pm2\logs\bot-out.log:30843:2026-06-27T19:55:30: [REQ] 5 request Pancake / 10s | nguồn: 
+{"list-hoithoai":3,"doc-tin-nhan":2}
+  .pm2\logs\bot-out.log:30844:2026-06-27T19:55:35:   [ảnh] album lỗi TẠM (invalid_upload_fb_attachments_result) -> 
+nghỉ 2000ms thử lại album (lần 2/5).
+  .pm2\logs\bot-out.log:30845:2026-06-27T19:55:43:   [ảnh] ALBUM 3 tấm bằng content_id (lần 2).
+  .pm2\logs\bot-out.log:30846:2026-06-27T19:55:43: IMG MRKVX6032: gửi 3 ảnh (màu: ĐỎ) -> OK.
+  .pm2\logs\bot-out.log:30847:2026-06-27T19:55:43: GỠ thẻ AI-XL ảnh: 
+{"data":[],"timestamp":1782564943380844,"success":true}
+  .pm2\logs\bot-out.log:30848:2026-06-27T19:55:43: IMG MRKVX6032: gửi ảnh -> OK (màu: ĐỎ, khớp: -). ĐÍCH: 
+1468690110033030_34409702685342704
+> .pm2\logs\bot-out.log:30849:2026-06-27T19:55:44: [Bảo Trâm] [follow-skip] KHÔNG có product | 
+conv=1468690110033030_34409702685342704 | reply="Dạ Váy Mona giá 850.000đ ạ. Chị cho em x"
+  .pm2\logs\bot-out.log:30850:2026-06-27T19:55:44: NOTE ads: KHÔNG ghi được (API có thể không hỗ trợ) | PHẢN HỒI: 
+{"success":false,"_status":404}
+  .pm2\logs\bot-out.log:30851:2026-06-27T19:55:44: [Bảo Trâm] [follow-hẹn] stage 1, sau 600s -> "Dạ không biết chị còn 
+phân vân điểm nào " | conv=1468690110033030_34409702685342704
+  .pm2\logs\bot-out.log:30852:2026-06-27T19:55:44: [Bảo Trâm] Tin từ QUẢNG CÁO -> báo giá mẫu MRKVX6032 (Mona) | 
+adId=1555383752809784 | title="".
+
+

@@ -1,0 +1,37 @@
+CẬP NHẬT BỔ SUNG ẢNH SẢN PHẨM MỚI
+
+Script này quét thư mục ảnh Google Drive, tìm ảnh MỚI (chưa có trong index)
+rồi bổ sung vào:
+  - clip_index.npz   (để bot NHẬN DIỆN mẫu mới)
+  - hash_index.json  (để bot GỬI ẢNH mẫu mới cho khách)
+Chỉ thêm ảnh mới -> nhanh, KHÔNG build lại 11.108 ảnh từ đầu.
+
+============ CHUẨN BỊ (chỉ làm 1 lần) ============
+Mở CMD trong C:\AI_HTK_BOT_V5 và cài 2 thư viện:
+   pip install google-api-python-client google-auth
+
+Đảm bảo trong thư mục đã có:
+   - google-service-account.json  (key đọc Drive)
+   - embedding_core.py            (đã có sẵn)
+   - clip_index.npz, hash_index.json (file index hiện tại)
+
+Và thư mục ảnh Drive đã CHIA SẺ cho email service account (quyền Người xem).
+
+============ CHẠY MỖI KHI THÊM MẪU MỚI ============
+   cd /d C:\AI_HTK_BOT_V5
+   python update_index.py
+
+Sẽ thấy:
+   Index hiện có: clip 11108 ảnh | hash ... ảnh
+   Drive có: 11200 ảnh
+   Cần bổ sung: 92 ảnh mới
+   ...
+   XONG. Đã bổ sung 92 ảnh. Tổng: clip 11200 | hash ...
+
+Sau khi xong -> tắt bot và mở lại (start_bot.bat) để nạp index mới.
+
+============ LƯU Ý ============
+- Lần đầu mỗi lần chạy sẽ nạp model CLIP (vài giây), bình thường.
+- Script CHỈ THÊM, không xóa. Nếu bạn muốn dọn các mã đã GỠ khỏi Drive thì cần
+  build lại từ đầu (báo mình, mình hướng dẫn).
+- Nhận diện ảnh mới phụ thuộc ảnh trong Drive rõ ràng; thêm xong test thử 1-2 mã mới.

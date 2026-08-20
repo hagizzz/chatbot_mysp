@@ -1,0 +1,970 @@
+MYS.P bot — các file đã sửa (cập nhật lần này)
+================================================
+
+CÁCH DÙNG: chép đè 4 file này vào thư mục bot, rồi:
+  - Khởi động lại bot (node bot_worker_api_v3.js)
+  - QUAN TRỌNG: khởi động lại worker vision (vì embedding_core.py đổi)
+
+FILE TRONG ZIP:
+  1) bot_worker_api_v3.js   (file chính)
+  2) recommend.js
+  3) vision_resolver.js
+  4) embedding_core.py      (worker CLIP — cần restart worker)
+
+TÓM TẮT THAY ĐỔI:
+- Không báo giá lại khi khách đang trả lời/chốt (cao-nặng, size, địa chỉ,
+  SĐT, "ship về đấy", "lấy mẫu này"); ảnh ads/comment bám theo tin không còn
+  kích báo giá lại.
+- Khách cho đủ size + SĐT + địa chỉ (+ý chốt) -> CHỐT ĐƠN luôn.
+- "Ship về đấy" -> hiểu là địa chỉ cũ; thiếu thì xin lại, không đọc được -> người thật.
+- Gửi >=2 mẫu -> hỏi size (không "lên đơn tổng N mẫu"); khử trùng mẫu trùng.
+- "Có size ko" -> "Dạ bên em có đủ size ạ, chị thường mặc size bao nhiêu ạ?"
+- "cho bảng size" -> gửi ảnh bảng size sau báo giá.
+- Ad/comment: gửi ảnh ĐÚNG MÀU bài (đọc màu trong caption, vd "hồng").
+- Comment/ads báo giá mà KHÔNG gửi được ảnh -> gắn thẻ AI-XL ảnh.
+- Nhận mẫu từ ads: ưu tiên TÊN KHÁCH GÕ (vd "Corine") trước vision -> hết báo nhầm mẫu.
+- Giữ mẫu đang khoá khi khách cho cân nặng/size (không tự lòi mẫu lạ).
+- Ảnh mẫu CHƯA có trong kho -> nâng ngưỡng tin cậy vision (MIN_SCORE 0.26, MIN_GAP 0.06)
+  để không "báo bừa"; log VISION kèm score/gap/top để tự canh ngưỡng.
+  Chỉnh nóng qua biến môi trường: CLIP_MIN_SCORE / CLIP_MIN_GAP (rồi restart worker).
+- Tắt log danh sách "Cần xử lý / (rỗng)" mặc định (bật lại: SHOW_QUEUE=1).
+
+- (bổ sung) "có quần bên trong không" bị hiểu nhầm thành địa chỉ -> tính ý chốt -> hỏi màu:
+  + intent_detector.js: "quần/quán/quan tâm" KHÔNG còn bị đọc thành địa chỉ (địa chỉ yếu phải kèm SỐ).
+  + looksLikeQuestion nhận dạng câu hỏi yes/no "co ... ko/không" (kể cả không dấu) -> không bị rơi vào nhánh chốt/hỏi màu.
+
+- (gốc lớn) Lỗi \b ASCII của JS: "Mình/Lan/Số/Màu..." bị đọc chữ đầu thành size (M/L/S) ->
+  intent = PROVIDE_SIZE -> tưởng khách đang chốt -> CHẶN báo giá -> đẩy người thật.
+  Sửa intent_detector.js: dùng ranh giới Unicode, size phải ĐỨNG RIÊNG.
+  => Khách gửi ảnh nhận ra mẫu + "Mình xin giá váy này ạ" -> BÁO GIÁ đúng (không đẩy người).
+- (nhắc lại) Ad nhận sai mẫu (Giannal->Celyne, Corine->Talia): bản vá ưu tiên TÊN KHÁCH GÕ
+  + màu theo caption/khách. Ca ảnh chụp "hôm qua" là TRƯỚC khi nạp bản vá -> nạp bản mới + restart.
+
+- (Thu Thuỷ Lương) "có quần/lót bên trong không": thêm nhận diện riêng (asksInnerLining) +
+  handler: đọc MÔ TẢ sản phẩm -> có ghi lót/quần trong thì trả lời "có"; KHÔNG ghi -> KHÔNG bịa,
+  nhờ NGƯỜI THẬT xác nhận (gắn AI-CHỜ XL). (Phân biệt với "đệm/lót NGỰC" đã có sẵn.)
+- Đã xác nhận: size S vẫn nhận đủ ("S","size S ạ","em mặc s","mình mặc size S"...);
+  bản vá ranh giới chỉ chặn đọc nhầm ("Mình","Sét"...).
+
+- (Huong Nguyen) HÀNG HOÀN sau khi đã nhận: khách "hoàn đơn rồi / gửi hoàn về rồi" (chê màu) mà bot
+  vẫn báo giá. Sửa: isReturnRefund bắt thêm "hoàn đơn/hoàn về/gửi hoàn/đã hoàn..."; thêm statedReturnAction
+  (khách ĐÃ/ĐANG hoàn-trả) -> LUÔN gắn AI-ĐƠN ƯU TIÊN (người thật) kể cả câu có "không thích",
+  KHÔNG báo giá. Câu HỎI chính sách ("có cho đổi trả không") vẫn trả lời như cũ; "hoàn hảo/hoàn toàn" không dính.
+
+- (Ngọc Huyền) Đơn ĐÃ CHỐT sẵn, khách "Mình nhận hàng thanh toán nha shop" (đồng ý COD) + gửi ảnh
+  -> bot báo giá nhầm Set Miretta. GỐC: dòng "thisTurn>0 -> orderClosed=false" + ảnh feedback khớp vision.
+  Sửa: thêm confirmsCodReceipt + handler SỚM (trước mọi nhánh ảnh/báo giá): khách đồng ý nhận+thanh toán COD
+  -> CHỈ cảm ơn, đặt orderClosed=true, TUYỆT ĐỐI không báo giá. (Câu HỎI "khi nào nhận được hàng" KHÔNG dính.)
+
+- (Quy trình "có xác nhận đơn = mã đã lên") Bot ĐÃ ghi mỗi mã đã chốt vào mem.orderedByCode (tên/màu/size,
+  bền vững, không bị xoá). Bổ sung guard §13: mã đã có trong orderedByCode -> KHÔNG báo giá lại mẫu đó nữa
+  (kể cả khách gửi lại ảnh mẫu đó). Muốn đặt THÊM -> handler "mua lại mẫu đã chốt" hỏi xác nhận (chống đơn lặp).
+  LƯU Ý: chỉ áp dụng cho đơn DO BOT chốt; đơn nhân viên lên tay trên POS thì bot chưa tự biết (cần tra POS).
+
+- (Nguyễn Trang) Khách quan tâm 1 mẫu mà bot hỏi "màu của TỪNG MÓN... lên đơn ĐỦ" (giọng nhiều món).
+  Sửa block "đơn nhiều dòng": câu hỏi màu/size theo SỐ DÒNG thực tế -> 1 mẫu thì "Dạ mẫu này mình lấy
+  màu nào ạ?" / "chị lấy size nào ạ?"; chỉ ">=2 món" mới dùng "từng món".
+  Thêm: MÀU ĂN THEO ẢNH khách gửi (mem.colorByCode/imageColor) -> nếu ảnh đã rõ màu thì KHÔNG hỏi lại màu.
+- (hỏi: bot có đọc hội thoại cũ?) Bộ nhớ LƯU ra conversation_memory.json + nạp lại khi khởi động ->
+  tắt/bật sửa code KHÔNG mất mẫu/màu/đơn đã học. (getMessages chỉ lấy tin gần đây, không phải toàn thread dài.)
+
+- (Tường Vi) Khách gửi ĐỊA CHỈ BẰNG ẢNH (card chữ) -> vision khớp MẪU (CLIP, không đọc chữ) rồi BÁO GIÁ bậy.
+  Thêm nhánh: khi vài tin shop gần đây ĐANG XIN ĐỊA CHỈ mà khách gửi ẢNH + chưa có địa chỉ
+  -> OCR (tesseract.js) đọc địa chỉ + SĐT, lưu mem + ghi chú nguyên văn cho NV đối chiếu, hỏi xác nhận,
+  gắn AI chốt. TUYỆT ĐỐI KHÔNG báo giá. OCR cần cài 1 lần: npm install tesseract.js
+  (chưa cài thì bot vẫn KHÔNG báo giá: nhắn "đã nhận ảnh địa chỉ" + gắn người thật đọc).
+
+- (ảnh 2 - gửi ảnh nhưng không gỡ thẻ) maybeSendImages + sendGallery: GỬI ĐƯỢC ẢNH -> LUÔN tự gỡ thẻ
+  AI-XL ảnh (184) (trước chỉ gỡ khi conv nằm trong hàng đợi "nợ ảnh").
+- (ảnh 1 - không nhận ra câu mà vẫn báo giá) ADS opener: thêm guard adCustTextBlocksQuote -> khi khách bấm ad
+  mà nhắn THAN PHIỀN / ĐƠN CŨ / hủy-hoàn / "lâu thế chưa có đơn" / hỏi tình trạng đơn -> KHÔNG tự báo giá
+  (nhường người thật). Câu mua/giá/tư vấn bình thường ("giá bao nhiêu", "tư vấn mẫu này") vẫn báo giá như cũ.
+
+- (Quynh Nguyen) Gửi 2 ảnh, nhận ra 1 (Giannal) + 1 chưa nhận ra: trước đây BỎ HẾT (chỉ báo chờ + AI-CHỜ XL).
+  Sửa: BÁO GIÁ mẫu đã nhận ra + gửi ảnh, SAU ĐÓ mới gắn AI-CHỜ XL cho mã còn lại (người thật bổ sung).
+
+- (Hà Te Te) Khách trả lời size bằng "Lúc M lúc L ạ" = chưa chắc size. Logic xin cao/nặng đã có sẵn nhưng
+  cờ sizeWavering KHÔNG được đặt vì "lúc M lúc L" thiếu prefix "mặc/lấy". Thêm detectsWaveringSizes bắt
+  "lúc M lúc L / khi M khi L / M hoặc/với/hay L / M-L" -> đặt sizeWavering -> bot XIN chiều cao + cân nặng
+  để tư vấn size chuẩn (đúng hướng dẫn). Câu nói rõ 1 size ("mặc M", "lấy size M") KHÔNG bị coi là lăn tăn.
+
+- (Triệu Nga / Đỗ Thị Yến) Ad báo SAI mẫu (Grace/Giannal -> Corine): caption ads bị lẫn câu rác
+  ("Dạ em rất vui ĐƯỢC hỗ trợ chị!") -> lead "được" khớp nhầm Corine, và thứ tự để CAPTION chạy TRƯỚC
+  mã trong tên ad. Sửa: (1) MÃ trong TÊN AD (exact, vd MR0VX6349=Grace) -> ưu tiên TRƯỚC caption;
+  (2) lọc từ thường tiếng Việt (được/shop/hỗ trợ/chị...) khỏi lead caption.
+- (thẻ AI-XL ảnh còn sau khi gửi ảnh) maybeSendImages: gửi được >=1 tấm = coi THÀNH CÔNG -> gỡ thẻ 184 +
+  trả true (tránh ADS/§13 gắn lại thẻ dù khách đã nhận ảnh). sendGallery cũng gỡ thẻ khi gửi được.
+
+- (Ninh Nga - ảnh SP bị nhận vơ thành địa chỉ) handler OCR địa chỉ: CHỈ coi là ảnh địa chỉ khi OCR THẬT SỰ
+  đọc ra địa chỉ; ảnh SP (vision nhận ra mẫu) -> BÁO GIÁ; OCR trống + không ra mẫu -> nhờ người thật.
+  Hết cảnh "em nhận được ảnh địa chỉ... lên đơn" khi khách chưa hề gửi địa chỉ.
+- (gắn AI-CHỜ XL rồi vẫn follow-up) sweepFollowups: bỏ follow-up nếu hội thoại đang giữ người thật
+  (cờ aiStandsOut bật khi còn thẻ CHỜ XL/ĐƠN ƯU TIÊN); đồng thời cancelFollowup khi vào nhánh giữ thẻ.
+- (câu freeship) "Để chị mua vui hơn, em xin shop freeship cho chị luôn nha" -> "Shop freeship cho chị nữa ạ".
+- (LỊCH SỬ mẫu cũ làm ads báo SAI) (1) ADS opener bước 0 chỉ đọc tin LƯỢT NÀY (không lấy 4 tin cũ);
+  (2) bấm AD MỚI (khác ad cũ) + đơn chưa chốt -> XOÁ khóa mẫu cũ để resolve theo ad mới.
+
+- (thẻ AI-XL ảnh kẹt do RACE) Cơ chế TỰ GỠ THẺ mới: mỗi vòng poll, nếu hội thoại CÒN thẻ AI-XL ảnh (184)
+  mà bot ĐÃ gửi được ảnh cho mã đang focus (mem.sentImageCodes) -> tự gỡ thẻ. Bù cho trường hợp thẻ bị gắn
+  lệch nhịp (báo giá -> gắn thẻ -> vài giây sau mới gửi được ảnh). Bot "nhận diện đã gửi ảnh" rồi mới gỡ.
+
+- (Bình Shushi) Khách hỏi bán trên SÀN SHOPEE ("Bên e bán sopi k", shoppe/shope/sopi/sốp pi...):
+  thêm asksSellOnShopee + handler -> "Dạ hiện tại shop em không mở bán trên sàn Shopee ạ, các mẫu mới
+  bên em đều cập nhật ở Facebook và TikTok ạ." + câu hành động động (_closeTail). KHÔNG nhầm với "shop" (cửa hàng).
+
+- (chỉnh) Câu Shopee BỎ "và TikTok": "...đều cập nhật ở Facebook ạ." TikTok chỉ vài mẫu -> thêm
+  asksSellOnTiktok + câu riêng "Dạ bên em có TikTok nhưng chỉ cập nhật một số mẫu thôi ạ, đầy đủ mẫu mới
+  thì chị xem ở Facebook nha" -> CHỈ nói khi khách HỎI TikTok.
+
+- (Hà Te Te - "lúc mặc L lúc M" bị báo HẾT SIZE ngay) Viết lại đúng QUY TRÌNH size:
+  Khi size khách khai KHÔNG có sẵn -> KHÔNG vội báo "không có size". Thứ tự:
+  (1) có số đo 3V -> fit size đang có; (2) có cân nặng -> resolveSizeByWeight fit size đang có;
+  (3) CHƯA có cao/nặng -> XIN chiều cao + cân nặng (chưa kết luận, KHÔNG cancelFollowup);
+  (4) ĐÃ có cân nặng/số đo mà vẫn không vừa -> LÚC ĐÓ mới báo hết size. Không khóa customerSize vào size
+  không có sẵn / đang lăn tăn.
+- detectsWaveringSizes bắt thêm "lúc MẶC L lúc M" (cho chèn mặc/lấy/mang giữa "lúc" và size) -> ['L','M'].
+
+- (BUG NẶNG: "Lỗi processOneConversation: color is not defined") Trong maybeSendImages, biến `color` và
+  `matchedId` khai báo bằng const TRONG block {} nhưng dùng Ở NGOÀI block (log/gắn màu/scheduleImageResend)
+  -> ReferenceError -> CRASH MỖI LẦN GỬI ẢNH ngay sau khi album gửi xong. Hệ quả: KHÔNG gỡ thẻ AI-XL ảnh,
+  KHÔNG ghi sentImageCodes, KHÔNG lưu màu đã gửi (chính là lý do THẺ KẸT + màu không nhớ). Đã đưa color/matchedId
+  ra phạm vi hàm -> hết crash, các bước sau (gỡ thẻ, nhớ mã, nhớ màu) chạy đủ.
+
+- (Trương Ngọc Lan - hỏi màu dù chỉ bám 1 màu) GÁC MÀU theo quy tắc shop:
+  * Cả hội thoại chỉ bám 1 MÀU (màu ảnh đã gửi / màu ad / ảnh khách) -> MẶC ĐỊNH chốt màu đó, KHÔNG hỏi
+    "lấy màu nào" -> đi thẳng luồng chốt với màu đó.
+  * Khách quan tâm >=2 màu (hỏi màu khác) HOẶC chưa rõ màu -> mới hỏi "Dạ mẫu này có màu kem, hồng, nâu...
+    chị lấy màu nào?" VÀ GỬI KÈM ẢNH ĐỦ MÀU (mỗi màu 1 tấm). multiColorInterest gắn theo ĐÚNG mã.
+  (Lưu ý: ca này lastSentImageColor rỗng là do bug 'color is not defined' vừa sửa -> nay nhớ màu lại đúng.)
+
+- (Phuong Pham - vision TRƯỢT mà vẫn báo giá) Fallback "CLIP trượt -> đọc tên từ caption/tin shop":
+  KHI KHÁCH GỬI ẢNH (imageCount>0) mà vision trượt -> KHÔNG lấy mẫu từ TIN SHOP cũ nữa (ảnh là mẫu mới
+  bot chưa nhận ra; lấy mẫu shop nhắc trước đó = báo giá nhầm). Tin shop cũ chỉ dùng khi khách KHÔNG gửi ảnh
+  (follow-up bằng chữ "giá"). Caption ad/post chỉ dùng khi đến từ ad/comment. Hết fallback -> ảnh không nhận ra
+  -> "Dạ chị đợi em kiểm tra lại..." + AI-CHỜ XL (KHÔNG báo giá).
+
+- (gắn AI-CHỜ XL mà vẫn nhắn "Dạ chị đợi em kiểm tra") Handler ẢNH KHÔNG NHẬN RA: BỎ câu "đợi em kiểm tra...",
+  chỉ gắn AI-CHỜ XL (+AI-XL ảnh nếu >=2 ảnh) rồi IM -> người thật trả lời (handoff câm, đúng quy ước).
+
+- (QUY ƯỚC THẺ) Làm rõ + sửa:
+  * AI-CHỜ XL (183) = ca bot KHÔNG xử lý được -> đẩy người thật. GỒM cả "gửi 2 ảnh nhận ra 1": báo giá mẫu
+    nhận ra + gửi ảnh -> rồi gắn AI-CHỜ XL chờ người thật (handler 4136 đã đúng).
+  * AI-XL ảnh (184) = CHỈ khi cần GỬI/BỔ SUNG ẢNH mà bot không gửi được/đủ (comment không gửi được ảnh,
+    thiếu ảnh mặt sau/đúng màu/bảng size...) -> hẹn gửi lại + tự gỡ khi gửi được.
+  * SỬA: handler ẢNH KHÔNG NHẬN RA bỏ việc gắn AI-XL ảnh khi >=2 ảnh -> chỉ gắn AI-CHỜ XL (đúng: lỗi nhận diện,
+    không phải lỗi gửi ảnh).
+
+- (AI-XL ảnh ÂM THẦM) Theo yêu cầu: gắn/gỡ thẻ AI-XL ảnh HOÀN TOÀN ÂM THẦM, KHÔNG nhắn khách gì.
+  Bỏ các câu "Dạ chị chờ em gửi ảnh ..." ở: ảnh bảng size lỗi, thiếu ảnh mặt sau, xin ảnh chi tiết,
+  chưa có ảnh đúng màu (2 chỗ). Chỉ lặng lẽ gắn thẻ; gửi được thì tự gỡ (đã có ở maybeSendImages + reconcile).
+- (chỉ gắn khi 0 tấm) maybeSendImages trả ok = (sres.ok || n>0) -> ≥1 tấm = thành công -> KHÔNG gắn AI-XL ảnh;
+  chỗ if(!ok)/if(!_adImgOk) chỉ gắn khi gửi được 0 tấm (gửi 1–2/3 cũng không gắn).
+
+- (không bắt được bài/màu, chỉ báo giá -> gửi ĐỦ MÀU) Trong maybeSendImages: khi KHÔNG có tín hiệu màu
+  (visionColor/reqColor/sourceColor đều rỗng) + mẫu NHIỀU MÀU + khách chưa chọn màu -> gửi ĐỦ TẤT CẢ MÀU,
+  MỖI MÀU 2 ẢNH (gửi theo từng cụm 3 ảnh). Sau khi gửi đủ màu -> đánh dấu multiColorInterest để lúc chốt
+  HỎI "lấy màu nào" (không mặc định 1 màu). Mẫu 1 màu / đã có tín hiệu màu -> giữ nguyên (gửi đúng màu đó).
+
+- (ảnh thi thoảng vỡ dù đã upload) upload_to_pancake.py: thêm KIỂM TRA ẢNH THẬT trước khi up:
+  bytes tải về phải MỞ ĐƯỢC bằng PIL + kích thước hợp lý mới up (trước đây chỉ check >1000 byte -> Drive trả
+  trang HTML lỗi/giới hạn vẫn bị up thành "ảnh" -> pancakeId trỏ ảnh vỡ). Tải về không phải ảnh -> BỎ QUA + ghi log,
+  KHÔNG set pancakeId rác. Sửa xong chạy: python upload_to_pancake.py --refresh <MÃ>  (tắt bot trước).
+
+- (ĐA-PAGE) Gộp nhiều page vào 1 tiến trình. Thêm page_registry.js: suy pageId từ convId (pageId_userId)
+  -> tra token page đó. Nguồn token: pages.json (thủ công) > PANCAKE_USER_ACCESS_TOKEN (account token, tự liệt
+  kê hết page + token) > PANCAKE_PAGE_ID/TOKEN (1 page, tương thích cũ).
+  * pancake_sender: endpoint/tag/unread/note suy page theo convId.
+  * pancake_reader: getConversations LẶP qua MỌI page rồi trộn theo giờ mới nhất; getMessages suy page theo convId;
+    phân biệt shop/khách theo pageId của hội thoại (không còn 1 PAGE_ID cứng); fetchPancakePost theo page.
+  * worker: await pageRegistry.init() lúc khởi động.
+  Thẻ (183/184/185) + content_id ảnh + Google Sheet + logic = DÙNG CHUNG. State 1 file (key pageId_userId, không đụng nhau).
+
+- (FIX) Khách đưa SĐT + ĐỊA CHỈ (thông tin chốt) -> bot KHÔNG báo giá lại nữa.
+  Thêm handler ngay trước router §GĐ2: khi khách VỪA cho contact (địa chỉ/sđt lượt này) và đang có mẫu:
+    * đủ (sđt + địa chỉ + size + màu) -> CHỐT ĐƠN (buildOrderConfirmation + gắn AI chốt).
+    * thiếu size -> "Dạ em nhận được thông tin của chị rồi ạ, chị cho em xin size..." (KHÔNG báo giá lại).
+    * thiếu màu -> xin màu; thiếu sđt/địa chỉ -> xin nốt phần thiếu.
+  Trước đây tin chỉ có sđt/địa chỉ không thoả customerWantsToOrder -> rơi §13 báo giá + hỏi lại size (ca Lê Thu Hiền).
+
+- (FIX) Khách HỎI CHẤT LIỆU/CẢM GIÁC VẢI ("tơ mềm hay tơ cứng", "vải mềm ko", "dày hay mỏng", "mặc nóng ko"...)
+  -> KHÔNG báo giá nữa.
+  * Mở rộng asksMaterial: bắt thêm hỏi đích danh loại vải (tơ/lụa/đũi/cotton/kate/voan/ren...).
+  * Thêm asksFabricFeel (mềm/cứng/dày/mỏng/nóng/mát/bí/nhăn...) + handler chạy TRƯỚC báo giá:
+    nói chất liệu (nếu sheet có) rồi nhường người thật phần mềm/cứng -> gắn AI-CHỜ XL (không tự đoán, không quote).
+  * Lưới chốt: câu hỏi cụ thể (không phải hỏi giá/chốt) mà KHÔNG handler nào trả được + reply rỗng
+    -> "chờ em kiểm tra lại rồi báo" (tự gắn AI-CHỜ XL) thay vì câu chung chung. Đúng ý: KHÔNG biết -> GẮN THẺ.
+  * Đã CÂN NHẮC chặn thẳng "ảnh mẫu mới + mọi câu hỏi -> không quote" nhưng GỠ bỏ: looksLikeQuestion dính
+    quirk chữ "này" (n-à-y khớp "à") -> sẽ chặn nhầm "còn mẫu này" (vốn cần báo giá). Giữ cổng quote như cũ,
+    chỉ chặn qua các handler thuộc tính đứng trước (an toàn, không đấu đá).
+
+- (FIX NẶNG) Ảnh SẢN PHẨM bị OCR đọc rác "A P.." -> tưởng địa chỉ -> "Dạ em nhận được địa chỉ... A P.. đúng không ạ?" + chốt bậy.
+  * Nhánh "ảnh địa chỉ" CHỈ chạy khi vision KHÔNG nhận ra mẫu (thisTurn===0). Ảnh nhận ra mẫu = ẢNH SẢN PHẨM -> bỏ qua nhánh địa chỉ.
+  * Siết bộ lọc địa chỉ: bỏ dấu rồi so từ khoá (phuong/quan/huyen/duong...) vì OCR hay mất dấu; cần số nhà/từ khoá + đủ dài;
+    bỏ "p."/"q." đứng lẻ (chính thủ phạm bắt nhầm "A P.."). Test: rác bị loại, địa chỉ thật (kể cả mất dấu) vẫn nhận.
+- (QUY TẮC) Khách GỬI ẢNH 1 mẫu + có câu hỏi (không phải hỏi giá/chốt/đưa contact) mà mẫu CHƯA báo giá trong 24h
+  -> BÁO GIÁ + 3 ẢNH 1 LẦN, RỒI trả lời câu hỏi (còn hàng/chất liệu/màu...). Thêm markPriced + quotedRecently:
+  trong 24h mỗi mẫu chỉ báo giá 1 lần (trừ khi khách hỏi giá). Mọi chỗ báo giá đều ghi thời gian (pricedAt).
+  * Mở rộng asksInStock bắt "này sẵn ko / set này sẵn ko e". Handler stock: vừa báo giá ở trên thì chỉ "Dạ mẫu này có sẵn ạ"
+    (không hỏi size lại -> tránh hỏi size 2 lần).
+
+- (RÀ SOÁT LÊN ĐƠN TỰ ĐỘNG) order_worker.js (tiến trình riêng) đọc hội thoại có thẻ AI chốt (182) -> order_extractor
+  bóc đơn -> pos_client.createOrder. Đã chỉnh order_extractor cho KHỚP câu xác nhận MỚI của bot:
+  * Địa chỉ: nhận cả "Giao về:" (cũ) lẫn "Địa chỉ:" (bot hiện tại).
+  * Màu: đọc thêm mem.orderColorByCode (màu KHÁCH CHỐT) + bóc màu ngay từ dòng "Sản phẩm: Tên - màu - size X".
+  * An toàn đa mẫu: tin chốt liệt kê NHIỀU mẫu 1 dòng -> KHÔNG auto (tránh sai size), nhường người thật (AI-CHỜ XL).
+  Đã test: đơn 1 mẫu ra đủ (mã/màu/size/sđt/địa chỉ/giá); format cũ vẫn chạy; đa mẫu bị chặn đúng.
+
+================= THIẾT KẾ LẠI HỆ LÊN ĐƠN TỰ ĐỘNG (chuẩn 100%, lên bằng MÃ) =================
+Mô hình mới: MỖI TIN CHỐT CỦA BOT = 1 ĐƠN (có thể NHIỀU MÓN). Lên đơn bằng MÃ (tên chỉ để tra mã).
+- order_extractor.js (viết lại buildOrderPlan -> trả {orders:[{sig,phone,address,cod,items[]}], blocked, missingGlobal}):
+  * Tách dòng "Sản phẩm:" thành TỪNG MÓN (parseProductSegments): "A - hồng - size M và A - hồng - size L"
+    -> 2 món; hỗ trợ 1 mã NHIỀU SIZE, 1 mã NHIỀU MÀU, nhiều SP khác nhau, số lượng "xN".
+  * Khách đặt LẺ TẺ nhiều lần/ngày: mỗi tin chốt 1 đơn, chữ ký sig = thời điểm tin chốt + các món
+    -> chống trùng (lên lại không nhân đôi) nhưng KHÔNG bỏ sót đơn đặt thêm.
+  * COD lấy ĐÚNG theo số bot đã chốt (không tự tính lại -> không lệch tiền/ship).
+  * SĐT phải đủ 10 số (/^0\d{9}$/). Địa chỉ phải đủ (addressComplete: có quận/huyện + phường/xã/đường/
+    thôn... hoặc số nhà + >=3 cấp) VÀ order_worker xác minh nhận diện được TỈNH/THÀNH (matchProvince).
+  * Thiếu mã/màu/size/sđt/địa chỉ -> KHÔNG lên đơn đó, đưa vào "blocked" kèm lý do.
+- order_worker.js (viết lại handleConversation):
+  * Duyệt plan.orders -> tra biến thể POS từng món -> tạo 1 đơn POS/tin chốt -> ghi nhận theo sig.
+  * BỎ chặn cũ isTagSwapped (trước đây khóa cứng hội thoại -> mất đơn đặt thêm). Giờ chống trùng theo sig
+    nên tái gắn thẻ 182 cho đơn mới sẽ được lên tiếp.
+  * Thành công hết & >=1 đơn -> GẮN thẻ AI- Đã xác nhận + GỠ thẻ AI chốt.
+  * Thiếu thông tin / không tra được tỉnh / POS lỗi -> GHI CHÚ vào hội thoại (báo NV rõ thiếu gì) +
+    gắn thẻ AI- CHỜ XL. Có CHỐNG GHI CHÚ LẶP (mỗi sig chỉ báo 1 lần).
+- order_store.js: thêm isOrderCreated/recordOrder (khóa theo sig đơn) -> chống lên trùng nhiều vòng quét.
+LƯU Ý CHUẨN HÓA (để lên 100% đúng): câu chốt của bot phải có dòng "Sản phẩm: Tên - màu - size X"
+(đủ màu nếu SP nhiều màu + size), "COD:", "SĐT:", "Địa chỉ:". Thiếu màu/size trong câu chốt -> sẽ bị chặn.
+
+================= THỐNG NHẤT QUY TẮC CHỐT ĐƠN <-> LÊN ĐƠN (chống lên lặp) =================
+Lỗi: khách đã mua hôm qua, hôm nay quay lại hỏi -> bot vẫn gắn thẻ AI chốt (182) -> nguy cơ lên đơn lặp.
+Sửa ĐỒNG BỘ 2 tầng:
+- TẦNG LÊN ĐƠN (order_extractor.js): CHỮ KÝ chống trùng đổi sang CHỈ THEO MÓN (mã:màu:size:sl),
+  BỎ thời gian. => cùng 1 đơn dù bot/khách xác nhận lại bao nhiêu lần, ngày nào, cũng là 1 chữ ký
+  -> worker thấy "đã tạo" -> BỎ QUA -> KHÔNG bao giờ lên lặp. Thêm/bớt mẫu -> chữ ký khác -> báo NV cập nhật.
+- TẦNG CHỐT (bot_worker_api_v3.js): thẻ 182 chỉ gắn khi CHỐT THẬT, không mở lại đơn đã đóng:
+  * Block "mời chốt" (~7193): thêm điều kiện !_wasOrderClosed -> đơn đã đóng thì KHÔNG reset orderClosed=false
+    + KHÔNG gắn 182 lại. (Đặt thêm mẫu thật đã được GĐ4 xử trước đó.)
+  * Block OCR ảnh địa chỉ (~4179): thêm !mem.orderClosed -> đơn đã mua thì KHÔNG tự xác nhận + gắn 182 lại.
+=> Quy tắc thống nhất: 1 HỘI THOẠI = 1 ĐƠN = ĐƠN TỔNG MỚI NHẤT. Xác nhận lại = không tạo trùng;
+   thêm mẫu trước khi worker kịp tạo = gộp 1 đơn; thêm mẫu sau khi đã tạo = NV cập nhật (không đúp tiền).
+
+================= SỬA LỖI BÁO GIÁ LẶP (sau khi đã báo giá cụm này) =================
+LỖI GỐC NGHIÊM TRỌNG: hàm markPriced() bị ĐỆ QUY VÔ HẠN (gọi lại chính nó thay vì pricedCodes.push)
+  -> markPriced LUÔN ném lỗi -> pricedAt KHÔNG bao giờ ghi -> quotedRecently() LUÔN = false
+  -> MỌI mẫu bị BÁO GIÁ LẠI vô tận; code sau markPriced (gửi ảnh / đánh dấu đã xử lý / return) bị nhảy qua
+  -> hội thoại "bung" lung tung (lặp giá, không tiến tới tư vấn màu/size).
+ĐÃ SỬA:
+- markPriced(): push đúng vào pricedCodes + ghi pricedAt (bỏ đệ quy). => 24h mỗi mẫu chỉ báo giá 1 lần.
+  Sau khi sửa: khách hỏi màu / cho cân nặng / gửi lại ảnh mẫu ĐÃ báo giá -> KHÔNG báo giá lại, đi thẳng tư vấn.
+- §13 _activeImageQuote: thêm !quotedRecently -> khách GỬI LẠI ẢNH mẫu đã báo giá thì KHÔNG báo giá lại
+  (trước đây cố ý "luôn báo giá kể cả đã báo" -> sai khi cụm đã báo xong).
+- parseWeightKg: chấp nhận gõ sai dấu "nạng"/"nang" (vd "cao 158 nạng 53" -> 53kg -> tư vấn size luôn).
+
+================= BÓC TÁCH 3 GIAI ĐOẠN: MỞ -> THÂN -> KẾT (không thụt lùi) =================
+Bổ sung getter convPhase(mem) suy từ trạng thái (KHÔNG đoán): MO (chưa báo giá) -> THAN (đã báo giá,
+chưa chốt) -> KET (đã chốt). Quy tắc: THÂN không quay về MỞ; KẾT không quay về MỞ/THÂN.
+- MỞ chỉ 1 lần/mẫu (trừ khi khách HỎI LẠI GIÁ): đã chặn ở markPriced + §13 + pre-quote, nay bịt nốt:
+  * sendBlocks (đa mẫu): mẫu đã báo giá 24h -> KHÔNG báo lại, chỉ gửi ảnh.
+  * Lưới an toàn (TAG_HUMAN+ảnh / chào hỏi / còn-mẫu-kia): thêm openerOrLead() -> đã báo giá thì DẪN DẮT
+    (không lặp giá), chưa báo thì opener đầy đủ.
+  * §13 _activeImageQuote: gửi lại ảnh mẫu đã báo giá -> KHÔNG báo lại (đã sửa ở bản trước).
+- THÂN luôn KÈM HÀNH ĐỘNG: handler CHẤT LIỆU trước đây trả lời xong bỏ lửng -> nay nối _closeTail()
+  (đẩy về hỏi size / xin sđt+địa chỉ / mời lên đơn theo trạng thái) + scheduleFollowup. Các handler khác
+  (lót trong, đệm, tiktok, ship...) vốn đã có CTA/scheduleFollowup hoặc nhường người thật khi không chắc.
+- KẾT không thụt lùi: đơn đã đóng -> không mở lại + không báo giá lại (đã chặn ở bản trước: 7193 !_wasOrderClosed,
+  OCR địa chỉ !orderClosed).
+Áp dụng ĐỒNG NHẤT mọi nguồn (ADS / bình luận / nhắn trực tiếp) vì đều đi qua cùng bộ handler + markPriced.
+
+================= KẾT: vẫn TRẢ LỜI câu hỏi của khách (chỉ không pitch lại) =================
+Làm rõ: "không quay lại" áp cho TIẾN TRÌNH BÁN (không báo giá lại, không mời chốt lại). Còn CÂU HỎI
+của khách (chất liệu, màu, size, ship...) thì LUÔN phải trả lời, kể cả khi đơn đã chốt (KẾT).
+- Kiểm: các handler TRẢ LỜI CÂU HỎI không bị gài !orderClosed -> vẫn trả lời sau chốt. Chỉ HÀNH ĐỘNG BÁN
+  (mời chốt 7201, xác nhận, xin contact, OCR địa chỉ) mới gài !orderClosed. appendCTA + scheduleFollowup
+  vốn đã tự né khi orderClosed (không nài lên đơn).
+- Sửa handler CHẤT LIỆU: chỉ nối CTA "_closeTail" khi CHƯA chốt; ĐÃ chốt -> chỉ trả lời chất liệu, KHÔNG
+  pitch "em lên đơn" lại.
+- Sửa asksMaterial: bắt được "chất gì e nhỉ" / "này chất gì" / "chất j ạ" / "chất chi" (trước đây trượt
+  -> bot không nhận ra là hỏi chất liệu nên không trả lời). KHÔNG bắt nhầm "chất lượng" / "chất giặt".
+
+================= SỬA OCR ĐỌC CARD SẢN PHẨM THÀNH ĐỊA CHỈ (ảnh giày G5H6061906-3) =================
+Lỗi: khách gửi ẢNH CARD SẢN PHẨM (có chữ "Mã: ... / Giá: ...đ / 3 màu/PU"), vision TRƯỢT (LOW_CONFIDENCE).
+Handler OCR-địa-chỉ đọc rác + chữ card thành "địa chỉ" -> "em nhận được địa chỉ..." + gắn 182. Sai hoàn toàn.
+ĐÃ SỬA (handler ảnh-địa-chỉ ~4190):
+- Phát hiện CARD SẢN PHẨM: OCR có "Mã:/Giá:/X màu//PU/size N/giá tiền x.xxx.xxxđ" -> KHÔNG phải địa chỉ.
+- Siết bộ lọc dòng địa chỉ: loại NHIỄU OCR (ký tự lạ < > = ⁄ ? | ^ ~ ` \), đòi >=2 TỪ THẬT, và đòi
+  TỪ KHÓA địa chỉ (phường/quận/đường/xã...) HOẶC (số nhà + tên tỉnh/thành). Bỏ nhánh "số+vài chữ" quá lỏng.
+- Khi KHÔNG phải địa chỉ + KHÔNG nhận ra mẫu -> nhường NGƯỜI THẬT (gắn AI-CHỜ XL) + câu "chờ em kiểm tra",
+  TUYỆT ĐỐI không bịa địa chỉ, không gắn 182.
+Đã test: rác card giày -> bị loại (ok=false); địa chỉ thật (đủ keyword / quê không số nhà / số nhà+tỉnh) -> nhận đúng.
+
+================= MỞ MÀN "lb/ib/inbox/xem/tư vấn/giá" -> GỬI GALLERY MẪU MỚI (không đẩy người) =================
+Lỗi: khách mở màn chỉ "lb" (xin nhắn tin từ ad/post) mà không nêu mẫu -> bot gắn AI-CHỜ XL (im, đẩy người).
+ĐÃ SỬA: thêm isOpenerPing() bắt mở màn trống kiểu quan tâm: lb/ib/inbox/cmt/xem/ngắm/tư vấn/quan tâm/
+giá/bảng giá/mẫu mới/còn mẫu... (đã loại câu hậu mãi/tra đơn: đơn/ship/giao/đổi/tới đâu...). Handler GALLERY
+(a3d) nay chạy cả khi AI định TAG_HUMAN -> GỬI 10 MẪU MỚI cho khách chọn (giống mời khách xem mẫu),
+chỉ 1 lần/hội thoại, vẫn né khi khách cáu/nhạy cảm hoặc đã có mẫu khoá.
+
+================= ADS + KHÁCH GỬI MẪU KHÁC -> BÁO GIÁ CẢ 2 LIỀN NHAU (chống đè focus) =================
+Lỗi (Mona/Plena): khách bấm ADS Plena nhưng gửi ảnh Mona. Lượt có ảnh -> cổng ADS bỏ qua (không set adQuotedFor)
+-> Plena "treo", báo TRỄ ở lượt sau (không ảnh: "M7 60kg") -> ĐÈ focus Mona -> "Có size L không" bị xử cho Plena.
+ĐÃ SỬA:
+- Thêm khối GHIM mẫu ADS: khi từ ADS + lượt có ẢNH mẫu khác -> ĐÁNH DẤU adQuotedFor NGAY (cổng ADS KHÔNG chạy lại
+  lượt sau -> KHÔNG đè focus, kể cả khi chưa resolve được mẫu ADS) + GHIM mẫu ADS (resolve rẻ qua ad_product_map /
+  mã trong tiêu đề ad) để báo LIỀN sau mẫu ảnh.
+- Sau khi báo giá mẫu ẢNH khách (Mona) ở §13 và ở path "ảnh mẫu mới + câu hỏi" -> BÁO LIỀN mẫu ADS đang ghim (Plena)
+  + 3 ảnh, thêm vào quotedProducts. = coi như khách gửi 2 sản phẩm, báo giá theo thứ tự, LIỀN NHAU (không tách xa).
+
+================= KHÔNG HIỂU / NHẠY CẢM -> NHƯỜNG NGƯỜI THẬT (không phun câu mẫu lạc ngữ cảnh) =================
+Ca Ngọc Huyền: khách hỏi "bên nào mới chuẩn" (so sánh shop khác) -> bot tự chế "hợp tác cùng hệ thống";
+sau "Vâng shop" -> bot phun "có kem/hồng, chưa có vàng" (chữ "vàng" dính từ tin cũ trong cụm 15s) ->
+khách "Shop lại nhắn nhầm ùi" -> bot lại trả lời lạc đề về chất vải. = bám 1 từ khoá, không đúng ngữ cảnh.
+ĐÃ THÊM 2 CHỐT CHẶN SỚM (ngay sau khi có latestText, trước mọi handler phun câu mẫu):
+- saysBotMistake(): khách báo bot SAI/LẠC ĐỀ ("nhắn nhầm","sai rồi","không liên quan","đang nói gì vậy",
+  "gửi nhầm")... -> DỪNG, gắn AI-CHỜ XL, nhường người thật (không phun thêm câu mẫu).
+- asksShopComparison(): so sánh shop khác / "bên nào chuẩn" / hàng thật-giả / chính hãng / "cũng đăng mẫu
+  giống hệt" -> gắn AI-CHỜ XL, nhường người thật (bot KHÔNG tự khẳng định quan hệ làm ăn / thật-giả).
+Đã test pos/neg: lời khen "hàng thật đẹp"/"đẹp thật", "hàng giao về đâu", "gia dụng" KHÔNG bị bắt nhầm.
+
+================= HOTFIX: _adCustNow is not defined (lặp vô hạn mọi conv ADS) =================
+Bản fix "ADS + ảnh khác -> 2 SP" lỡ XOÁ dòng `const _adCustNow = ...` -> dòng _adTextBlocks dùng nó
+-> ReferenceError -> processOnce văng mỗi vòng cho MỌI hội thoại từ ADS -> không đánh dấu xong -> quét lại
+vô hạn, tin dồn ứ. ĐÃ THÊM LẠI định nghĩa _adCustNow ngay trước _adTextBlocks.
+
+================= NỀN "AI TƯ VẤN CÓ SOI" — 3 chế độ qua env AI_REPLY_MODE =================
+Bối cảnh: bot ĐÃ có reasoning() (AI) chạy + dây chuyền soi câu (ép size, cắt 'hết hàng', chống lặp giá),
+nhưng khối (a4) đang KHOÁ: AI tự trả lời = ép đẩy người. Nay mở van CÓ KIỂM SOÁT.
+- THÊM reply_guard.js: vetAdvisoryReply(reply) -> CHẶN mọi câu AI dính TIỀN / SỐ-GIÁ / SĐT / CHỐT-ĐƠN /
+  SHIP / TỒN-KHO (mấy thứ phải do CODE). Câu tư vấn thuần (chất vải, phom, trấn an, hiểu câu lạ) -> cho qua.
+- (a4) nay theo env AI_REPLY_MODE:
+    off    (MẶC ĐỊNH) = y như cũ: AI tự chế -> đẩy người. KHÔNG đổi hành vi, an toàn tuyệt đối.
+    shadow = VẪN đẩy người, nhưng IN LOG "[AI-REPLY shadow] PASS/BLOCK | AI định nói: ..." để soi traffic thật.
+    on     = bộ soi PASS -> CHO AI tư vấn (giá/đơn vẫn do code); BLOCK/nhạy cảm/nhắn-nhầm/so-sánh -> đẩy người.
+- Giá, lên đơn, sđt, địa chỉ, lấy ảnh, báo giá: GIỮ NGUYÊN code, AI KHÔNG đụng.
+CÁCH DÙNG: chạy `AI_REPLY_MODE=shadow` vài ngày, soi log AI đúng tới đâu -> ưng thì đổi sang `on`.
+
+========================================
+[FIX] Khách gửi ảnh mẫu MỚI (vision trượt) rồi hỏi "báo giá mẫu này" -> bot báo nhầm mẫu CŨ
+(ca Quỳnh Quỳnh Lâm: gửi ảnh Galisse -> báo giá Galisse OK; gửi ảnh váy hồng khác (vision TRƯỢT,
+gap=0) -> CHỜ XL OK; rồi "Báo giá mẫu này" -> lưới đỡ "đọc TÊN từ tin shop" vớ lại Galisse cũ -> SAI).
+
+- bot_worker_api_v3.js:
+  * Sau khi tính thisTurn: nếu khách gửi ẢNH mà vision không ra mẫu nào (imageCount>0 & fromImages rỗng)
+    -> ghi mem._unresolvedImgAt = now (mẫu mới bot chưa biết). Có mẫu ra ảnh -> xoá cờ.
+  * Lưới đỡ "đọc TÊN từ TIN SHOP" (CLIP trượt + tin không có tên mẫu): THÊM chặn -> nếu vừa có ảnh trượt
+    gần đây (<15') VÀ khách nhắn "mẫu này / còn mẫu / báo giá mẫu..." -> KHÔNG vớ tin shop cũ.
+    Hệ quả: không có mẫu -> nhường người thật (CHỜ XL) thay vì báo nhầm mẫu cũ.
+
+LƯU Ý: KHÔNG do đổi AI (reply_guard). Báo giá sai đến từ CODE (dòng "Báo giá (code):"), van AI vẫn đóng.
+node --check OK | load OK.
+
+================================================================
+[2026-06-22] FIX SIZE + CHẶN VỚ NHẦM MẪU CŨ (Phuong Pham + Quỳnh Quỳnh Lâm)
+----------------------------------------------------------------
+1) [SIZE] "size S bao nhiêu KÝ mặc được" -> bot đứng hình, đẩy người thật.
+   - Gốc: regex asksWeightForSize dùng \b sau "ký"/"kí". \b sau nguyên âm
+     tiếng Việt (ý, í) KHÔNG ăn -> "bao nhiêu ký" trượt (còn "kg"/"cân" thì ok).
+   - Vá: \b -> (?![a-zà-ỹ]). Giờ "bao nhiêu ký/kí mặc được", "mấy ký",
+     "mẫu này cho bao nhiêu ký"... đều bắt được -> CODE tự trả theo bảng size
+     (S 40-48kg, M 49-55kg, L 56-59kg, Freesize 42-57kg), KHÔNG cần AI.
+
+2) [FOCUS] Quỳnh Quỳnh Lâm: gửi ảnh mẫu MỚI (vision trượt) -> lượt sau
+   "Báo giá mẫu này" -> bot báo lại mẫu CŨ (Galisse) vì lưới "đọc tên từ
+   tin shop" vớ nhầm mẫu shop nhắc trước đó.
+   - Vá: nhớ thời điểm khách gửi ảnh mà vision đọc KHÔNG ra (mem._unresolvedImgAt).
+     Lượt sau khách hỏi "mẫu này / còn mẫu / báo giá mẫu này" trong vòng 15'
+     -> KHÔNG vớ mẫu shop cũ -> nhường người thật (đúng mẫu mới bot chưa biết).
+   * Lưu ý: 2 lỗi này KHÔNG do thay đổi AI. Báo giá tới từ CODE (tag "(code)"),
+     van AI vẫn đóng (shadow). Đây là lỗi code có sẵn.
+File đổi: bot_worker_api_v3.js
+
+================================================================
+[2026-06-22] CHẶN ẢNH ĐÈ TIN KHÁCH (khách chen tin lúc bot đang gửi ảnh lẻ)
+----------------------------------------------------------------
+Bối cảnh: khách nhắn -> bot báo giá + gửi ảnh. Album = 1 phát (ok). Nhưng khi
+album rớt -> gửi LẺ từng tấm (vài giây). Trong lúc đó khách hỏi thêm -> bot
+vẫn tuôn nốt ảnh, ĐÈ lên câu hỏi khách. (poll 4s, các vòng chồng nhau.)
+
+Sửa:
+- Thêm map lastCustomerMsgAt[convId] = mốc tin khách mới nhất (cập nhật mỗi vòng poll).
+- sendImages3: lúc bắt đầu chụp mốc; trước mỗi tấm gửi LẺ, nếu vòng poll khác
+  cập nhật mốc mới hơn (khách vừa chen tin) -> NGỪNG gửi nốt (ảnh đã gửi vẫn đủ).
+  Log: "[ảnh] khách vừa nhắn tin MỚI -> NGỪNG gửi nốt (đã gửi x/y...)".
+- sendBlocks (báo giá NHIỀU mẫu): khách chen tin giữa chừng -> dừng các mẫu còn lại.
+  Log: "[block] khách vừa nhắn tin MỚI -> NGỪNG báo nốt ... mẫu còn lại".
+* Tin khách chen vào KHÔNG bị mất: vòng poll kế (4s) nhặt và trả lời.
+* Album (1 phát) không bị ảnh hưởng - vốn không gây đè.
+File đổi: bot_worker_api_v3.js
+
+================================================================
+[2026-06-22] FIX HỎI ĐỊA CHỈ SHOP (ca Minh Tú) -> hết lạc đề + lặp giá
+----------------------------------------------------------------
+Lỗi: khách hỏi "Shop ở sg hay hn", "shop ở hà nội hay sài gòn", "bên em ở sg hả"
+-> KHÔNG khớp asksShopAddress -> rớt xuống nhánh báo lại mẫu đang khoá (Corine)
+=> vừa LẶP GIÁ vừa LẠC TRỌNG TÂM (không trả địa chỉ showroom).
+Gốc: regex asksShopAddress chỉ bắt "shop ... ở đâu/nào", KHÔNG bắt
+"shop ở <thành phố>" hay "shop ở <tp> HAY <tp>".
+
+Sửa: thêm nhánh (shop|bên em|cửa hàng|showroom|store|cơ sở) + (ở|tại) +
+(sg|sài gòn|hn|hà nội|hcm|tphcm|đà nẵng|đn|hp|đâu|nào|tỉnh|miền|chỗ).
+Giờ "Shop ở sg hay hn" -> trả showroom (nhánh 6401), KHÔNG báo giá.
+Đã test: bắt đúng các câu hỏi địa chỉ shop; KHÔNG nhầm "em ở sg ship mấy ngày",
+"địa chỉ của em là... sg" (địa chỉ GIAO của khách).
+* Lặp giá ở ca này chính là hệ quả của câu địa chỉ không trả được -> fix luôn.
+File đổi: bot_worker_api_v3.js
+
+================================================================
+[2026-06-22] HẾT GỬI ẢNH VÔ NGHĨA + ĐẨY NGƯỜI KHI KHÁCH SỐT RUỘT (ca Quỳnh)
+----------------------------------------------------------------
+1) [GỬI ẢNH VÔ NGHĨA] Tin "?" -> code dò tên Galisse từ TIN SHOP cũ ->
+   thisTurn=[Galisse] (length 1) -> nhánh "§13: 1 mẫu -> LUÔN kèm 3 ảnh" với
+   force=true -> gửi LẠI bộ ảnh Galisse dù khách KHÔNG gửi ảnh, KHÔNG xin ảnh,
+   mẫu đã gửi ảnh rồi. (force=true bỏ qua guard "đã gửi".)
+   Sửa: force chỉ true khi khách THẬT SỰ gửi ảnh lượt này (imageCount>0).
+   Mẫu dò từ chữ/tin shop -> force=false -> maybeSendImages tự bỏ qua nếu đã gửi.
+
+2) [SỐT RUỘT -> NGƯỜI THẬT] Khách "Làm việc chậm thế có bán hàng không" ->
+   trước đây không có khuôn -> AI trả filler ("gửi ảnh lần nữa"). Thêm
+   saysImpatientOrSlow: chậm thế/vậy, sao chậm, làm việc/làm ăn chậm-kiểu,
+   bán hàng kiểu gì, mãi không trả lời, đợi/chờ mãi, có ai bán không... ->
+   đẩy NGƯỜI THẬT (AI-CHỜ XL). KHÔNG nhầm "giao bao lâu", "còn bán không",
+   "ship lâu không" (đã test).
+* Lưu ý gốc sâu của ca Quỳnh: khách muốn 2 MẪU + tổng tiền, bot mới nhận ra 1
+  (mẫu 2 vision trượt) -> nên hay rối. Đẩy người thật là đúng cho ca này.
+File đổi: bot_worker_api_v3.js
+
+================================================================
+[2026-06-22] KHÔNG BỎ SÓT "CHO BẢNG SIZE" KHI TIN CÒN Ý KHÁC (đọc 2 hiểu 1)
+----------------------------------------------------------------
+Lỗi (Đình Mai Phương): "B cho m bảng size ah" đi kèm tin từ QUẢNG CÁO ->
+nhánh ad báo giá Gabrielles xong RETURN luôn, NUỐT ý "cho bảng size" ->
+khách không nhận được bảng size -> người thật phải tự gửi.
+Cũng xảy ra ở luồng thường: nhánh asksSizeChart (5559) chạy TRƯỚC báo giá ->
+"ảnh mẫu + cho bảng size" thì gửi bảng size mà BỎ giá (nuốt ngược lại).
+
+Sửa:
+- Thêm helper maybeSendSizeChart(conv, custText, product, mem): khách xin bảng
+  size -> gửi ẢNH bảng size + câu hành động (theo size khách/freesize). Trả true nếu gửi.
+- Gắn rider sau khi báo giá ở: nhánh QUẢNG CÁO (ad), báo giá 1 mẫu (Báo giá code),
+  báo giá NHIỀU mẫu -> báo giá xong GỬI KÈM bảng size nếu khách xin.
+- Guard nhánh 5559: chỉ early-return bảng size khi KHÔNG có mẫu mới chưa báo giá;
+  có mẫu mới -> để báo giá chạy rồi rider gửi bảng size (đủ cả giá lẫn bảng size).
+* Nguyên tắc: 1 tin nhiều ý -> trả đủ, không nói-2-hiểu-1.
+File đổi: bot_worker_api_v3.js
+
+================================================================
+[2026-06-22] KHÁCH CHO SIZE "L em" + ĐỊA CHỈ "21A...Nhà Bè" -> BOT BÁO GIÁ LẠI (sai)
+----------------------------------------------------------------
+Ca Truc Thanh (Corae): khách nhắn "L em" rồi "21A lê thị kinh nhà bè"
+nhưng bot báo giá "Set Corae giá 990.000đ. Chị thường mặc size bao nhiêu..."
+LẶP LẠI -> vi phạm "mỗi mẫu 1 lần" + bỏ sót ý khách.
+
+Gốc:
+1) extractStatedSize TRƯỢT "L em" / "L nha em" / "L e ơi": nhánh "cả tin chỉ
+   là size" chỉ cho đuôi ạ/a/nha/nhé -> thiếu "em/e/ơi/ơi/với/đó..." ->
+   không bắt được size khách cho -> hỏi size lại.
+   Sửa: cho đuôi là CHUỖI hạt từ an toàn (em|e|ơi|oi|với|đó|í|ý|thui|thôi...).
+   Vẫn KHÔNG bắt nhầm "L áo dài", "Mẫu này", "2 mẫu".
+2) Địa chỉ "21A Lê Thị Kinh Nhà Bè" KHÔNG được nhận: detector cần từ khoá
+   đường/phố/phường hoặc tỉnh viết tắt. Địa chỉ kiểu "số nhà + tên đường +
+   quận" (không có chữ "đường") -> trượt -> _addrJustGiven=false -> bot báo
+   giá lại thay vì coi là ĐANG CHỐT ĐƠN.
+   Sửa: thêm nhận diện địa chỉ "lỏng" = bắt đầu BẰNG số nhà (21A/105/12B) +
+   >=3 từ + KHÔNG phải câu số lượng/cân nặng/giá. -> set _addrJustGiven ->
+   chạy luồng chốt/đẩy người (đã có sẵn), KHÔNG báo giá lại.
+* Khách cho size/địa chỉ = đang chốt -> đọc đúng, không báo giá lại.
+File đổi: bot_worker_api_v3.js
+
+================================================================
+[2026-06-22] PHƯƠNG ÁN B: AI ĐỌC TIN ĐẦU TIÊN (bản LAI AN TOÀN)
+----------------------------------------------------------------
+Vấn đề: bật AI nhưng AI gần như không cứu được lỗi đọc-hiểu, vì kiến trúc là
+"code chạy trước, AI chạy chót" -> tin nào bị 1 khuôn code nhận là return luôn,
+AI không được gọi (vd "L em", "21A...Nhà Bè" bị code đọc sai -> báo giá lại).
+
+Đảo vai (an toàn): THÊM bộ AI ĐỌC ĐẦU TIÊN -> CHỈ GẮN NHÃN, code vẫn LÀM.
+- File mới ai_intent.js: classifyIntent(text, lockedProductName, lastShopLine)
+  -> JSON {kind,size,is_address,has_phone,wants_order,asks_price,asks_size_chart}.
+  AI KHÔNG chế giá/đơn/sđt. Lỗi/timeout(6s)/tắt -> {ok:false} -> chạy thuần code.
+- bot_worker: ngay sau khi dựng thisTurn/latestText (trước chuỗi handler), gọi
+  classifyIntent. Dùng nhãn để ĐIỀN chỗ code trượt:
+   (1) size: AI bắt được size mà extractStatedSize trượt -> set mem.customerSize.
+   (2) địa chỉ: AI nhận ra địa chỉ giao -> set mem._addrJustGiven (=> luồng chốt,
+       KHÔNG báo giá lại). Lưu mem._aiIntent = nhãn (để các bước sau dùng).
+  Log: "[AI-READ] nhãn=... size=... addr=... order=...".
+- env AI_READ_FIRST=on (mặc định on; đặt off để tắt, chạy thuần code).
+- 2 LỚP CHẶN GIỮ NGUYÊN: reply_guard veto + sanitize. AI vẫn KHÔNG được nói tiền/đơn.
+- test_read.js: chạy với key thật để xem AI gắn nhãn "L em"/"21A..."/"cho bảng size"... đúng chưa.
+File mới: ai_intent.js, test_read.js | File đổi: bot_worker_api_v3.js
+
+================================================================
+[2026-06-22] COMMENT KHÔNG ĐỌC ĐƯỢC (KHÁCH-comment=0) -> bot đứng chờ
+----------------------------------------------------------------
+Triệu chứng: hội thoại type=COMMENT (khách bình luận) nhưng reader trả về 0 tin
+comment -> log "COMMENT: chưa có comment id / kênh nhắn riêng -> chờ. post: null"
++ "KHÁCH-comment=0 -> không có tin khách đọc được" -> bot không có gì để trả.
+Gốc: endpoint /conversations/{id}/messages trả comment ở field khác, hoặc nội
+dung comment nằm ở mảng khác (comments/activities) chứ không phải messages.
+(Đây là lỗi ĐỌC API Pancake, không tái hiện được ngoài máy thật.)
+
+Làm 2 việc:
+1) VỚT AN TOÀN: normalizeMessages giờ thử thêm field content/text/data.message/
+   comment.message/message_text khi original_message & message đều rỗng. Nếu text
+   comment nằm ở mấy field này -> comment CHẠY NGAY, không cần làm gì thêm.
+2) DUMP chẩn đoán: set DUMP_COMMENT=1 -> với mỗi hội thoại COMMENT, in TOÀN BỘ cấu
+   trúc thô (keys + JSON tin cuối + các mảng comments/activities/post/data) để biết
+   CHÍNH XÁC text comment nằm đâu -> chỉnh đúng (không đoán).
+File đổi: pancake_reader.js
+
+================================================================
+[2026-06-22] KHÁCH GỬI ẢNH HỒNG NHƯNG BOT "0 ẢNH" -> không bám màu
+----------------------------------------------------------------
+Ca Nguyễn Quỳnh Như: "Set này bn ạ" + (ảnh hồng trên Pancake) NHƯNG log:
+"Khách gửi 0 ảnh | nhận diện 0 từ ảnh 0 từ chữ | FOCUS no_detect | ad_ids=[]"
+-> bot KHÔNG đọc được ảnh/màu/ad nào -> gửi đại gallery 10 mẫu (không bám màu).
+Tức KHÔNG phải nhận sai màu, mà KHÔNG ĐỌC ĐƯỢC ảnh khách (hoặc ảnh đó là creative
+quảng cáo phía shop). Cần biết "hồng" trong API là ảnh khách up hay ảnh ad.
+=> Mở rộng DUMP_RAW: in thêm ATTACHMENTS (type + url) của mỗi tin -> thấy rõ ảnh
+   khách / ad_click / sticker. Bật: set DUMP_RAW=1 (lọc: set DUMP_CONV=<id>).
+File đổi: pancake_reader.js
+
+================================================================
+[2026-06-22] KHÁCH GỬI ẢNH GIỮA LÚC BOT ĐANG GỬI ẢNH -> tin/ảnh khách bị bỏ quên
+----------------------------------------------------------------
+Đúng như phân tích: "Set này bn ạ" -> bot gửi gallery 10 mẫu. ĐANG gửi dở thì
+khách gửi ảnh (hồng) -> bot DỪNG ở 1/10 (đúng, để không đè tin khách) và định
+"nhường lượt sau". NHƯNG lượt sau list thấy last_sent_by=Public API (bot gửi ảnh
+cuối) -> LỌC RỚT "shop nhắn cuối coi như đã trả" -> ảnh khách KHÔNG bao giờ được xử.
+
+Sửa: thêm Set forceRecheckConvs. Khi bot DỪNG gửi giữa chừng vì khách chen tin
+(gallery / sendImages3 / sendBlocks) -> add convId vào Set -> bộ lọc chọn hội thoại
+GIỮ LẠI conv đó (dù list coi là "shop nhắn cuối") -> lượt poll sau ĐỌC LẠI, lúc này
+ảnh khách đã có trong messages -> vision đọc mẫu+màu -> trả lời + gửi ảnh ĐÚNG màu.
+Cờ xoá ngay khi conv được đưa vào xử (1 lần; nếu lại bị ngừng sẽ set lại).
+File đổi: bot_worker_api_v3.js
+
+================================================================
+[2026-06-22] GỐC THẬT: COMMENT ĐỌC/GỬI SAI PAGE -> "toàn bộ bình luận ko đọc được"
+----------------------------------------------------------------
+PHÁT HIỆN: hội thoại COMMENT có id kiểu "POSTID_xxx" (vd 1567293531618806_9319...),
+KHÁC inbox ("PAGEID_userId"). Hàm pageIdFromConv lấy phần trước "_" -> với comment
+ra POST id (1567293531618806) CHỨ KHÔNG phải page id (1468690110033030).
+-> getMessages gọi /pages/<POSTID>/... = SAI PAGE -> API rỗng -> KHÁCH-comment=0
+   -> bot không có comment id -> "chưa có comment id -> chờ" với MỌI comment.
+-> gửi (pancake_sender._pc) cũng sai page tương tự.
+-> PID phân biệt shop/khách trong reader cũng bị nhầm cho comment.
+
+SỬA (3 chỗ):
+1) pancake_reader.getMessages(conversationId, pageIdHint): ưu tiên page_id THẬT từ
+   list; nếu pid suy ra KHÔNG phải page đã đăng ký -> dùng page đã biết (1 page -> nó).
+2) pancake_reader.readConversation: tính PID = page THẬT (page_id từ convMeta hoặc
+   fallback) -> getMessages + phân biệt shop/khách đều đúng cho comment.
+3) pancake_sender._pc: cùng fallback -> GỬI trả lời comment đúng page/token.
+=> Comment giờ đọc được nội dung + comment id -> bot chạy luồng comment (nhắn riêng
+   báo giá + ảnh) như thiết kế.
+File đổi: pancake_reader.js, pancake_sender.js
+
+================================================================
+[2026-06-22] COMMENT REPLY: thêm post_id để chắc có banner "phản hồi bình luận"
+----------------------------------------------------------------
+Banner "Bạn đang phản hồi bình luận ... (Link Facebook)" do FB gắn khi gửi qua
+private_replies CÓ KÈM post_id. Log cũ "post: null" -> nhiều ca thiếu post_id ->
+không có banner (rơi xuống gửi inbox thường).
+Tận dụng: id hội thoại comment = "POSTID_xxx" -> POSTID chính là post_id. Nếu reader
+chưa ra postId -> lấy luôn từ id hội thoại (khác page id) -> private_replies có post_id
+-> FB gắn banner. (Log thêm: "post_id: ... | can_reply_privately: ...".)
+LƯU Ý: banner còn phụ thuộc FB cho phép trả lời riêng (can_reply_privately). Nếu hết
+cửa sổ này thì FB từ chối -> bot gửi inbox thường (không banner) — đây là giới hạn FB.
+File đổi: bot_worker_api_v3.js
+
+================================================================
+[2026-06-22] LÀM RÕ: trả lời CÔNG KHAI dưới comment (định hướng vào inbox) ĐÃ CÓ SẴN
+----------------------------------------------------------------
+Khối 3900 (POST_PUBLIC_COMMENT) đã có sẵn trong code gốc: sau khi nhắn riêng (DM),
+bot trả lời CÔNG KHAI dưới bình luận "chị check tin nhắn shop vừa gửi nhe ạ..." để
+lùa khách vào inbox. KHÔNG cần thêm mới.
+LÝ DO trước đây nó không chạy = CÙNG GỐC lỗi page-id:
+ - comment đọc về rỗng -> commentId=null -> khối comment RETURN ngay ở "chưa có
+   comment id -> chờ" -> không tới được DM lẫn reply_comment công khai.
+ - kể cả tới thì replyComment cũng gửi SAI PAGE -> fail.
+=> Fix page-id (getMessages/readConversation/_pc) đã sửa luôn: commentId đọc được +
+   replyComment gửi đúng page -> DM + trả lời công khai (định hướng inbox) đều chạy.
+(Gói đồng bộ đủ file: bot_worker_api_v3.js, pancake_reader.js, pancake_sender.js, ai_intent.js)
+
+================================================================
+[2026-06-22] "Bắt đầu"/"ib" + mẫu CŨ (>24h) -> coi như khách MỚI, gửi gallery mẫu mới
+----------------------------------------------------------------
+Ca Anna Tan: khách gõ "Bắt đầu" hôm nay, hội thoại có mẫu Set Vera báo giá từ 30/4-1/5
+(~2 tháng trước) -> bot lôi Set Vera ra báo giá lại (sai). Phải: opener + mẫu cũ >24h
+-> coi như khách MỚI -> gửi GALLERY MẪU MỚI (khối a3d cột T isNew đã có sẵn).
+
+HỎI: "làm sao biết mẫu quá 24h?" -> dùng mem.pricedAt[code]: markPriced lưu Date.now()
+mỗi lần báo giá. Nếu Date.now() - pricedAt[code] > 24h => mẫu CŨ.
+
+SỬA: sau khi resolve productInfo (single-focus), thêm khối:
+  - opener = "bắt đầu/bat dau/get started/menu/ib/inbox/start" HOẶC isGreetingPing/isOpenerPing
+  - _noNewModelThisTurn = thisTurn rỗng & imageCount=0 (mẫu CHỈ đến từ khoá/lịch sử, không phải tin này)
+  - _stale = pricedAt[code] > 0 && (now - pricedAt > 24h)
+  -> nếu (opener & noNewModel & stale): productInfo=null, currentProduct=null, quotedProducts=[],
+     commentPostProduct=null, newGallerySent=false -> rơi vào khối a3d gửi gallery MẪU MỚI.
+AN TOÀN: chỉ xoá khi pricedAt CÓ và >24h (mẫu vừa báo giá vài phút trước -> GIỮ, không phá
+hội thoại đang chạy); "Set này bn ạ"/"giá" KHÔNG phải opener nên vẫn báo giá bình thường.
+Log: '[Bảo Trâm] "Mở đầu" + mẫu khoá <code> đã CŨ (...>24h) -> coi như khách MỚI: ... gửi gallery mẫu mới.'
+File đổi: bot_worker_api_v3.js
+
+================================================================
+[2026-06-22] LUỒNG ADS "báo giá, báo giá" — chặn handler size + xoá khoá mỗi lượt
+----------------------------------------------------------------
+SO SÁNH (manh mối từ user):
+ - Linh Ngân (tin THƯỜNG) "50ky mặc size nào": FOCUS text_confirm lock=Plena switch=false
+   -> "Tư vấn size bằng code: 50kg -> M" ✓ (trả lời đúng).
+ - Phuong Pham (ADS) "50 ký mặc size nào": báo giá lại + "size S" (sai), lặp 2 lần.
+GỐC: hội thoại ads có NHIỀU ad_ids; reader nhặt id KHÁC nhau mỗi lượt -> khối "Bấm AD MỚI"
+(3926) tưởng ad mới -> XOÁ khoá mẫu -> resolve lại -> switch=true -> "Hỏi giá (mẫu mới gửi)"
+-> báo giá lại; KHÔNG bao giờ tới handler "Tư vấn size".
+SỬA: tính _adFollowupQ = khách HỎI TIẾP về mẫu (asksWeightForSize / extractStatedSize /
+asksSizeChart / asksMaterial / asksShopAddress). Nếu (_adFollowupQ && đã có mẫu khoá):
+ - KHÔNG chạy "Bấm AD MỚI" (không xoá khoá).
+ - KHÔNG chạy cổng ad-quote (không báo giá lại).
+ -> rơi xuống handler thường (size...) trả lời ĐÚNG, y như tin thường.
+Lượt ĐẦU (chưa có mẫu khoá) vẫn báo giá bình thường (guard có "&& mem.currentProduct").
+
+[2026-06-22] "Bắt đầu" + mẫu cũ: thêm tín hiệu KHOẢNG CÁCH thời gian (fix Anna Tan)
+----------------------------------------------------------------
+Fix trước chỉ dựa mem.pricedAt -> ca Anna Tan mẫu đọc từ tin shop CŨ (text_first, lock=-,
+pricedAt rỗng) nên KHÔNG xoá -> vẫn báo giá Vera. Thêm _gapStale: nếu tin "Bắt đầu" cách
+lần hoạt động trước >24h (xét inserted_at các tin, bỏ tin cùng phiên <10p) -> coi mẫu CŨ.
+_stale = pricedStale HOẶC gapStale. Khách chat liên tục thì gap nhỏ -> GIỮ (không phá phiên).
+File đổi: bot_worker_api_v3.js
+
+================================================================
+[2026-06-22] FIX ADS (vòng 2): "50 ký mặc size nào" vẫn báo giá -> sửa dứt điểm
+----------------------------------------------------------------
+Lỗi fix vòng 1 chưa ăn vì 2 chỗ:
+ (1) asksWeightForSize("50 ký mặc size nào") = FALSE (regex chỉ bắt "bao nhiêu ký",
+     không bắt "50 ký ... size nào") -> _adFollowupQ rỗng -> guard không chặn.
+ (2) lock (mem.currentProduct) bị rỗng lúc vào lượt (đã bị xoá trước đó) -> dù chặn
+     báo giá thì FOCUS vẫn switch=true -> "Hỏi giá mẫu mới".
+SỬA:
+ - _adFollowupQ thêm: parseWeightKg (khai cân "50 ký" -> 50), asksWhichSizeAdvice,
+   asksWhatSize. -> "50 ký mặc size nào" giờ = follow-up.
+ - _adHadModel = mem.currentProduct HOẶC mem.pricedCodes.length (đã báo giá -> còn dấu
+   vết dù lock bị xoá). _adSkipForFollowup = _adFollowupQ && _adHadModel.
+ - KHÔI PHỤC lock: nếu _adSkipForFollowup mà lock rỗng -> set lại mem.currentProduct từ
+   pricedCodes gần nhất (ensureCatalog.byCode) -> FOCUS = text_confirm switch=false ->
+   handler "Tư vấn size bằng code: 50kg -> M" chạy (giống tin thường Linh Ngân).
+ - Cả "Bấm AD MỚI" (xoá khoá) lẫn cổng ad-quote đều guard bằng !_adSkipForFollowup.
+Lượt ĐẦU (chưa báo giá mẫu nào, pricedCodes rỗng) -> vẫn báo giá ad bình thường.
+File đổi: bot_worker_api_v3.js
+
+================================================================
+[2026-06-22] Cắt câu "đoán size lịch sử" -> chỉ trả size chuẩn + câu hành động
+----------------------------------------------------------------
+Câu cũ (khi khách từng tự khai size khác với cân nặng):
+"Dạ với 50kg thì chị mặc size M là chuẩn form nhất ạ. Em thấy trước đó chị hay mặc
+ size S, chắc mình thích mặc thoải mái dễ chịu hơn ha ạ? Để em lên đơn cho vừa form mình nha"
+-> đoán mò ("trước đó chị hay mặc S, chắc thích thoải mái") dễ sai/kém duyên.
+SỬA thành:
+"Dạ với 50kg thì chị mặc size M là chuẩn form nhất ạ. <câu hành động>"
+  + câu hành động: có sđt+địa chỉ -> "Để em lên đơn gửi về địa chỉ cũ cho mình nhe ạ."
+                   chưa có        -> "Chị cho em xin sđt và địa chỉ em lên đơn cho mình nhe ạ."
+(Bỏ biến order/lighter/guess không dùng.)
+File đổi: bot_worker_api_v3.js
+
+================================================================
+[2026-06-22] CO GIÃN trả NGƯỢC: đọc đúng "không co giãn" nhưng dịch ra "có co giãn"
+----------------------------------------------------------------
+PHÂN BIỆT: code ĐỌC ô cột S đúng ("KHÔng co giãn" = giá trị thô, log in ra đúng).
+Lỗi ở bước DỊCH ô -> câu: stretchReplyFromSheet dùng normalizeViet (KHÔNG bỏ dấu) ->
+"khÔng" còn dấu -> /khong/ TRƯỢT -> rớt xuống gặp "co giãn" -> /co/ khớp -> trả NGƯỢC
+"CÓ co giãn". (Màn hình: "Set Clarine có co giãn..." dù file ghi KHÔNG co giãn.)
+SỬA: bỏ dấu THẬT bằng NFD ( .normalize("NFD").replace(/[\u0300-\u036f]/g,"") + đ->d )
+-> "không co giãn" -> "khong co gian" -> /khong/ khớp -> trả "không co giãn" ĐÚNG.
+"CÓ CO GIÃN" -> "co co gian" -> trả "có co giãn". Ô trống -> null -> CHỜ XL (không bịa).
+Áp cho CẢ 2 đường gọi stretchReplyFromSheet (router ~4791 + handler ~6031).
+File đổi: bot_worker_api_v3.js
+
+================================================================
+[2026-06-22] AI bịa "set liền" -> DẠY AI + thêm CODE handler cho set/váy/bán riêng
+----------------------------------------------------------------
+Ca Phuong Pham: khách "quần riêng hay s ạ" -> AI (AI-REPLY on) tự bịa "Set Clarine là
+BỘ LIỀN, không bán quần riêng" -> SAI (set của shop là set RỜI: áo+quần, chỉ là không
+bán lẻ). asksSkirtOrSet không bắt "quần riêng" nên rớt xuống AI -> AI đoán linh tính.
+
+QUY TẮC (user chốt): set = SET RỜI (set váy=áo+chân váy, set quần=áo+quần); váy = VÁY LIỀN;
+đã là set thì KHÔNG bán rời (bán nguyên set). KHÔNG được nói set là "bộ liền".
+
+SỬA 2 tầng:
+ 1) DẠY AI (reasoning_engine.js, rule 13c): nêu rõ set=rời, váy=liền, set váy/set quần
+    gồm gì, set không bán lẻ -> khách hỏi bán lẻ thì "bán nguyên set, không bán lẻ"; CẤM
+    nói "bộ liền"; không chắc -> TAG_HUMAN (không đoán).
+ 2) CODE handler (bot_worker): thêm asksBuySeparate (bắt "quần riêng", "bán/mua lẻ",
+    "tách món"...) + đưa vào asksSkirtOrSet -> handler set/váy trả theo CỘT D (category):
+      - set + hỏi bán riêng -> "là set, bán nguyên set chứ không bán lẻ từng món..."
+      - set (hỏi cấu trúc)  -> "là set rời ạ..."
+      - váy                 -> "là váy liền ạ..."
+    Chặn TRƯỚC AI nên không cần AI đoán nữa.
+File đổi: bot_worker_api_v3.js, reasoning_engine.js
+
+================================================================
+[2026-06-22] Set/váy answer: câu hành động TUỲ trạng thái (chống lặp "tư vấn size")
+----------------------------------------------------------------
+Lỗi: khách ĐÃ được tư vấn size (M) ở trên, nhưng câu trả set lại đính "Chị ưng em tư
+vấn size lên đơn..." -> quay lại vòng tư vấn size = luẩn quẩn.
+SỬA: câu hành động (_cta) theo trạng thái:
+  - mem.customerSize ĐÃ có:
+      + có sđt+địa chỉ -> "Để em lên đơn gửi về địa chỉ cũ cho mình nhe ạ."
+      + chưa          -> "Chị cho em xin sđt và địa chỉ em lên đơn cho mình nhe ạ."
+  - chưa có size      -> "Chị ưng em tư vấn size lên đơn cho mình nha." (như cũ)
+Áp cho cả 3 câu (bán riêng / set rời / váy liền). Log thêm size=... để soi.
+File đổi: bot_worker_api_v3.js
+
+================================================================
+[2026-06-22] Nhận ra câu hỏi "phần dưới là quần?" (thay vì báo giá)
+----------------------------------------------------------------
+Thêm asksBottomPart (bắt "phần dưới là quần em nhỉ", "bên dưới là gì", "dưới là quần
+hay váy"...) + đưa vào asksSkirtOrSet. Handler trả theo cột D:
+  - set + cột D có "quần"     -> "phần dưới là quần ạ"
+  - set + cột D có "chân váy" -> "phần dưới là chân váy ạ"
+  - set (không rõ)            -> "set rời gồm áo và phần dưới ạ" (không khẳng định quần/váy)
+  - không set                 -> "váy liền 1 món, không tách phần dưới"
+Câu hành động vẫn TUỲ trạng thái size (chống lặp tư vấn size).
+LƯU Ý (chưa fix): tin TRẢ LỜI LẠI ảnh cũ của shop + vision trượt -> reader fallback vớ
+caption AD cũ (Genessa) -> nhận NHẦM mẫu. Cần DUMP_RAW conv để xem cấu trúc tin-được-trả-lời
+rồi mới chặn đúng (đang chờ log).
+File đổi: bot_worker_api_v3.js
+
+================================================================
+[2026-06-22] LƯỢT NHIỀU CÂU HỎI -> để AI GỘP trả ĐỦ ý (không đọc 2 hiểu 1)
+----------------------------------------------------------------
+Ca Phuong Pham: khách hỏi "Đầm liền hay rời? Có lót ko e" + "chất gì" -> code chỉ trả
+"váy liền" rồi return, BỎ lót + chất liệu. Vi phạm luật "trả đủ ý".
+Kiến trúc code-first: mỗi handler trả 1 ý rồi return -> không gộp được nhiều ý.
+
+SỬA (theo ý user: để AI gộp cho mượt, bắt buộc đủ ý, dùng data đã dạy):
+ 1) DẠY AI (reasoning_engine rule 14b): khách hỏi NHIỀU ý 1 lượt -> trả ĐỦ tất cả trong
+    1 tin gộp; mỗi ý lấy ĐÚNG trường data (material/stretch/category); co giãn theo trường
+    stretch không nói ngược; set=rời/váy=liền (13c); lót chỉ nói có nếu description ghi,
+    không thì "em kiểm tra lại báo ngay"; ý nào không có data -> không bịa. Kết câu hành
+    động ngắn hợp ngữ cảnh (không lặp tư vấn size).
+ 2) CODE (bot_worker): cờ _multiAttrQ = (>=2 câu hỏi thuộc tính: material/stretch/lót/
+    breastpad/set) && có productInfo && AI_REPLY_MODE=on && không nhạy cảm. Khi bật ->
+    CHẶN các handler đơn lẻ (material router, stretch router, asksSkirtOrSet, asksInnerLining,
+    asksBreastPad) -> chảy xuống a4 (reasoning) để AI gộp. Guard (reply_guard) vẫn soi;
+    AI bịa/đụng số -> BLOCK -> đẩy người (an toàn). AI_REPLY_MODE=off thì giữ nguyên cũ.
+File đổi: bot_worker_api_v3.js, reasoning_engine.js
+
+================================================================
+[2026-06-22] Gộp câu hỏi (vòng 2): chặn NỐT các handler thuộc tính còn sót
+----------------------------------------------------------------
+Vòng 1 bật được _multiAttrQ nhưng vẫn lọt: chất liệu & co giãn mỗi cái có 2 handler,
+mới chặn router (tầng 1), còn handler tầng 2 chưa chặn -> vẫn trả 1 ý (Silk Chiffon).
+SỬA: gate thêm bằng !_multiAttrQ:
+  - material handler #2 (6118)   - stretch handler #2 (6090)   - fabric-feel (6106)
++ thêm asksFabricFeel vào bộ đếm _attrQ.
+Giờ ĐỦ 8 handler thuộc tính đều bị chặn khi lượt có >=2 câu hỏi -> chảy xuống AI gộp.
+File đổi: bot_worker_api_v3.js
+
+================================================================
+[2026-06-22] "2 lớp" = CÓ LÓT (cột R padInfo) — bổ sung cả code lẫn AI
+----------------------------------------------------------------
+User chốt: cột R ("ĐỆM NGỰC, lót, khóa" = padInfo) ghi "2 LỚP" -> hiểu là CÓ LÓT.
+SỬA:
+ 1) CODE handler asksInnerLining: thêm "2 lop / hai lop / 02 lop" vào nhận diện CÓ lót
+    (đọc description + material + padInfo). Test: "2 LỚP" -> CÓ LÓT; "1 lớp"/"KHÔNG CÓ
+    LÓT" -> chưa rõ (giữ negation).
+ 2) AI: đưa thêm trường padInfo (cột R) vào dữ liệu sản phẩm (buildProductSummary) +
+    dạy rule 14b: "2 lớp = có lót"; đệm/mút ngực cũng đọc padInfo; không ghi -> "kiểm
+    tra lại báo ngay" (không bịa).
+File đổi: bot_worker_api_v3.js, reasoning_engine.js
+
+================================================================
+[2026-06-22] (1) Gắn người thật IM LẶNG  (2) "bên ngoài có ngắn ko" bị nhầm so giá
+----------------------------------------------------------------
+(1) GẮN NGƯỜI THẬT IM LẶNG: handoff "so giá/chê giá sau giải thích" trước đây nhắn
+   "Dạ để em báo bạn phụ trách... báo lại chị ngay" rồi mới tag. User: gắn thẻ thì IM
+   LẶNG, không báo chờ/báo ai. -> bỏ câu nhắn, CHỈ tagChoXuLyVaUnread (2 chỗ: priceComparison
+   + priceObjection). Dạy AI rule 14d: TAG_HUMAN thì để reply RỖNG (trừ khách cáu giận).
+
+(2) "bên ngoài có ngắn ko" (lớp NGOÀI váy có ngắn không) bị priceComparison khớp nhầm
+   "(bên ngoài)...(có)" -> tưởng "chỗ khác có giá rẻ" -> nhánh so giá -> handoff.
+   SỬA:
+   - priceComparison: bỏ "có" lỏng + thêm guard: câu có (ngắn/dài/lớp/lót/form/dáng/chất/
+     vải/co giãn) -> KHÔNG phải so giá. Test "bên ngoài shop 700k rẻ hơn" vẫn = so giá.
+   - Thêm worriesGarmentShort + handler trấn an: "Dạ mẫu này được thiết kế riêng để tôn
+     form... Độ dài vừa phải, không quá ngắn... kín đáo lịch sự lắm chị." (gated !_multiAttrQ,
+     + vào bộ đếm multi-attr). Dạy AI rule 14c tương ứng.
+File đổi: bot_worker_api_v3.js, reasoning_engine.js
+
+================================================================
+[2026-06-22] AI lo tới khâu CUỐI (xin sđt/địa chỉ, dẫn chốt) — CHỈ chừa BÁO GIÁ cho code
+----------------------------------------------------------------
+User: để AI phụ trách tới khâu cuối, chỉ trừ phần báo giá, miễn kiểm soát chặt.
+Trước đây guard chặn cả "lên đơn/chốt" -> "oki e" bị đẩy người.
+
+A) HANDLER CODE "đồng ý" (lưới deterministic, đặt sát trước AI):
+   saysAgree() bắt "ok/oki/đồng ý/chốt/lấy/ừ/vâng" (câu NGẮN, KHÔNG kèm câu hỏi/số/size).
+   Dẫn theo TRẠNG THÁI: chưa có size -> hỏi size (freesize -> hỏi cao/nặng); có size, thiếu
+   liên hệ -> xin sđt+địa chỉ; đủ -> "em lên đơn gửi địa chỉ cũ". Phân biệt ok-mở/thân/kết
+   bằng trạng thái (pricedCodes/customerSize/phone/address), không bằng chữ "ok". Code viết
+   câu -> không bị guard chặn. Đơn THẬT vẫn do người/auto-order.
+
+B) NỚI GUARD (reply_guard) cho AI dẫn chốt:
+   - CHO PHÉP: "lên đơn / chốt cho / chốt nha / xin sđt + địa chỉ".
+   - VẪN CHẶN CỨNG: giá tiền/số giá (BÁO GIÁ = code), tổng đơn/tổng tiền/cọc/STK/chuyển khoản,
+     "đã lên đơn/đã đặt/đã xác nhận" (tự nhận đơn xong), echo SĐT, phí ship, tồn kho.
+   Dạy AI rule 0c3: được dẫn tới khâu cuối nhưng KHÔNG tự viết giá/tổng/ship/STK/đọc lại sđt,
+   KHÔNG tự nhận "đã lên đơn". Chỉ DẪN, không chốt tiền.
+   Test guard: 4 câu dẫn chốt PASS; 7 câu giá/đơn-xong/sđt/ship/tồn BLOCK.
+File đổi: bot_worker_api_v3.js, reasoning_engine.js, reply_guard.js
+
+================================================================
+[2026-06-22] CHIẾN DỊCH MGKVX6310: ghim ảnh ưu tiên (ảnh đã có sẵn trong hash_index)
+----------------------------------------------------------------
+Yêu cầu user:
+ - Gửi màu HỒNG MGKVX6310 -> luôn ưu tiên 3 ảnh (3 link Drive), đúng thứ tự.
+ - Mỗi màu tối đa 3 ảnh, KHÔNG trùng; khách xin thêm mới gửi tiếp ảnh khác.
+ - Gửi "ảnh mới": MGKVX6310 ưu tiên đầu tiên, mặc định 2 hồng + 1 kem.
+
+SỬA (product_images.js):
+ - CAMPAIGN_PIN: MGKVX6310 / hồng -> 3 file Drive (ghim theo FILE ID, khớp downloadUrl
+   lh3.../d/{ID}; 3 file đều có sẵn = 3 ảnh MGKVX6310-HONG-AI). campaignPins() resolve ra
+   {contentId,url}, dedupe, tối đa 3.
+ - imageItemsByColor + contentIdsByColor: ghim ảnh chiến dịch LÊN ĐẦU, không trùng, cắt theo limit.
+ - CAMPAIGN_DEFAULT: gửi MGKVX6310 KHÔNG nêu màu -> 2 hồng (ghim) + 1 kem.
+SỬA (bot_worker): gallery mẫu mới (mở đầu) -> ghim MGKVX6310 ĐẦU danh sách (kể cả không gắn
+   cờ mẫu mới), còn hàng mới ghim. buildGallery tự lấy ảnh hồng cho mẫu này (qua default).
+
+Test: hồng -> đúng 3 file 1GH/1hD/1S9 theo thứ tự; null màu -> 2 hồng + 1 kem; KEM/mã khác
+   không ảnh hưởng.
+LƯU Ý: ảnh Drive gửi qua URL lh3 (đã có normDriveUrl). File phải đang chia sẻ công khai.
+File đổi: product_images.js, bot_worker_api_v3.js
+
+================================================================
+[2026-06-22] LỖI NẶNG: chốt đơn với ĐỊA CHỈ RÁC / thiếu (vẫn lên đơn)
+----------------------------------------------------------------
+Ca Phuong Pham: đơn chốt với địa chỉ = RÁC catalog mẫu khác ("<7 er bes a... Ma:
+G5H6061906-3, Giá: 1.050.000đ, 3 màu/PU"), lại còn "hà nội" trống (thiếu số nhà) vẫn chốt.
+GỐC: handler chốt chỉ kiểm tra mem.address CÓ/KHÔNG, không kiểm tra HỢP LỆ. Lệnh chốt
+bắn ở turn SĐT, lúc đó mem.address còn rác tồn từ lần test trước -> !mem.address=false -> chốt.
+
+SỬA:
+ - Thêm isDeliverableAddress(): loại rác OCR (< > = ? | \), data catalog (mã/giá/màu/size/
+   số giá 1.050.000), và tỉnh/thành TRỐNG ("hà nội" không số nhà/đường). Cần có số nhà HOẶC
+   chỉ dẫn vị trí (đường/phường/xã/ngõ...) + đủ dài.
+ - Thêm isGarbageAddress(): rác rõ -> XOÁ khỏi mem (chống tồn đọng qua các lượt).
+ - 3 điểm chốt (cho-contact 4810, _addrJustGiven 7722, thêm-mẫu-đơn-cũ 4612): XOÁ địa chỉ rác +
+   CHỈ chốt khi isDeliverableAddress=true; thiếu/không hợp lệ -> xin "địa chỉ cụ thể (số nhà,
+   đường, phường/xã)", KHÔNG chốt.
+ - Câu xin địa chỉ rõ ràng hơn (nêu số nhà/đường/phường-xã) khi khách mới cho tỉnh trống.
+Test: 3 địa chỉ đủ -> true; "hà nội"/"hcm"/"sg"/rác catalog -> false.
+File đổi: bot_worker_api_v3.js
+
+================================================================
+[2026-06-22] 3 LỖI: (1) gallery "mẫu mới" lấy bừa (2) "có size X" sai (3) "ngắn" -> "mỏng"
+----------------------------------------------------------------
+(1) "gửi mẫu MỚI" -> lấy bừa mẫu tương tự, không lọc cột T, không pin MGKVX6310.
+    GỐC: "mẫu mới" bị asksSimilarModels bắt -> nhánh similarByCode (CLIP giống mẫu đang xem).
+    SỬA: tách asksNewCollection (mẫu mới/BST mới/hàng mới/có gì mới) ra KHỎI asksSimilarModels;
+    thêm nhánh trong tryBrowseGallery: lọc isNew (cột T="mới") + pin MGKVX6310 đầu; thêm vào
+    cổng gọi gallery. Giờ "mẫu mới" -> đúng mẫu cột T=mới, MGKVX6310 đứng đầu.
+
+(2) "co xl ko" -> bot trả "không có size M" (sai: phải "không có XL"; mẫu CÓ M). Là AI bịa.
+    SỬA: thêm handler CODE asksWhichSpecificSize -> đọc bảng size mẫu (parseAvailableSizes),
+    trả ĐÚNG "có size X" / "không có size X, chỉ có S/M/L". Dính bug \b sau nguyên âm có dấu
+    ("có" -> ó) làm guard trượt -> đã sửa dùng (\s|$). Test: co xl ko->XL, có size l ko->L,
+    có size nào->null (không nhầm), có màu ko->null.
+
+(3) "chị nhìn ảnh thấy ngắn nhi" + "sợ hở hết" -> bot tư vấn ÁO MỎNG/HỞ (phối lót nude).
+    GỐC: worriesGarmentShort chỉ bắt "có ngắn/ngắn ko/sợ ngắn" -> trượt "thấy ngắn nhi";
+    sheer handler bắt "hở" -> cướp. SỬA: mở rộng worriesGarmentShort (thấy/nhìn/trông/hơi +
+    ngắn, "ngắn nhỉ/nhi/thế/vậy/quá"); gate sheer bằng !worriesGarmentShort (ngắn != mỏng).
+File đổi: bot_worker_api_v3.js
+
+================================================================
+[2026-06-22] ĐỊA CHỈ: ảnh -> người thật; validate 3 TẦNG; suy luận tỉnh + HỎI xác nhận
+----------------------------------------------------------------
+Vẫn lọt: bot OCR ảnh giày dép -> điền địa chỉ rác (Mã/Giá/màu) vào đơn, chốt bậy.
+
+SỬA:
+(1) ẢNH ĐỊA CHỈ -> KHÔNG TỰ ĐIỀN: bỏ hẳn nhánh OCR auto-fill địa chỉ. Khách gửi ảnh lúc bot
+    đang xin địa chỉ -> GẮN NGƯỜI THẬT + xin địa chỉ bằng CHỮ (chống đọc rác từ ảnh giày/card SP).
+(2) VALIDATE 3 TẦNG (isDeliverableAddress mới): phải đủ
+      - chi tiết (số nhà/thôn/xóm/ngõ/ngách)
+      - phường/xã/thị trấn (hoặc quận/huyện)
+      - tỉnh/thành phố (RÕ)
+    Thiếu tầng nào -> xin đúng tầng đó. Loại rác (ký tự lạ < > = ?, data catalog Mã/Giá/màu/PU/
+    số giá) -> địa chỉ KHÔNG bao giờ chứa cod/giá/màu.
+(3) SUY LUẬN TỈNH + HỎI XÁC NHẬN: map quận/huyện -> tỉnh (HN/HCM/ĐN...). VD "458 Minh Khai
+    Hai Bà Trưng" -> suy ra Hà Nội nhưng KHÔNG tự ghi, mà HỎI: "Dạ địa chỉ này ở Hà Nội đúng
+    không chị? 🥰 Chị xác nhận giúp em...". Khách "đúng/ok" -> ghép tỉnh + chốt (nếu đủ size+sđt).
+(4) 3 điểm chốt đều validate 3 tầng; rác -> xoá; chưa đủ -> dùng addressGapReply (xin tầng / hỏi
+    xác nhận tỉnh) thay vì chốt bừa.
+File đổi: bot_worker_api_v3.js
+
+================================================================
+[2026-06-22] Handler "có size X không": THIẾU vớt size bằng cao/nặng -> bổ sung
+----------------------------------------------------------------
+Luật cũ (đã dạy): khách hỏi/cần size mà shop KHÔNG có -> KHÔNG dừng ở "không có", phải
+HƯỚNG khách đưa CHIỀU CAO + CÂN NẶNG để kiểm tra mặc có vừa size đang có không.
+Handler asksWhichSpecificSize tao thêm trước đó chỉ trả "không có size X, có S/M/L" -> THIẾU.
+SỬA: khi size hỏi KHÔNG có -> nêu size đang có + "Chị cho em xin chiều cao và cân nặng
+(của người mặc) để em kiểm tra mặc có vừa size nào không nha ạ." Nếu đã biết size khách &
+size đó có -> xác nhận luôn, không hỏi lại. ("của người mặc" -> hợp ca mua tặng em gái.)
+File đổi: bot_worker_api_v3.js
+
+================================================================
+[2026-06-22] Xin cao/nặng: "(của người mặc)" -> ĐÚNG quan hệ (em gái/bạn/mẹ...)
+----------------------------------------------------------------
+User: không để "của người mặc" chung chung; mua tặng ai thì nói đúng người đó.
+SỬA: thêm giftRecipient() bóc người được tặng (tặng/biếu/mua cho + em gái/chị gái/bạn/mẹ/
+con/cháu/vợ/người yêu...); "mua cho mình/chị" -> null (mua cho bản thân). Lưu mem._giftFor
+mỗi lượt. Handler vớt size dùng: "chiều cao và cân nặng của em gái..." (mua tặng) hoặc
+"chiều cao và cân nặng..." (mua cho mình, BỎ "của người mặc").
+File đổi: bot_worker_api_v3.js
+
+================================================================
+[2026-06-22] GỐC LỖI KHÔNG TRẢ LỜI BÌNH LUẬN: getToken fallback phá check page-id
+----------------------------------------------------------------
+Đối chiếu bản cũ (GHI_CHU_v6, trả lời comment OK) vs bản mới: khác ở refactor ĐA-PAGE
+(page_registry). Bản cũ dùng PAGE_ID thẳng; bản mới suy page_id từ conv id.
+GỐC: comment conv id = "POSTID_xxx" -> pageIdFromConv ra POST id (KHÔNG phải page).
+Khối SỬA page-id dùng check "!reg.getToken(pid)" -> NHƯNG getToken() LUÔN fallback
+ENV_PAGE_TOKEN nên !getToken(pid) LUÔN false -> khối sửa KHÔNG chạy -> PID = POSTID (sai
+page) -> getMessages/sender gọi sai page -> đọc RỖNG -> không có commentId -> KHÔNG reply.
+
+SỬA: thêm reg.isKnownPage(pid) (chỉ true nếu pid CÓ THẬT trong registry hoặc == ENV_PAGE_ID;
+KHÁC getToken vì không fallback). Đổi check ở 3 chỗ sửa page-id: reader.getMessages,
+reader.readConversation (PID), sender._pc -> dùng !isKnownPage thay !getToken.
+Test: comment conv "POSTID_xxx" -> resolve về PAGE_ID đúng (trước ra POSTID). Inbox vẫn đúng.
+File đổi: page_registry.js, pancake_reader.js, pancake_sender.js
+
+================================================================
+[2026-06-22] AI-READ bóc thêm slot "concern" (pilot mô hình AI-phân-loại + code-trả)
+----------------------------------------------------------------
+Làm rõ: mô hình "AI bóc slot -> code dùng" ĐÃ CÓ sẵn cho SIZE + ĐỊA CHỈ (ai_intent.js
+trả size/is_address; bot_worker dùng để VỚT khi regex trượt). Mở rộng 1 cụm hay vỡ nhất:
+ - ai_intent.js: thêm field concern = ngan|mong|chat|cogian|lot|dem|null (dạy AI phân
+   RÕ "ngắn" KHÁC "mỏng", không gộp).
+ - bot_worker: lưu mem._aiConcern mỗi lượt (reset đầu lượt). Dùng VỚT cụm ngắn/mỏng:
+   * sheer handler: chỉ chạy khi (isSheerConcern || concern="mong") && concern!="ngan".
+   * short handler: chạy khi (worriesGarmentShort || concern="ngan").
+   -> AI hiểu ngữ cảnh "thấy ngắn, sợ hở" = lo NGẮN dù regex mơ hồ; hết nhầm ngắn<->mỏng.
+   AI tắt/timeout -> concern=null -> chạy thuần regex như cũ (an toàn).
+File đổi: ai_intent.js, bot_worker_api_v3.js
+
+================================================================
+[2026-06-23] Suy luận TỈNH từ quận/huyện: thay map bé -> map ĐẦY ĐỦ 34 tỉnh (sáp nhập 2025)
+----------------------------------------------------------------
+Cơ chế suy tỉnh + hỏi xác nhận ĐÃ có; nhưng map chỉ HN/HCM/ĐN. User đưa map đầy đủ theo
+cải cách 1/7/2025 (63->34 tỉnh/thành) + danh sách token TRÙNG nhiều tỉnh (ambiguous).
+THÊM:
+ - vn_admin_2025.json: 6 TP TW + 28 tỉnh, mỗi tỉnh kèm danh sách khu vực (quận/huyện cũ),
+   + ambiguous_tokens (Châu Thành, Hòa Bình, Tân Phú, Bình Tân, Sơn Tây, Phong Điền...).
+ - vn_address.js: fold + explicitProvince (tỉnh ghi rõ, có HN/HCM/SG/ĐN) + inferProvince
+   (quận/huyện -> tỉnh; token trùng -> trả {ambiguous}). Bỏ token ambiguous khỏi map suy luận.
+ - bot_worker: addressTiers/isDeliverableAddress/addressGapReply dùng vn_address. Ambiguous ->
+   KHÔNG đoán, HỎI THẲNG "địa chỉ ở tỉnh/thành nào ạ". Suy được tỉnh chắc -> hỏi xác nhận như cũ.
+Test: "Hai Bà Trưng"->HN, "Ninh Kiều"->Cần Thơ, "Nhà Bè"->HCM, "Sa Pa"->Lào Cai, "Buôn Ma
+Thuột"->Đắk Lắk; "Châu Thành"/"Hòa Bình"->ambiguous (hỏi khách).
+File: vn_admin_2025.json (mới), vn_address.js (mới), bot_worker_api_v3.js

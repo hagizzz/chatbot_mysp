@@ -1,0 +1,9 @@
+{
+  "_huong_dan": "Công tắc AI-QUYẾT. Sửa xong KHÔNG cần restart bot (đọc lại mỗi lượt). log_so_sanh=true: AI chạy ngầm, chỉ ghi log '[AI-QUYẾT so sánh]' cạnh quyết định của luật cũ để đối chiếu (shadow mode - nên chạy 2-3 ngày trước). bat_referent=true: AI quyết KHÁCH ĐANG NÓI MẪU NÀO (đè focus của luật cũ khi đủ tự tin). bat_diachi_chotdon=true: AI quyết địa chỉ đủ/thiếu + hành động xin thông tin + CHỐT ĐƠN và tự soạn tin theo phom (tiền COD vẫn do code tra sheet).",
+  "log_so_sanh": true,
+  "bat_referent": true,
+  "bat_diachi_chotdon": true,
+  "nguong_tin_cay": 0.7,
+  "regex_theo_nhan": "chan",
+  "_huong_dan_chot_nhan": "regex_theo_nhan: 'chan' = regex trái nhãn AI (nhóm luồng) bị nhường; 'log' = chỉ ghi log đối chiếu; 'off' = tắt chốt."
+}

@@ -1,0 +1,70 @@
+========================================================
+ HƯỚNG DẪN ĐẶT LỊCH TỰ ĐỘNG ĐỒNG BỘ ẢNH (Task Scheduler)
+ -> Đặt 1 lần, sau đó KHÔNG phải đụng tay nữa.
+========================================================
+
+CHUẨN BỊ
+--------
+1) Chép 3 file này vào C:\AI_HTK_BOT_V5 (ĐÈ file cũ nếu có):
+   - start_bot.bat          (bản mới - biết chờ khi đang đồng bộ)
+   - dong_bo_hang_ngay.bat
+   - dong_bo_hang_tuan.bat
+   (Và nhớ đã chép bản mới của update_index.py, refresh_names.py,
+    upload_to_pancake.py vào thư mục bot như đã gửi trước đó.)
+
+2) Bảo đảm có sẵn trong thư mục bot:
+   - google-service-account.json  (để vào Drive)
+   - file .env có PANCAKE_PAGE_ID, PANCAKE_PAGE_ACCESS_TOKEN
+
+3) Mở lại bot bằng start_bot.bat (bản mới).
+
+
+TẠO LỊCH HẰNG NGÀY
+------------------
+1) Mở "Task Scheduler" (gõ "Task Scheduler" ở ô tìm kiếm Windows).
+2) Bên phải bấm "Create Task..." (KHÔNG phải "Basic Task").
+3) Tab General:
+   - Name: MYS.P - Dong bo anh HANG NGAY
+   - Chọn "Run only when user is logged on"
+   - Tick "Run with highest privileges"
+4) Tab Triggers -> New:
+   - Begin the task: On a schedule
+   - Daily, mỗi 1 ngày, giờ chạy: chọn lúc ÍT KHÁCH (vd 03:00 sáng)
+   - OK
+5) Tab Actions -> New:
+   - Action: Start a program
+   - Program/script:  C:\AI_HTK_BOT_V5\dong_bo_hang_ngay.bat
+   - Start in (quan trọng!):  C:\AI_HTK_BOT_V5
+   - OK
+6) Tab Conditions: bỏ tick "Start the task only if the computer is on AC power"
+   (nếu là laptop, để nó vẫn chạy khi dùng pin).
+7) OK -> nhập mật khẩu Windows nếu được hỏi.
+
+
+TẠO LỊCH HẰNG TUẦN (refresh toàn bộ)
+-----------------------------------
+Làm y hệt trên, KHÁC 3 chỗ:
+   - Name: MYS.P - Dong bo anh HANG TUAN (refresh)
+   - Triggers: chọn "Weekly", 1 tuần/lần, vd Chủ Nhật 03:30 sáng
+   - Actions -> Program/script:  C:\AI_HTK_BOT_V5\dong_bo_hang_tuan.bat
+     (Start in vẫn:  C:\AI_HTK_BOT_V5)
+
+
+KIỂM TRA NGAY (không cần chờ tới giờ)
+-------------------------------------
+- Trong Task Scheduler, bấm chuột phải vào task -> "Run".
+- Bot sẽ tạm tắt, đồng bộ, rồi tự mở lại (cửa sổ start_bot.bat đang chạy
+  sẽ hiện "Dang dong bo anh... cho xong roi moi mo bot lai").
+- Mở file C:\AI_HTK_BOT_V5\dong_bo_log.txt để xem kết quả mỗi lần chạy.
+
+
+LƯU Ý
+-----
+- MÁY TÍNH PHẢI BẬT (và đang đăng nhập Windows) vào giờ đã hẹn thì lịch mới chạy.
+  Nếu hay tắt máy ban đêm, đặt giờ vào lúc máy chắc chắn đang mở.
+- Lịch HẰNG TUẦN chạy LÂU (up lại ~11k ảnh, có thể hơn 1 tiếng) -> để ban đêm.
+- Thỉnh thoảng (vd 1 tháng/lần) liếc qua dong_bo_log.txt xem có dòng "lỗi" không
+  (thường do token Pancake hết hạn hoặc mất mạng) -> nếu có thì báo kỹ thuật.
+- Việc duy nhất bạn cần làm tiếp: BỎ ẢNH MỚI VÀO FOLDER DRIVE, đặt tên dạng
+  MÃ-MÀU-AI (vd: MMVX5211-KEM-AI.jpg). Còn lại máy lo hết.
+========================================================

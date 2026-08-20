@@ -1,0 +1,109 @@
+﻿
+> .pm2\logs\bot-out.log:148600:2026-06-27T23:56:15: Khách: Linh Ngân | Conv: 1468690110033030_6633608696749140
+  .pm2\logs\bot-out.log:148601:2026-06-27T23:56:15: Tin: text: MRVX559 gửi c xem video
+  .pm2\logs\bot-out.log:148602:2026-06-27T23:56:16: [AI-READ] nhãn=IMAGE_REQ | size=- addr=false order=false 
+price=false chart=false concern=-
+  .pm2\logs\bot-out.log:148603:2026-06-27T23:56:16: Khách gửi 0 ảnh | nhận diện 0 từ ảnh, 1 từ chữ | trượt 0
+  .pm2\logs\bot-out.log:148604:2026-06-27T23:56:16: MẪU: Ryleigh(MRVX559)=975000
+  .pm2\logs\bot-out.log:148605:2026-06-27T23:56:16: FOCUS: text_code | lock=MGKVX6044 -> MRVX559 | switch=true
+  .pm2\logs\bot-out.log:148606:2026-06-27T23:56:16: [images] đã nạp ảnh cho 678 mã sản phẩm
+  .pm2\logs\bot-out.log:148607:2026-06-27T23:56:20: [Bảo Trâm] [follow-hẹn] stage 1, sau 600s -> "Dạ mẫu này đang có 
+ưu đãi nên giá này là" | conv=1468690110033030_6633608696749140
+  .pm2\logs\bot-out.log:148608:2026-06-27T23:56:20: REPLY: Dạ em gửi chị xem ảnh Váy Ryleigh nhe ạ.
+  .pm2\logs\bot-out.log:148609:2026-06-27T23:56:22: [REQ] 4 request Pancake / 10s | nguồn: 
+{"list-hoithoai":2,"doc-tin-nhan":2}
+  .pm2\logs\bot-out.log:148610:2026-06-27T23:56:30:   [ảnh] ALBUM 3 tấm bằng content_id.
+  .pm2\logs\bot-out.log:148611:2026-06-27T23:56:30: IMG MRVX559: gửi 3 ảnh (màu: -) -> OK.
+  .pm2\logs\bot-out.log:148612:2026-06-27T23:56:30: GỠ thẻ AI-XL ảnh: 
+{"data":[-6,182,202],"timestamp":1782579390648672,"success":true}
+  .pm2\logs\bot-out.log:148613:2026-06-27T23:56:30: IMG MRVX559: gửi ảnh -> OK (màu: -, khớp: -). ĐÍCH: 
+1468690110033030_6633608696749140
+  .pm2\logs\bot-out.log:148614:2026-06-27T23:56:30: [Bảo Trâm] [follow-hẹn] stage 1, sau 600s -> "Dạ bên em đang có ưu 
+đãi, mẫu này còn rấ" | conv=1468690110033030_6633608696749140
+  .pm2\logs\bot-out.log:148615:2026-06-27T23:56:31: [VÀO XỬ] Phuong Pham | seen=false | last_sent_by=(rỗng=khách) | 
+updated=2026-06-27T16:51:48.000000 | id=1468690110033030_6394346307338466
+  .pm2\logs\bot-out.log:148616:2026-06-27T23:56:31: [VÀO XỬ] Tâm Minh | seen=true | last_sent_by=(rỗng=khách) | 
+updated=2026-06-27T13:43:12.000000 | id=1468690110033030_28591074827148974
+  .pm2\logs\bot-out.log:148617:2026-06-27T23:56:31: [VÀO XỬ] Quynh Chery | seen=true | last_sent_by=(rỗng=khách) | 
+updated=2026-06-27T13:40:39.000000 | id=1468690110033030_35679153268394627
+  .pm2\logs\bot-out.log:148618:2026-06-27T23:56:31: [VÀO XỬ] Mai Hải | seen=true | last_sent_by=(rỗng=khách) | 
+updated=2026-06-27T13:39:43.000000 | id=1468690110033030_27911390201786476
+  .pm2\logs\bot-out.log:148619:2026-06-27T23:56:31: [VÀO XỬ] Xuân Lương | seen=true | last_sent_by=(rỗng=khách) | 
+updated=2026-06-27T13:00:52.000000 | id=1468690110033030_7286889561367787
+  .pm2\logs\bot-out.log:148620:2026-06-27T23:56:31: [VÀO XỬ] Phạm Oanh | seen=true | last_sent_by=(rỗng=khách) | 
+updated=2026-06-27T12:14:57.000000 | id=1468690110033030_27501792932787871
+  .pm2\logs\bot-out.log:148621:2026-06-27T23:56:31: [VÀO XỬ] Tuyết Vũ | seen=true | last_sent_by=(rỗng=khách) | 
+updated=2026-06-27T10:22:46.000000 | id=1468690110033030_26549522528010828
+  .pm2\logs\bot-out.log:148622:2026-06-27T23:56:31: [VÀO XỬ] Hoài Nuyên | seen=true | last_sent_by=(rỗng=khách) | 
+updated=2026-06-27T10:11:20.000000 | id=1468690110033030_28340772245512989
+  .pm2\logs\bot-out.log:148623:2026-06-27T23:56:31: [VÀO XỬ] Kỳ Duyên | seen=true | last_sent_by=(rỗng=khách) | 
+updated=2026-06-27T09:56:40.000000 | id=1468690110033030_27192175387119243
+  .pm2\logs\bot-out.log:148624:2026-06-27T23:56:34: [Bảo Trâm] [follow-sweep] đang chờ 2 hội thoại, đến hạn 0.
+  .pm2\logs\bot-out.log:148625:2026-06-27T23:56:34: API success: true | 1 page | đã gộp: 120 hội thoại
+  .pm2\logs\bot-out.log:148626:2026-06-27T23:56:35: [HÀNG ĐỢI] 10 conv cần xử: Linh Ngân(seen=true), Phuong 
+Pham(seen=false), Tâm Minh(seen=true), Quynh Chery(seen=true), Mai Hải(seen=true), Xuân Lương(seen=true), Phạm 
+Oanh(seen=true), Tuyết Vũ(seen=true) ...+2
+  .pm2\logs\bot-out.log:148627:2026-06-27T23:56:35:   [LỌC RỚT] Linh Ngân | type=INBOX | seen=true | 
+last_sent_by=Public API | updated=2026-06-27T16:56:29.962000 | -> seen=true & SHOP/bot nhắn cuối (list coi như đã trả) 
+| id=1468690110033030_6633608696749140
+  .pm2\logs\bot-out.log:148628:2026-06-27T23:56:35:   [LỌC RỚT] Hồng Nguyễn | type=INBOX | seen=true | 
+last_sent_by=Public API | updated=2026-06-27T16:55:12.411000 | -> seen=true & SHOP/bot nhắn cuối (list coi như đã trả) 
+| id=1468690110033030_27768725666098749
+  .pm2\logs\bot-out.log:148629:2026-06-27T23:56:35:   [THEO DÕI] tên "pham phuong": KHÔNG có trong 120 hội thoại lấy 
+về.
+  .pm2\logs\bot-out.log:148630:2026-06-27T23:56:35:   [THEO DÕI] tên "tham tran": KHÔNG có trong 120 hội thoại lấy về.
+  .pm2\logs\bot-out.log:148631:2026-06-27T23:56:35:   [THEO DÕI] tên "nguyen thanh nhu": KHÔNG có trong 120 hội thoại 
+lấy về.
+  .pm2\logs\bot-out.log:148632:2026-06-27T23:56:35:   [THEO DÕI] Phuong Pham | type=INBOX | seen=false | 
+last_sent_by=(rỗng=khách nhắn cuối) | updated=2026-06-27T16:51:48.000000 | -> VÀO 'Cần xử lý' | 
+id=1468690110033030_6394346307338466
+  .pm2\logs\bot-out.log:148633:2026-06-27T23:56:35: [reader] tin TRẢ LỜI: bóc 3 ảnh từ replied_message -> đưa vào nhận 
+diện. id=m_Kz83DzayeK0lq-r_a92dLZIYVf8PYGxU3sjgu_Uw-nsXbrOiYvHcEqHRQMZtWhoGm7wzycpZp9MOb-Pfonx4sA
+  .pm2\logs\bot-out.log:148634:2026-06-27T23:56:35: [reader] tin TRẢ LỜI: bóc 3 ảnh từ replied_message -> đưa vào nhận 
+diện. id=m_8-XzUYbpZ0PPumkySC5W3ZIYVf8PYGxU3sjgu_Uw-ntbrWR53k7n-_0qiCq7kULi87NGtlDZDHsB71Vyac8eRw
+  .pm2\logs\bot-out.log:148635:2026-06-27T23:56:35:       [THEO DÕI/tin] 1468690110033030_6394346307338466: 
+KHÁCH-inbox=21 | KHÁCH-comment=0 | tin cuối khách @2026-06-27T16:51:48.000000 -> ❗ CÓ tin INBOX của khách -> BOT PHẢI 
+TRẢ | text:"có video ko"  text:"MRVX559 gửi c xem video"
+  .pm2\logs\bot-out.log:148636:2026-06-27T23:56:35: [VÀO XỬ] Linh Ngân | seen=true | last_sent_by=Public API | 
+updated=2026-06-27T16:56:29.962000 | id=1468690110033030_6633608696749140
+  .pm2\logs\bot-out.log:148637:2026-06-27T23:56:35: [BỎ QUA] Linh Ngân (1468690110033030_6633608696749140): không còn 
+tin MỚI (cả cụm đã xử lý). ids=m_yOXYBm3MpFXEygIlaHpIawtI6UaG4rmoAsA-B3nCK4H9hrx9KTS2AlzwcUehw_px-OYHKMThU3gKKETDurv-og
+  .pm2\logs\bot-out.log:148638:2026-06-27T23:56:35: [VÀO XỬ] Phuong Pham | seen=false | last_sent_by=(rỗng=khách) | 
+updated=2026-06-27T16:51:48.000000 | id=1468690110033030_6394346307338466
+  .pm2\logs\bot-out.log:148639:2026-06-27T23:56:35: [VÀO XỬ] Tâm Minh | seen=true | last_sent_by=(rỗng=khách) | 
+updated=2026-06-27T13:43:12.000000 | id=1468690110033030_28591074827148974
+  .pm2\logs\bot-out.log:148640:2026-06-27T23:56:35: [VÀO XỬ] Quynh Chery | seen=true | last_sent_by=(rỗng=khách) | 
+updated=2026-06-27T13:40:39.000000 | id=1468690110033030_35679153268394627
+  .pm2\logs\bot-out.log:148641:2026-06-27T23:56:35: [VÀO XỬ] Mai Hải | seen=true | last_sent_by=(rỗng=khách) | 
+updated=2026-06-27T13:39:43.000000 | id=1468690110033030_27911390201786476
+  .pm2\logs\bot-out.log:148642:2026-06-27T23:56:35: [VÀO XỬ] Xuân Lương | seen=true | last_sent_by=(rỗng=khách) | 
+updated=2026-06-27T13:00:52.000000 | id=1468690110033030_7286889561367787
+  .pm2\logs\bot-out.log:148643:2026-06-27T23:56:35: [VÀO XỬ] Phạm Oanh | seen=true | last_sent_by=(rỗng=khách) | 
+updated=2026-06-27T12:14:57.000000 | id=1468690110033030_27501792932787871
+  .pm2\logs\bot-out.log:148644:2026-06-27T23:56:35: [VÀO XỬ] Tuyết Vũ | seen=true | last_sent_by=(rỗng=khách) | 
+updated=2026-06-27T10:22:46.000000 | id=1468690110033030_26549522528010828
+  .pm2\logs\bot-out.log:148645:2026-06-27T23:56:35: [VÀO XỬ] Hoài Nuyên | seen=true | last_sent_by=(rỗng=khách) | 
+updated=2026-06-27T10:11:20.000000 | id=1468690110033030_28340772245512989
+  .pm2\logs\bot-out.log:148646:2026-06-27T23:56:35: [VÀO XỬ] Kỳ Duyên | seen=true | last_sent_by=(rỗng=khách) | 
+updated=2026-06-27T09:56:40.000000 | id=1468690110033030_27192175387119243
+  .pm2\logs\bot-out.log:148647:2026-06-27T23:56:38: [Bảo Trâm] [follow-sweep] đang chờ 2 hội thoại, đến hạn 0.
+  .pm2\logs\bot-out.log:148648:2026-06-27T23:56:39: API success: true | 1 page | đã gộp: 120 hội thoại
+  .pm2\logs\bot-out.log:148649:2026-06-27T23:56:39: [HÀNG ĐỢI] 9 conv cần xử: Phuong Pham(seen=false), Tâm 
+Minh(seen=true), Quynh Chery(seen=true), Mai Hải(seen=true), Xuân Lương(seen=true), Phạm Oanh(seen=true), Tuyết 
+Vũ(seen=true), Hoài Nuyên(seen=true) ...+1
+  .pm2\logs\bot-out.log:148650:2026-06-27T23:56:39:   [LỌC RỚT] Linh Ngân | type=INBOX | seen=true | 
+last_sent_by=Public API | updated=2026-06-27T16:56:29.962000 | -> seen=true & SHOP/bot nhắn cuối (list coi như đã trả) 
+| id=1468690110033030_6633608696749140
+  .pm2\logs\bot-out.log:148651:2026-06-27T23:56:39:   [LỌC RỚT] Hồng Nguyễn | type=INBOX | seen=true | 
+last_sent_by=Public API | updated=2026-06-27T16:55:12.411000 | -> seen=true & SHOP/bot nhắn cuối (list coi như đã trả) 
+| id=1468690110033030_27768725666098749
+  .pm2\logs\bot-out.log:148652:2026-06-27T23:56:39:   [THEO DÕI] tên "pham phuong": KHÔNG có trong 120 hội thoại lấy 
+về.
+  .pm2\logs\bot-out.log:148653:2026-06-27T23:56:39:   [THEO DÕI] tên "tham tran": KHÔNG có trong 120 hội thoại lấy về.
+  .pm2\logs\bot-out.log:148654:2026-06-27T23:56:39:   [THEO DÕI] tên "nguyen thanh nhu": KHÔNG có trong 120 hội thoại 
+lấy về.
+  .pm2\logs\bot-out.log:148655:2026-06-27T23:56:39:   [THEO DÕI] Phuong Pham | type=INBOX | seen=false | 
+last_sent_by=(rỗng=khách nhắn cuối) | updated=2026-06-27T16:51:48.000000 | -> VÀO 'Cần xử lý' | 
+id=1468690110033030_6394346307338466
+
+

@@ -1,0 +1,46 @@
+========================================
+   BẢN SỬA LỖI v9 - 2026-06-27 (2 lỗi mới: CRASH + chốt sai màu)
+========================================
+
+CHÉP ĐÈ vào C:\AI_HTK_BOT_V5 (Replace), TẮT bot mở lại:
+   - bot_worker_api_v3.js   (đã sửa - QUAN TRỌNG)
+   - ai_intent.js           (giữ từ v8)
+   - catalog_cache.js       (giữ từ v8)
+Chạy: node bot_worker_api_v3.js
+
+==================================================
+LỖI A (NẶNG NHẤT - làm CHẾT lượt xử lý) — bot CRASH
+   "Lỗi processOneConversation: _ai is not defined"
+==================================================
+- Hiện tượng: conv như Nhung Phan ("Tv e thêm mẫu này" + ảnh) văng lỗi, KHÔNG trả
+  lời được gì (rơi vào catch, bỏ qua).
+- Gốc: hàm tryBrowseGallery (xử lý khách xin xem thêm mẫu) gọi _ai("BROWSE_CATALOG"),
+  nhưng _ai chỉ tồn tại BÊN TRONG hàm processOneConversation -> ngoài scope -> văng.
+  Đây là lỗi CÓ SẴN trong code (không phải mới), chỉ là tới hôm nay có khách đi đúng
+  vào nhánh đó nên mới lộ. Cứ khách xin "tư vấn thêm/xem thêm mẫu" là dính.
+- Đã sửa: thay _ai("BROWSE_CATALOG") -> mem._aiIntent === "BROWSE_CATALOG"
+  (hàm này có sẵn tham số mem). Hết crash.
+
+==================================================
+LỖI B — Chốt đơn SAI MÀU (ad hồng -> chốt hồng dù khách chọn kem)
+   (ca Thuthanh Pham: khách hỏi "có màu khác ko", shop báo "hồng và kem",
+    khách nói "thích màu kem" / "màu kem nha" mấy lần -> đơn vẫn ra "hồng")
+==================================================
+- Gốc: mẫu nhiều màu, code lấy màu MẶC ĐỊNH theo AD/ẢNH đã gửi (hồng) rồi ghi thành
+  màu chốt. Câu khách GÕ THẲNG "màu kem" KHÔNG được bắt -> màu ad (hồng) thắng.
+- Đã sửa: thêm 1 điểm ở ĐẦU xử lý mỗi lượt: nếu khách gõ 1 màu CÓ trong danh sách
+  màu của mẫu đang tư vấn (vd "kem") -> ghi NGAY vào màu chốt, GHI ĐÈ màu ad/ảnh.
+  Bỏ qua khi khách chỉ HỎI "có màu khác ko" hoặc CHÊ màu.
+  Test ca Thuthanh: "có màu khác ko"->giữ; "thích màu kem"->kem; "màu kem nha"->kem;
+  "Sz M nha"->vẫn kem (không lộn lại hồng). => chốt ĐÚNG màu kem.
+
+--------------------------------------------------
+GIỮ NGUYÊN các fix cũ (v7/v8) trong bản này:
+  1 Mai Thanh Lê (tên mẫu gõ sai), 2 Chuột Xinh (địa chỉ rác),
+  3 Giang Dao (đơn đã gửi không hỏi lại size),
+  4 Thuthanh "có quần luôn" (AI gắn concern=lot là chính, regex đỡ),
+  5 Diễm Thanh Hương (hoãn 1 nhịp trước khi dội gallery).
+--------------------------------------------------
+- bot_worker_api_v3.js qua node --check. Lỗi B đã test logic trên đúng câu của khách.
+- Theo dõi log: ca chốt nhiều màu sẽ thấy dòng
+  'Khách GÕ chọn màu "Kem" cho <mã> -> ghi đè màu chốt (trước: hồng).'

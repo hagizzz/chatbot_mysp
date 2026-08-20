@@ -1,0 +1,51 @@
+========================================
+   BẢN v15 - 2026-06-27  ("AI QUYẾT NHÃN, CODE TRẢ KỊCH BẢN" - làm trọn Bước 2->6)
+========================================
+
+CHÉP ĐÈ vào C:\AI_HTK_BOT_V5 (Replace), TẮT bot mở lại:
+   - bot_worker_api_v3.js (sửa nhiều)   - ai_intent.js, catalog_cache.js (giữ nguyên)
+Chạy: node bot_worker_api_v3.js
+
+==================================================
+NGUYÊN TẮC ÁP DỤNG (theo ý anh/chị)
+  AI chạy được  -> TIN nhãn AI, BỎ regex (hết cảnh regex bắt nhầm tự bắn).
+  AI rỗng/timeout -> mới rớt về regex (lưới đỡ).
+  Số tiền/đơn/sđt: VẪN 100% do code (sheet/catalog/POS). AI chỉ quyết KHÁCH HỎI GÌ.
+Cơ chế: 2 thứ dùng chung đặt ngay sau khi AI đọc nhãn:
+  - priceAsk : AI sống -> = mem._aiAsksPrice ; AI chết -> = regex isPriceAsk.
+  - _aiOr(regex, "NHÃN") : AI sống -> = nhãn AI ; AI chết -> = regex.
+
+--- ĐÃ LÀM ---
+BƯỚC 1 (đã có ở v14) Thanh toán/CK: nhãn PAYMENT_METHOD quyết. (sửa lỗi "măck"=mặc).
+
+BƯỚC 2 GIÁ: biến priceAsk thành 1 NGUỒN DUY NHẤT do AI quyết, thay cho 19 chỗ
+  trước đây gọi regex isPriceAsk rải rác (gồm cả các điều kiện loại trừ !isPriceAsk
+  trong luồng chốt đơn). Không cần dời khối AI-read vì priceAsk chỉ DÙNG sau khi AI đã đọc.
+  (Cổng quảng cáo 5394 GIỮ regex riêng vì chạy TRƯỚC bước AI đọc + đã có AI riêng của nó.)
+
+BƯỚC 3 Thuộc tính: chất liệu (asksMaterial) bị CHẶN khi AI sống -> để nhãn MATERIAL_QA
+  và concern (chat/mỏng/lót...) của AI quyết. AI chết -> asksMaterial đỡ.
+
+BƯỚC 4+5 Tồn kho/màu/size + ship/chính sách: hạ 20 detector xuống "đỡ" (AI quyết):
+  STOCK, COLOR_ASK, SIZE_CHART, SET_TYPE, BUY_SEPARATE, BACK_VIEW, MODEL_REFERENCE,
+  SHOPEE_TIKTOK, COMPARE_MODELS(x2), OCCASION_QA, SIMILAR_MODELS, RESTOCK_PREORDER,
+  RETURN_POLICY, STORE_ADDRESS, TOTAL_PAYMENT, DELIVERY_QA, IMAGE_REQ, browse-more.
+
+BƯỚC 6 Dọn: KHÔNG xoá hàm regex (còn cần làm lưới đỡ khi AI timeout). Việc "dọn" =
+  hạ vai chúng xuống fallback như trên.
+
+--- CỐ Ý GIỮ NGUYÊN (KHÔNG hạ regex - lưới đỡ KÉP) ---
+  Nhóm hard-guard tiền/đơn/cảm xúc: COMPLAINT, CANCEL_ORDER, PAYMENT_CONFIRM,
+  ORDER_STATUS, REFUSE_DELIVERY, CK_PROOF, chốt đơn, bắt size/cân nặng, PREGNANCY_FIT.
+  -> mấy cái này regex VẪN bắt song song kể cả khi AI nhầm (an toàn hơn).
+
+--- LƯU Ý THẬT (phải theo dõi khi chạy) ---
+1) Đây là thay đổi LỚN, mới kiểm bằng node --check + test logic hàm; CHƯA chạy thật
+   trong môi trường soạn bản. Hãy nhìn log kỹ 30-60' đầu.
+2) Đánh đổi của "AI quyết": nếu AI ĐỌC ĐƯỢC nhưng gắn SAI nhãn (vd quên PRICE_ASK),
+   bot sẽ KHÔNG báo giá (regex không còn cứu vì regex chỉ chạy khi AI RỖNG/timeout).
+   Nếu thấy ca này nhiều -> báo, mình chỉnh PROMPT ai_intent.js cho nhãn chuẩn hơn.
+3) Lỗi "quên giá/quên ảnh" kiểu Genova/Ngo Kim Anh là lỗi KỊCH BẢN handler, KHÔNG
+   phải lỗi nhãn -> v15 không tự sửa mấy cái đó; gặp thì sửa handler riêng.
+
+- bot_worker_api_v3.js qua node --check OK. priceAsk & _aiOr đã test 3 ca mỗi loại.

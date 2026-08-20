@@ -1,0 +1,30 @@
+============================================================
+T�� GẮN THẺ "AI - CHỜ XL" mỗi khi bot báo "chờ kiểm tra"
+============================================================
+Thẻ AI - CHỜ XL có id = 183 (đã lấy từ danh sách thẻ của shop).
+
+2 file trong gói - copy ĐÈ vào C:\AI_HTK_BOT_V5:
+  - pancake_sender.js     (đè) thêm hàm gắn thẻ
+  - bot_worker_api_v3.js  (đè) tự gắn thẻ khi báo chờ
+
+## Khi nào bot gắn thẻ?
+Mỗi khi bot gửi câu mang nghĩa "chờ kiểm tra", ví dụ:
+  - "Dạ chị đợi em kiểm tra lại thông tin cho mình ạ, chị chờ em một chút nhé."
+  - "Dạ chị đợi em kiểm tra lại thông tin mẫu này rồi em báo mình nha"
+-> bot tự gắn thẻ AI - CHỜ XL cho hội thoại đó. Nhân viên nhìn thẻ là biết cuộc
+   nào cần người vào xử lý tay.
+
+## Kiểm tra
+Chạy bot, tạo tình huống bot phải báo chờ (vd gửi ảnh lạ không có trong kho).
+Trong cửa sổ đen sẽ thấy:
+  AI báo chờ -> gắn thẻ AI-CHỜ XL
+  TAG AI-CHỜ XL: {"success":true,...}
+Rồi mở Pancake xem hội thoại đó đã có thẻ AI - CHỜ XL chưa.
+
+## Nếu thẻ KHÔNG gắn được
+Xem dòng "TAG AI-CHỜ XL: ..." trong log:
+  - success:true  -> ok.
+  - báo lỗi/false -> chụp gửi mình, có thể API gắn thẻ nhận tham số khác,
+    mình chỉnh (đã thử sẵn vài kiểu nhưng để chắc).
+
+Chạy lại: bấm đúp start_bot.bat

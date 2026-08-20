@@ -1,0 +1,5 @@
+﻿
+> .pm2\logs\bot-out.log:141605:2026-06-27T23:41:02: [Bảo Trâm] [follow-skip] câu chốt/cảm ơn/gửi ảnh | 
+conv=1468690110033030_6633608696749140 | reply="Cảm ơn chị đã đặt hàng
+
+

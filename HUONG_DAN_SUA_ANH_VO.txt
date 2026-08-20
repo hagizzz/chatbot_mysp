@@ -1,0 +1,39 @@
+============================================================
+SỬA ẢNH VỠ Ở PANCAKE (khách vẫn nhận ảnh thật như cũ)
+============================================================
+
+VÌ SAO VỠ: link cũ dạng drive.google.com/thumbnail bị Pancake chặn nhúng.
+Đổi sang dạng lh3.googleusercontent.com -> trình duyệt hiển thị trực tiếp.
+Khách KHÔNG bị ảnh hưởng (vẫn nhận ảnh thật), chỉ giúp BẠN xem được ảnh ở Pancake.
+
+============================================================
+3 file trong gói - copy ĐÈ vào C:\AI_HTK_BOT_V5:
+============================================================
+  - fix_image_links.py   (MỚI) đổi link cho hash_index.json hiện tại
+  - product_images.js    (đè)  từ giờ bot luôn dùng link hiển thị trực tiếp
+  - update_index.py      (đè)  thêm ảnh mới cũng dùng link mới + thử lại khi tải lỗi
+
+============================================================
+CÁC BƯỚC CHẠY (làm đúng thứ tự):
+============================================================
+1. TẮT BOT (đóng cửa sổ đen đang chạy bot).
+
+2. Copy 3 file trên đè vào C:\AI_HTK_BOT_V5.
+
+3. Đổi link cho toàn bộ ảnh hiện có:
+      cd /d C:\AI_HTK_BOT_V5
+      python fix_image_links.py
+   (sẽ tạo hash_index.json.bak để phòng hờ, rồi đổi ~12.000 link)
+
+4. Mở lại bot:  bấm đúp start_bot.bat
+
+5. Test: gửi ảnh cho bot -> xem ở Pancake ảnh đã hiện (không còn ô vỡ).
+
+============================================================
+LƯU Ý QUAN TRỌNG:
+============================================================
+- KHÔNG chạy update_index.py CÙNG LÚC với bot. Cập nhật ảnh thì tắt bot,
+  chạy update_index.py xong, rồi mới mở bot. Chạy song song -> nghẽn/đơ.
+- Nếu sau khi đổi mà Pancake VẪN vỡ vài ảnh: chụp gửi mình, có thể do
+  ảnh đó chưa chia sẻ công khai. Đa số sẽ hiện bình thường.
+- Khách nhận ảnh: KHÔNG đổi gì, vẫn là ảnh thật trong khung chat.

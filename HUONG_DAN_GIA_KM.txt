@@ -1,0 +1,29 @@
+============================================================
+BÁO GIÁ GỐC + GIÁ KHUYẾN MÃI (theo §15) + chống lỗi #REF!
+============================================================
+3 file - copy ĐÈ vào C:\AI_HTK_BOT_V5, chạy lại bot:
+  - catalog_cache.js       (đè)
+  - reasoning_engine.js    (đè)
+  - bot_worker_api_v3.js   (đè)
+
+## Đã làm
+1. Mã có CẢ giá gốc (cột H) LẪN giá KM (cột K) -> bot báo ĐỦ HAI:
+   "Dạ mẫu [tên] giá gốc [H], hiện đang ưu đãi còn [K] ạ."
+   (Trước đây chỉ báo mỗi giá KM.)
+2. Mã chỉ có giá gốc (cột K trống / = 0) -> báo "giá [H]".
+3. CHỐNG LỖI #REF!: nếu cột K bị lỗi (#REF!, #N/A...) -> tự bỏ qua, dùng giá gốc
+   cột H, KHÔNG còn bị "tịt" như mẫu Mona nữa.
+4. Câu giá do CODE ghép sẵn rồi mới đưa AI + ép AI dùng đúng -> giá luôn chuẩn,
+   không phụ thuộc AI có "nghe lời" kịch bản hay không.
+   (Vì sao trước AI không làm theo §15: kịch bản chỉ là lời dặn, AI hay rút gọn.
+    Giờ code ghép sẵn nên chắc chắn đúng.)
+
+## Lưu ý
+- Cần đảm bảo ô giá trong Sheet đúng (Mona K122 bạn đã sửa). Mã nào K còn #REF!
+  thì bot tự dùng giá gốc - vẫn báo giá bình thường.
+
+## Test
+Hỏi 1 mẫu có KM (vd Mireva, Maris) -> bot phải báo:
+  "Dạ mẫu Mireva giá gốc 1.200.000đ, hiện đang ưu đãi còn 600.000đ ạ."
+
+Chạy lại: bấm đúp start_bot.bat

@@ -1,0 +1,46 @@
+========================================
+   BẢN SỬA LỖI v12 - 2026-06-27 (đơn ĐÃ CHỐT mà bot báo giá lại - Hoang Quynh Nga)
+========================================
+
+CHÉP ĐÈ vào C:\AI_HTK_BOT_V5 (Replace), TẮT bot mở lại:
+   - bot_worker_api_v3.js   (đã sửa - QUAN TRỌNG)
+   - ai_intent.js           (giữ từ v11)
+   - catalog_cache.js       (giữ từ v11)
+Chạy: node bot_worker_api_v3.js
+
+==================================================
+HỎI: "ai nhận ra nhãn gì đây? sao nó lại báo giá?" (Hoang Quynh Nga, đơn Áo Orissa
+     đã chốt 7 ngày, khách hỏi khi nào giao / dọa từ chối nhận hàng)
+==================================================
+TRẢ LỜI (đọc log):
+1) NHÃN: KHÔNG có nhãn nào. Log conv này KHÔNG có dòng [AI-READ]. Bot KHÔNG đọc câu
+   khách để phân loại - nó nhảy thẳng vào CỔNG ADS rồi bắn báo giá.
+2) SAO BÁO GIÁ: Bot vừa KHỞI ĐỘNG LẠI -> mất sạch trí nhớ đơn đã chốt (orderClosed=
+   false, alreadyQuoted=false). Conv này đến từ AD Orissa (khách bấm từ 11/06). Bot
+   thấy "từ ad + chưa báo giá lần nào" -> bắn lại opener "Dạ Áo Orissa giá 790.000đ..."
+   + gửi ảnh, BỎ QUA hoàn toàn việc khách đang khiếu nại giao hàng.
+   => Gốc: CỔNG ADS báo giá TRƯỚC khi đọc lịch sử để biết đây là đơn ĐÃ CHỐT.
+      (Cờ hậu-đơn _postOrderThread mãi tới sau cổng ad mới được tính.)
+
+--------------------------------------------------
+ĐÃ SỬA: trước khi cổng ADS bắn opener, bot soi LỊCH SỬ (12 tin khách gần nhất + tin
+  shop). Nếu thấy tín hiệu HẬU-ĐƠN ("đã đặt / ... ngày từ chốt đơn / từ chối nhận
+  hàng / khi nào nhận hàng", hoặc shop đã xác nhận đơn) -> KHÔNG báo giá lại, GIAO
+  NGƯỜI THẬT (AI-CHỜ XL) + bật cờ hậu-đơn. Áp cả khi bot mới restart mất mem.
+  (Khách BẤM AD MỚI bình thường, không có tín hiệu đơn cũ -> vẫn báo giá như cũ.)
+
+Test trên đúng 4 câu của Hoang Quynh Nga: 3 câu trước ("7 ngày từ ngày chốt đơn",
+"khi nào nhận đc hàng", "đã đặt... từ chối nhận hàng") đều bị nhận diện hậu-đơn ->
+conv được chặn báo giá, giao người.
+
+--------------------------------------------------
+GIỮ NGUYÊN các fix cũ (cộng dồn):
+  - v11: chất liệu/hàng-sẵn mẫu chưa báo giá -> báo giá + ẢNH.
+  - v10: ads webhook (hoãn đợi ad_ids) + fuzzy tên ad (ALISSE->Galisse).
+  - v9 : CRASH "_ai is not defined"; chốt SAI MÀU.
+  - v7/v8: tên gõ sai, địa chỉ rác, đơn đã gửi ko hỏi lại size, "có quần luôn",
+           hoãn-1-nhịp mở màn.
+--------------------------------------------------
+- bot_worker_api_v3.js qua node --check. Detector hậu-đơn đã test trên log thật.
+- Theo dõi log: ca giống sẽ thấy
+  '... hội thoại ĐÃ là HẬU-ĐƠN ... -> KHÔNG báo giá lại, GIAO NGƯỜI THẬT.'

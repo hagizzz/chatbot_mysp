@@ -1,0 +1,19 @@
+﻿
+> .pm2\logs\bot-out.log:144203:2026-06-27T23:46:05: Khách: Phuong Pham | Conv: 1468690110033030_6394346307338466
+  .pm2\logs\bot-out.log:144204:2026-06-27T23:46:05: Tin: text: cho c giá | image: [Photo] | text: . | text: có video ko
+  .pm2\logs\bot-out.log:144205:2026-06-27T23:46:05: [vision] màu (từ tên file): XANH NHẠT | mã MRAD5171 | img 
+1sG9BfBazKFmiI2YcdIqdATdfvPTnsfLo
+  .pm2\logs\bot-out.log:144206:2026-06-27T23:46:05: VISION: {"ok":true,"code":"MRAD5171","color":"XANH 
+NHẠT","score":0.931,"gap":0.1272} | top: MRAD5171:0.931 MRAD5205:0.8038 MRAD5122:0.7848
+  .pm2\logs\bot-out.log:144207:2026-06-27T23:46:06: [REQ] 12 request Pancake / 10s | nguồn: 
+{"list-hoithoai":4,"doc-tin-nhan":4,"lay-baiviet-ads":4}
+  .pm2\logs\bot-out.log:144208:2026-06-27T23:46:06: [AI-READ] nhãn=PRICE_ASK | size=- addr=false order=false 
+price=true chart=false concern=-
+  .pm2\logs\bot-out.log:144209:2026-06-27T23:46:06: Khách gửi 1 ảnh | nhận diện 1 từ ảnh (màu: XANH NHẠT), 0 từ chữ | 
+trượt 0
+  .pm2\logs\bot-out.log:144210:2026-06-27T23:46:06: MẪU: Camellia(MRAD5171)=820000
+  .pm2\logs\bot-out.log:144211:2026-06-27T23:46:06: FOCUS: image_confirm | lock=MRAD5171 -> MRAD5171 | switch=false
+  .pm2\logs\bot-out.log:144212:2026-06-27T23:46:06: [Bảo Trâm] Hỏi giá nhưng mẫu MRAD5171 ĐÃ báo giá lượt trước (bot) 
+-> KHÔNG báo lại / không gửi lại ảnh (chống lặp).
+
+

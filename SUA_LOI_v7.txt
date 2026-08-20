@@ -1,0 +1,69 @@
+========================================
+   BẢN SỬA LỖI (3 lỗi) - 2026-06-27
+========================================
+
+CHÉP ĐÈ 2 FILE NÀY vào C:\AI_HTK_BOT_V5 (Replace), rồi TẮT bot mở lại:
+   - catalog_cache.js
+   - bot_worker_api_v3.js
+Chạy: node bot_worker_api_v3.js
+
+----------------------------------------
+LỖI 1 — Hỏi giá đích danh 1 mẫu nhưng bot dội 10 mẫu mới
+(ca Mai Thanh Lê: "Giá thiết kế Alisse?" -> bot gửi gallery)
+----------------------------------------
+- Vì sao: trong catalog tên là "Galisse", khách gõ thiếu chữ thành
+  "Alisse". Code dò tên chỉ khớp ĐÚNG NGUYÊN VĂN nên trượt -> tưởng
+  không có mẫu -> rơi vào nhánh "mở đầu trống" -> dội 10 mẫu mới.
+- Đã sửa:
+  * catalog_cache.js: thêm dò tên GẦN ĐÚNG (gõ sai/thiếu 1-2 chữ vẫn ra)
+    -> fuzzyFindModel, hasModelNameToken.
+  * bot_worker_api_v3.js: thêm nhánh (a3c2) — khách gõ TÊN MẪU mà khớp
+    nguyên văn trượt: khớp gần đúng -> BÁO GIÁ luôn; không chắc -> HỎI LẠI
+    tên/ảnh; KHÔNG dội 10 mẫu nữa. Nhánh gallery cũ (a3d) cũng đã chặn
+    lại khi câu có nêu tên mẫu.
+  * AN TOÀN: câu hỏi giá CHUNG CHUNG ("giá váy bao nhiêu", "shop ơi")
+    vẫn KHÔNG bịa mẫu — chỉ kích khi khách thực sự nêu 1 tên mẫu.
+
+----------------------------------------
+LỖI 2 — Địa chỉ dính câu chat ("3 m cần mặc Toà Prime...")
+(ca Chuột Xinh)
+----------------------------------------
+- Vì sao: nhiều tin trong 1 lượt bị gộp, câu "Thứ 3 m cần mặc" dính
+  trước địa chỉ. Hàm dọn địa chỉ cắt rác theo SỐ ĐẦU TIÊN, mà "Thứ 3"
+  có số 3 nên chỉ cắt mỗi "Thứ", giữ lại "3 m cần mặc".
+- Đã sửa (bot_worker_api_v3.js, hàm cleanAddress):
+  * (Z0) Cắt rác dẫn nhập theo MỐC địa chỉ thật (toà/số nhà/số N/ngõ/
+    ngách/hẻm/đường/phố/thôn/xóm/ấp/khu/tổ N/chung cư/kđt/lô N/kiệt).
+  * (Z0b) Gột cụm chat lẫn vào: "thứ N", "... cần mặc/cần lấy", "đám cưới",
+    "kiểm tra hàng/ktra hàg", "ship ... nhé" — gột ĐÚNG cụm, KHÔNG nuốt địa chỉ.
+- Đã test: 5 ca (gồm ca Chuột Xinh + địa chỉ sạch giữ nguyên) PASS.
+
+----------------------------------------
+LỖI 3 — Đơn đã gửi rồi, khách "Ok" -> bot hỏi lại size / đòi lên đơn mới
+(ca Giang Dao)
+----------------------------------------
+- Vì sao: cờ "đã có đơn" chỉ tin mấy cờ do BOT tự bật (everOrdered,
+  orderedByCode). Đơn này do NGƯỜI THẬT chốt tay trên Pancake nên cờ tắt
+  -> bot không biết đã có đơn -> coi "Ok" là chốt mới -> hỏi size.
+- Đã sửa (bot_worker_api_v3.js): cho chế độ HẬU-ĐƠN tin thêm dấu hiệu
+  _postOrderThread (đọc TỪ LỊCH SỬ tin nhắn: shop đã cảm ơn/đã gửi đơn)
+  -> bắt được cả đơn người thật chốt. Giờ "Ok" / "đã gửi chưa" sau khi
+  có đơn -> xử hậu-đơn (im hoặc cảm ơn), KHÔNG hỏi size lại.
+
+----------------------------------------
+VỀ CA VAN ANH (👍 -> nhãn POST_ORDER_CHITCHAT)
+----------------------------------------
+- KHÔNG phải lỗi. Sau khi chốt đơn, khách thả tim -> trả câu ấm áp khép
+  hội thoại là ĐÚNG. Không cần sửa.
+
+----------------------------------------
+GHI CHÚ
+----------------------------------------
+- Cả 2 file đều qua kiểm tra cú pháp (node --check).
+- Chưa chạy được full bot trong môi trường test (thiếu token Pancake +
+  google-service-account thật) nên các đoạn dùng catalog/Pancake test bằng
+  dữ liệu giả lập + kiểm cú pháp. Nên theo dõi log vài hội thoại đầu sau
+  khi chạy thật:
+    * "khớp GẦN ĐÚNG ... -> BÁO GIÁ"   (lỗi 1 chạy đúng)
+    * địa chỉ in ra không còn dính "cần mặc"  (lỗi 2)
+    * "[HẬU-ĐƠN] ... -> IM" khi khách "Ok" sau đơn đã gửi  (lỗi 3)

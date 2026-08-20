@@ -1,0 +1,115 @@
+========================================
+  SUA_LOI_v31 — Mys.P BOT  (tích luỹ từ v17)
+========================================
+Deploy: copy 3 file .js đè vào C:\AI_HTK_BOT_V5 -> Ctrl-C -> node bot_worker_api_v3.js
+FILE THAY ĐỔI: bot_worker_api_v3.js, ai_intent.js, color_utils.js
+LƯU Ý: KHÔNG đè ad_product_map.json.
+
+================= MỚI Ở v31 =================
+[HIEN NGUYEN - đã tư vấn size từ cân nặng mà tới lượt địa chỉ lại XIN SIZE LẠI]
+   Hiện tượng: khách "50kg cao 1m58" -> bot trả "sẽ mặc size M vừa xinh" + xin SĐT/địa chỉ.
+   Khách cho địa chỉ+sđt -> bot lại "...chị cho em xin size để em lên đơn" (xin lại dù đã tư vấn M).
+   Gốc: lúc tư vấn "size M" KHÔNG lưu mem.customerSize; khối "khôi phục từ lịch sử" (@6005)
+        thấy cân nặng thì chỉ nhét mem._weightFromHistory (biến phụ), KHÔNG set mem.weightKg,
+        KHÔNG suy ra size. -> effectiveSize=null -> haveSize=false -> XIN LẠI size.
+   Sửa (3 chỗ, đều CHỈ THÊM, không phá luồng cũ):
+     1) @6019  lịch sử có cân nặng -> set luôn mem.weightKg (nhớ cân nặng THẬT).
+     2) @6775  khối chốt-khi-khách-cho-contact: nếu cần size & chưa có & ĐÃ biết cân nặng
+               -> resolveSizeByWeight (đúng hàm đã dùng để tư vấn) -> lưu mem.customerSize
+               -> CHỐT đơn size đó, KHÔNG xin lại. (guard OVER/FREESIZE -> vẫn xin nếu không ra size hợp lệ)
+     3) @1419  tryCloseFromState (đường nhãn ORDER_CLOSE) vá y hệt cho đồng bộ.
+   An toàn: size suy ra = ĐÚNG size bot đã tư vấn (cùng resolveSizeByWeight + cùng bảng size mẫu);
+            effectiveSize tự kiểm size có nằm trong bảng mẫu không -> không chốt sai size.
+   ** Đây cũng là gốc của ca "Set Talia hỏi lại size" (Thư Phượng) khi khách đã có cân nặng/size. **
+
+================= ĐÃ CÓ TỪ v30 =================
+[TỰ ĐỘNG HÓA ĐỌC AD - lấy BÀI trực tiếp theo post_id]  *** CẦN TEST TRÊN MÁY LIVE ***
+   Gốc Plena (MR0SQ6114, tên sheet "Plena" ĐÚNG, KHÔNG cần token):
+     - Bot đọc bài bằng cách QUÉT list bài 120 ngày của page (Pancake bắt cửa sổ <1 tháng).
+     - Bài Plena KHÔNG có trong list -> cũ >120 ngày HOẶC dính 429 "Too many requests"
+       (log: "POSTS win ... 429 | success=false") -> quét sót -> không có caption/ảnh BÀI -> trượt.
+     => Không phải token, không phải tên, không phải khớp. Là khâu LẤY BÀI.
+   Sửa @pancake_reader.js fetchPancakePost: thêm _fetchPostDirect() - LẤY THẲNG 1 bài theo
+   post_id TRƯỚC, né cả 120 ngày lẫn 429. Không được -> FALLBACK quét list cũ (KHÔNG regression).
+   Thử 2 dạng id: "{PG}_{postid}" và "{postid}".
+   *** XÁC MINH SAU KHI DEPLOY ***
+     - Bấm 1 ad trỏ về bài cũ (vd Plena). Coi log:
+         CÓ "[reader] POST lấy TRỰC TIẾP OK -> id=... caption=..."  => endpoint chạy, hết phụ thuộc 120 ngày/429.
+         KHÔNG có dòng đó (vẫn "POST KHÔNG thấy trong list") => Pancake không hỗ trợ endpoint này
+            -> fallback list cũ (y như trước, không hư gì) -> gửi tao log để tao chỉnh URL/cách khác.
+   GHI CHÚ: code đọc TÊN trong ad ("MR0SQ6114-...") vẫn cần FB_ADS_TOKEN; nhưng tên "Plena"
+   trong CAPTION thì KHÔNG cần token - chỉ cần bot lấy được bài/snippet (đó là cái v30 này lo).
+
+================= ĐÃ CÓ TỪ v29 =================
+[Huyen Trang Le - "52kh cao 1m58" bị đẩy người oan]
+   Gốc: AI nhãn ĐÚNG = WEIGHT_HEIGHT. NHƯNG khách gõ "52kh" (=52kg, phím h cạnh g),
+   parseWeightKg chỉ nhận kg/kí/ký/cân... KHÔNG nhận "kh" -> không bóc ra cân nặng
+   -> rec=null -> khối tư vấn size bỏ qua -> rơi "CHƯA CÓ KỊCH BẢN DẠY" -> đẩy người.
+   (Cùng họ "Szai": AI hiểu đúng, code bắt số/đơn vị trượt do gõ sai.)
+   Sửa: @parseWeightKg (~1923) thêm "kh" vào đơn vị cân:
+        (kg|kgs|kh|kí|ký|ki|ky|cân|can). KHÔNG nhận "k" trơn (52k = 52 nghìn = GIÁ).
+   Unit-test 8/8 (52k/250k vẫn KHÔNG bị nhầm thành cân).
+
+[Thư Phượng - bấm QC Plena bị đẩy người] = LỖI DATA, KHÔNG sửa code.
+   Bài QC Plena (post 1494697558878404 / ad 120252618641940550) KHÔNG resolve ra mã.
+   Theo luật reader v17 (đọc bài THẬT, không vớ mẫu shop cũ) -> bot không đoán bừa -> đẩy người.
+   FIX: thêm map post/ad Plena -> mã đúng vào ad_product_map.json (giống cách thêm OCELIA).
+   -> Cần xác định mã Plena rồi thêm: "1494697558878404": "<MÃ_PLENA>".
+
+================= ĐÃ CÓ TỪ v28 =================
+[Q3 - "Szai M e" bị đẩy người oan (tag AI-LỖI 203)]
+   Gốc: AI đọc đúng nhãn=SIZE size=M, NHƯNG code dùng extractStatedSize() bắt size theo regex
+   -> gõ sai "Szai" (=size) làm regex TRƯỢT -> statedNow=null -> khối "khách tự khai size" bị bỏ
+   -> rơi xuống cuối action=NONE -> ĐẨY NGƯỜI THẬT + tag CHỜ XL/AI-LỖI.
+   Sửa:
+   - @AI-READ (~6064): lưu mem._aiSize = size AI bóc (reset null mỗi lượt @~6050).
+   - @khối khai size (~7912): statedNow = extractStatedSize(latestText)
+        || (mem._aiIntent==="SIZE" && mem._aiSize ? mem._aiSize : null);
+     -> AI nhãn SIZE + có size -> dùng size AI khi regex trượt -> CÓ kịch bản "Dạ mẫu này có size M...".
+     Chốt CHẶT: chỉ cứu khi mem._aiIntent==="SIZE" (không phải SIZE -> không bịa size). Unit-test 6/6.
+
+[Q2 - Tham Lai/Nguyet: câu tư vấn size LẶP 3-4 lần (chỉ khác praise())]
+   Gốc: ĐUA ĐỒNG BỘ. Bot gửi câu size xong, tin CHƯA kịp về Pancake -> vòng quét sau
+   shopRepliedAfterLastCustomer=false -> vào lại path size @9614 -> gửi tiếp với praise() random
+   khác -> 4 vòng = 4 câu. Chống-lặp theo text không bắt vì praise() khác nhau.
+   Sửa: @đầu if(rec) (~9566) thêm cổng cooldown theo CHỮ KÝ (cân|size|mẫu):
+     nếu mem._sizeAdviceSig trùng & <120s -> markProcessed + return (KHÔNG gửi lại, chờ đồng bộ);
+     khác sig hoặc >120s -> cho gửi (khách đổi cân/mẫu hoặc hỏi lại thật vẫn được tư vấn). Unit-test 7/7.
+   Phủ cả 3 nhánh: mua-hộ / vênh-size-cũ / thường.
+
+================= ĐÃ CÓ TỪ v27 =================
+[Câu BẦU/SAU SINH bị cụt] (dòng 8222, nhãn PREGNANCY_FIT):
+   - Cũ (cụt, thiếu "xin gì"): "...Chị cho em xin để em tư vấn mẫu rộng rãi, thoải mái và đúng size..."
+   - Mới: "Dạ chị bầu được mấy tháng rồi ạ? Chị cho em xin số đo cụ thể để em tư vấn thoải mái và đúng size cho mình nha."
+   (Vẫn giữ: hỏi xong -> giao người thật xác nhận, bot không tự khẳng định mặc được.)
+
+================= ĐÃ CÓ TỪ v26 =================
+[Hoàng Yến] gate hậu-đơn (5481) TAG CHỜ XL DÙ tin cuối là của SHOP/người thật:
+   - LỖI: gate "Conv TỪ AD + hậu-đơn -> giao người thật" THIẾU guard shopRepliedAfterLastCustomer.
+     Khi người thật (Công Nguyễn) đã nhắn cuối (đang lo đơn hoàn của khách) -> bot vẫn nhảy vào tag
+     AI-CHỜ XL (vô nghĩa, người thật đang xử rồi).
+   - SỬA: thêm "&& !shopRepliedAfterLastCustomer(data.messages)" vào gate. Người thật/bot nhắn cuối
+     -> KHÔNG tag, nhường xuống anti-loop @5727 -> [BỎ QUA] (chống lặp).
+   - Khách nhắn cuối + hậu-đơn (vd Nguyễn Thúy An, shopReplied=false) -> gate VẪN tag đúng (giao người thật).
+
+================= ĐÃ CÓ TỪ v25 =================
+[THẺ GIỮ] Thêm 2 thẻ -> AI ĐỨNG NGOÀI (giao người thật) như CHỜ XL:
+   - Hàng đổi (id=166): khách muốn ĐỔI hàng sau khi đã nhận đơn.
+   - Đang hoàn (id=177): khách muốn HOÀN/HỦY đơn.
+   HOLD_TAG_IDS = [183, 185, 166, 177]; tên thẻ cũng nhận "hàng đổi"/"đang hoàn".
+   Conv có 1 trong 4 thẻ này -> bot im, giao người thật (log: "Còn thẻ giữ (...Hàng đổi/Đang hoàn) -> ... AI đứng ngoài").
+
+================= ĐÃ CÓ TỪ v24 =================
+[Phuong Pham — KHÁCH CŨ ĐẶT THÊM] khách đã có đơn + gửi ẢNH mẫu mới + không hỏi đơn cũ -> BÁO GIÁ mẫu mới
+   (không giao người thật). Hỏi về đơn cũ (khi nào nhận/đổi/hoàn) -> giao người thật.
+
+================= ĐÃ CÓ TỪ v23 =================
+[MRAD5171] mã chiến dịch -> mặc định ảnh XANH NHẠT. *** NHỚ deploy + đổi tên file "MRAD5171--XANH NHẠT.13-jpg".
+
+================= ĐÃ CÓ TỪ v21/v20/v19 =================
+[Duyên Phận+SIZE CŨ] tư vấn=chốt + size cũ +2kg. [Khoai Khoai] COMMENT người thật -> bot đứng ngoài.
+[1] Tách khách CŨ/MỚI. [2] ai_intent "bn/bnn"=hỏi giá. [3] Ngoc Lan màu->đúng mẫu. [4] Hải Kiên retry. [5] Đặng Vân ảnh lặp.
+[Hong Nhung] thêm ad_product_map.json: "1568946478120178": "MRKVX6335"
+
+================= CHỜ LOG =================
+[Nguyet] câu tư vấn size lặp 2 lần -> cần log đoạn xử Nguyet.

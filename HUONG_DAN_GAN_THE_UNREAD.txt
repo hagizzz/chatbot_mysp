@@ -1,0 +1,30 @@
+============================================================
+GẮN THẺ AI - CHỜ XL + tự chuyển cuộc về CHƯA ĐỌC
+============================================================
+2 file - copy ĐÈ vào C:\AI_HTK_BOT_V5, chạy lại bot:
+  - pancake_sender.js     (đè)
+  - bot_worker_api_v3.js  (đè)
+
+## Hoạt động
+Mỗi khi bot báo "chờ kiểm tra":
+  1. Gắn thẻ AI - CHỜ XL (id 183).
+  2. Chuyển hội thoại về CHƯA ĐỌC -> nổi lên cho nhân viên thấy, không bị bỏ sót.
+
+## Bot có bị trả lời lại không?
+KHÔNG. Bot nhớ tin đã xử lý (theo messageId). Dù cuộc thành "chưa đọc", vòng sau
+bot thấy tin đó đã xử lý rồi -> bỏ qua, không trả lời lại. Chỉ đổi trạng thái
+hiển thị để nhân viên chú ý.
+
+## Kiểm tra (log)
+Khi bot báo chờ sẽ thấy:
+  AI báo chờ -> gắn thẻ AI-CHỜ XL   (hoặc: Ảnh mới không nhận ra ...)
+  TAG AI-CHỜ XL: {"success":true,...}
+  UNREAD: {"success":true,...}
+Rồi mở Pancake: cuộc đó vừa có thẻ AI - CHỜ XL, vừa hiển thị CHƯA ĐỌC (đậm/nổi lên).
+
+## Nếu UNREAD báo lỗi/false
+Chụp dòng "UNREAD: ..." gửi mình. Endpoint dùng:
+  POST /pages/{page_id}/conversations/{conversation_id}/unread
+Nếu Pancake cần tham số khác, mình chỉnh.
+
+Chạy lại: bấm đúp start_bot.bat

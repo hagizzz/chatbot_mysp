@@ -1,0 +1,34 @@
+========================================
+  SUA_LOI_v22 — Mys.P BOT  (tích luỹ từ v17)
+========================================
+Deploy: copy 3 file .js đè vào C:\AI_HTK_BOT_V5 -> Ctrl-C -> node bot_worker_api_v3.js
+FILE THAY ĐỔI: bot_worker_api_v3.js, ai_intent.js, color_utils.js
+LƯU Ý: KHÔNG đè ad_product_map.json (tự sửa trên máy shop).
+
+================= MỚI Ở v22 =================
+[MRAD5171 - MÃ CHIẾN DỊCH] mặc định gửi ảnh màu XANH NHẠT:
+   - Thêm bảng CAMPAIGN_DEFAULT_COLOR = { "MRAD5171": "xanh nhạt" } (đặt trên maybeSendImages).
+   - Trong maybeSendImages: nếu mã thuộc bảng này + khách KHÔNG có tín hiệu màu (không gửi ảnh màu khác,
+     không xin màu khác bằng chữ) -> ÉP màu mặc định = "xanh nhạt" -> bộ lọc ảnh-theo-màu tự lấy đúng
+     mấy file MRAD5171 XANH NHẠT, gửi 3 tấm.
+   - Khách XIN màu khác (vd "cho xem màu kem") -> tôn trọng, gửi màu đó (không ép xanh nhạt).
+   - CHỈ áp cho mã trong bảng, KHÔNG ảnh hưởng mã khác.
+   - Đã test colorFromName + colorMatches: 4/5 file khớp "Xanh nhạt".
+
+   *** CẦN SỬA TÊN FILE TRÊN DRIVE/CATALOG ***
+   File "MRAD5171--XANH NHẠT.13-jpg" bị SAI ĐUÔI (".13-jpg" thay vì "-13.jpg") -> parse màu ra
+   "Xanh nhạt.13-jpg" -> KHÔNG khớp -> bị loại. 4 file kia vẫn đủ gửi 3. Nên đổi tên lại thành
+   "MRAD5171 -XANH NHẠT-13.jpg" cho đủ 5 file dùng được.
+
+================= ĐÃ CÓ TỪ v21 =================
+[Duyên Phận + LUẬT SIZE CŨ] tư vấn=chốt + ưu tiên size cũ (+2kg, tối đa ~3kg). LUÔN set customerSize=size
+   vừa tư vấn -> hết cảnh tư vấn M chốt L. (unit-test 7/7)
+
+================= CHỜ LOG =================
+[Nguyet Nguyen Minh] câu tư vấn size LẶP 2 lần -> cần log đoạn xử Nguyet để chốt chỗ chặn (không đoán vùng size).
+
+================= ĐÃ CÓ TỪ v20 / v19 =================
+[Khoai Khoai] COMMENT người thật đã trả lời -> bot đứng ngoài (humanTookOverComment, chỉ type=COMMENT).
+[1] Tách khách CŨ/MỚI. [2] ai_intent "bn/bnn"=hỏi giá. [3] Ngoc Lan màu->đúng mẫu.
+[4] Hải Kiên retry gửi. [5] Đặng Vân chống ảnh lặp.
+[Hong Nhung] thêm vào ad_product_map.json (máy shop): "1568946478120178": "MRKVX6335"

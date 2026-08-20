@@ -1,0 +1,45 @@
+========================================
+   BẢN SỬA LỖI v11 - 2026-06-27 (báo giá thiếu / báo giá ko gửi ảnh)
+========================================
+
+CHÉP ĐÈ vào C:\AI_HTK_BOT_V5 (Replace), TẮT bot mở lại:
+   - bot_worker_api_v3.js   (đã sửa - QUAN TRỌNG)
+   - ai_intent.js           (giữ từ v10)
+   - catalog_cache.js       (giữ từ v10)
+Chạy: node bot_worker_api_v3.js
+
+==================================================
+LỖI 1 — Thanh Tran (Genova): hỏi "Chất liệu Genova là gì?" -> bot trả CHẤT LIỆU
+        nhưng KHÔNG báo giá. Mẫu này CHƯA TỪNG báo giá trong hội thoại.
+==================================================
+- Đúng như anh/chị nói: mẫu chưa từng báo giá -> phải BÁO GIÁ + trả lời câu hỏi.
+- Gốc: handler "hỏi chất liệu" trả thẳng chất liệu, KHÔNG kiểm "mẫu đã báo giá
+  chưa". (Logic "chưa báo giá -> báo giá + ảnh trước" CHỈ áp cho nhãn STYLING_QA/
+  PRODUCT_DETAIL_QA; Genova bị AI gắn nhãn MATERIAL_QA nên lọt ra ngoài.)
+- Đã sửa: handler chất liệu nay kiểm "mẫu CHƯA báo giá" -> chèn GIÁ trước + GỬI ẢNH,
+  rồi trả lời chất liệu. Mẫu đã báo giá rồi thì giữ nguyên (chỉ trả lời).
+
+==================================================
+LỖI 2 — Ngo Kim Anh (Giannal): hỏi giá/màu/size -> bot BÁO GIÁ bằng CHỮ nhưng
+        KHÔNG gửi ẢNH.
+==================================================
+- Gốc: khách hỏi "có sẵn size nào" -> rơi vào nhánh "hàng sẵn". Nhánh này CÓ chèn
+  giá khi mẫu chưa báo giá, nhưng CHỈ gửi CHỮ, QUÊN gửi ảnh.
+- Đã sửa: nhánh "hàng sẵn" khi báo giá LẦN ĐẦU -> GỬI KÈM ẢNH mẫu.
+  (Dùng force=false: nếu ảnh đã gửi trước đó thì tự bỏ qua, KHÔNG gửi đúp.)
+
+--------------------------------------------------
+Cả 2 chỉ kích khi mẫu CHƯA từng báo giá (lần đầu giới thiệu). Mẫu đã báo giá/đã
+gửi ảnh rồi -> không lặp lại.
+
+GIỮ NGUYÊN các fix cũ (cộng dồn): 
+  - v10: bài ads webhook (hoãn 1 nhịp đợi ad_ids đọc ảnh ad) + khớp tên ad FUZZY
+         (ALISSE->Galisse) + sửa bug gán sai shape fuzzy.
+  - v9 : CRASH "_ai is not defined"; chốt SAI MÀU (ghi đè đúng màu khách gõ).
+  - v7/v8: tên gõ sai (fuzzy), địa chỉ rác, đơn đã gửi ko hỏi lại size, "có quần
+           luôn" (concern=lot), hoãn-1-nhịp mở màn (Diễm).
+--------------------------------------------------
+- bot_worker_api_v3.js qua node --check. Logic 2 nhánh đã test: chỉ kích lần đầu,
+  không gửi đúp ảnh.
+- Theo dõi log: ca giống Thanh Tran sẽ thấy
+  '... -> BÁO GIÁ + ẢNH trước rồi trả từ sheet: <chất liệu>'.

@@ -1,0 +1,37 @@
+========================================
+  SUA_LOI_v20 — Mys.P BOT  (tích luỹ từ v17)
+========================================
+Deploy: copy 3 file .js đè vào C:\AI_HTK_BOT_V5 -> Ctrl-C -> node bot_worker_api_v3.js
+FILE THAY ĐỔI: bot_worker_api_v3.js, ai_intent.js, color_utils.js
+LƯU Ý: KHÔNG đè ad_product_map.json (mày tự sửa file đó trên máy shop — xem mục Hong Nhung).
+
+================= MỚI Ở v20 =================
+[Khoai Khoai] COMMENT người thật đã trả lời -> bot ĐỨNG NGOÀI, không chen.
+   - Lỗi cũ: cổng chặn chỉ soi kênh INBOX (humanTookOverInbox). Người thật trả lời ở kênh COMMENT
+     công khai ("Chị ... check inbox nha") thì bot KHÔNG thấy -> vẫn gửi giá+ảnh Celyne chen vào.
+   - Sửa: thêm humanTookOverComment() (sinh đôi của humanTookOverInbox cho kênh COMMENT). Đầu block
+     comment: nếu là conv COMMENT THẬT (type=COMMENT) + người thật đã trả lời (comment HOẶC inbox)
+     -> IM HẲN (không gửi giá/ảnh inbox, không thả comment công khai).
+   - SIẾT an toàn: chỉ áp cho type=COMMENT. Conv ad-inbox (type=INBOX + postId) KHÔNG bị đụng
+     -> khách bấm AD MỚI vẫn báo giá bình thường (không regress luồng ad).
+
+================= ĐÃ CÓ TỪ v19 (vẫn còn) =================
+[1] TÁCH khách CŨ vs MỚI (~9097, botQuotedPriceInHistory): khách cũ chào trống -> câu nhẹ;
+    khách mới + ad -> báo giá ad (Nga Lê/Bếp Cô Sin); hỏi GIÁ cụ thể -> vẫn báo giá.
+[2] ai_intent: "bn/bnn/bn em/bnn ak/bao nhiu/nhiu" = HỎI GIÁ, kể cả khi kind=FIT_SUITABILITY/GREETING.
+    => Hải Kiên, Đặng Vân vào đúng luồng báo giá.
+[3] Ngoc Lan (~5800): khách nói MÀU khi đang có ≥2 mẫu -> chọn ĐÚNG mẫu khớp màu; mơ hồ -> không đoán.
+[4] Hải Kiên - sendInboxMessage RETRY 1 lần khi gửi fail (trước đây nuốt âm thầm).
+[5] Đặng Vân - chống ẢNH LẶP trong 1 lượt (marker _turnCtx._imgSentCodes, reset mỗi lượt).
+
+================= Hong Nhung — SỬA BẰNG DATA (KHÔNG đổi code) =================
+Thêm 1 dòng vào ad_product_map.json trên máy shop (KHÔNG cần tắt/bật bot):
+     "1568946478120178": "MRKVX6335"
+(post_id bài OCELIA -> mã Ocelia). Sau đó OCELIA luôn resolve được kể cả khi Pancake đọc creative trượt.
+Quy tắc chung: ad nào hay rớt gallery -> xem log "[ADS MAP] >>> THÊM vào ad_product_map.json: ..." rồi thêm post_id.
+
+================= ĐÃ CÓ TỪ v16/v17 =================
+- Chau Ha: caption ad CHỈ nhận MẪU, không nhận MÀU.
+- Trang Đặng: ai_intent "mẫu chưa báo giá + hỏi thuộc tính -> asks_price"; size báo giá+ảnh trước.
+- Thanh Nga: ảnh gallery content_id ghi botSentIds.
+- Tuyết Babie: cổng gallery mở-đầu-trống bám nhãn AI priceAsk.

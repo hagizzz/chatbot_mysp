@@ -1,0 +1,65 @@
+SUA_LOI_v38 — 2026-07-07 — KIẾN TRÚC AI-QUYẾT (referent + địa chỉ/chốt đơn) + fix lặp hỏi tỉnh (Mỹ Linh) + fix "Địa chỉ: Có mấy màu" (Nhung Cao)
+
+GÓI NÀY GỒM (đè lên bản đã có v37 — seenAdIds + map Miretta):
+  bot_worker_api_v3.js   (v37 + v38)
+  ad_product_map.json    (v37: thêm bài Miretta 1477589957255831 -> MRKSQ6035|Kem)
+  ai_quyet.js            (MỚI - module AI quyết định)
+  ai_quyet_config.json   (MỚI - công tắc, mặc định SHADOW MODE)
+  SUA_LOI_v37.txt / SUA_LOI_v38.txt
+
+============ A. FIX LẶP HỎI TỈNH (Mỹ Linh 26909505108642706) ============
+Nguyên nhân: cờ _aiProvinceConfirm được AI chấm LẠI MỖI LƯỢT (địa chỉ còn chữ "Hà Nam" cũ)
+-> addrReady=false vĩnh viễn + PHƯƠNG ÁN B hỏi "TỈNH/THÀNH nào ạ?" lặp vô hạn, kể cả khi
+khách ĐÃ trả "Ninh Bình em" và code đã ghép tỉnh.
+Sửa: (1) địa chỉ đã có tỉnh RÕ (kể cả tên CŨ - explicitProvince tự map sang tỉnh mới) -> KHÔNG hỏi;
+(2) hỏi xác nhận tỉnh TỐI ĐA 1 lần/hội thoại (cờ bền _provConfirmDone); (3) khách trả lời tỉnh xong
+-> tắt hẳn vòng hỏi. Đã test vn_address với câu thật: "Ninh Bình em" -> nhận đúng Ninh Bình.
+
+============ B. FIX "ĐỊA CHỈ: Có mấy màu" (Nhung Cao 25694660466899117) ============
+Nguyên nhân: AI phất nhầm is_address=true cho câu "Có mấy màu" (nhãn chính COLOR_ASK đúng),
+danh sách nhãn-câu-hỏi THIẾU COLOR_ASK -> code lưu nguyên văn tin khách làm mem.address.
+Sửa: thêm COLOR_ASK/ASK_COLOR vào danh sách chặn; câu trông như câu hỏi (looksLikeQuestion)
+không bao giờ là địa chỉ; và CHỈ lưu địa chỉ khi chuỗi có TÍN HIỆU ĐỊA DANH THẬT
+(tỉnh/địa danh vn_address hoặc thôn/xã/phường/đường/số nhà...). "Có mấy màu" -> bị loại.
+** VIỆC TAY: đơn Nhung Cao (0984040907) trên POS đang mang địa chỉ "Có mấy màu" -> sửa tay
+   thành địa chỉ thật + xác nhận mẫu Miretta MRKSQ6035 Kem M 950k với khách trước khi giao. **
+
+============ C. KIẾN TRÚC AI-QUYẾT (MỚI) ============
+Nguyên tắc: AI làm phần HIỂU, code làm phần SỰ THẬT + HÀNH ĐỘNG.
+Mỗi lượt tin gọi AI 1 lần (ai_quyet.js, gpt-4.1-mini): đầu vào = 20 tin gần nhất (KHACH/SHOP)
++ danh sách mẫu ứng viên kèm nguồn (ẢNH/AD/đã báo giá/đang khoá) + thông tin đã gom.
+AI trả JSON: referent (khách đang nói mẫu nào) + mẫu_cũ, địa_chỉ (đủ/thiếu/xác nhận tỉnh
++ địa chỉ gộp chuẩn), hành_động (hỏi size/màu, xin sđt/địa chỉ, xác nhận tỉnh, CHỐT ĐƠN,
+im nhường người), tin_nhắn soạn theo PHOM, don{mã,màu,size,sđt,địa chỉ}.
+
+RÀO CODE (không tắt được):
+- Mã AI trả phải CÓ trong catalog; không có -> bỏ, giữ luật cũ / gắn người thật.
+- Địa chỉ phải có địa danh thật (vn_address); sđt phải đúng định dạng 0xxxxxxxxx.
+- Size phải nằm trong bảng size của mẫu (tra sheet).
+- TIỀN COD: code tra sheet (computeOrderTotal) điền vào chỗ {COD}; AI ghi số tiền -> bị lọc.
+- Phom chốt AI soạn thiếu trường -> tự rơi về phom code dựng (buildOrderConfirmation).
+- AI không chắc (do_tin_cay < ngưỡng) / thẩm định trượt -> gắn Chờ-XL, KHÔNG làm bừa.
+- AI lỗi/timeout -> {ok:false} -> toàn bộ luật cũ chạy y nguyên.
+
+CÔNG TẮC (ai_quyet_config.json — sửa xong KHÔNG cần restart):
+  log_so_sanh        true   -> SHADOW MODE: AI chạy ngầm, chỉ in log "[AI-QUYẾT]..." và
+                              "[AI-QUYẾT so sánh] referent: AI=X | luật cũ=Y" để đối chiếu.
+  bat_referent       false  -> bật: AI quyết mẫu, đè focus luật cũ khi đủ tự tin.
+  bat_diachi_chotdon false  -> bật: AI quyết địa chỉ đủ/thiếu + xin thông tin + CHỐT ĐƠN theo phom.
+  nguong_tin_cay     0.7    -> dưới ngưỡng này AI không được cầm lái.
+
+LỘ TRÌNH KHUYÊN DÙNG:
+  Ngày 1-3: để nguyên mặc định (shadow). Soi log: grep "AI-QUYẾT so sánh" xem AI vs luật cũ
+            lệch chỗ nào, ai đúng. Lệch mà AI đúng nhiều -> bật.
+  Bước 2:   bat_referent=true (hết loạn mẫu do bài ad).
+  Bước 3:   bat_diachi_chotdon=true (AI quyết + tự nhắn luồng địa chỉ/chốt đơn theo phom).
+
+CHI PHÍ: +1 call gpt-4.1-mini/lượt (~450 token out) khi bất kỳ công tắc nào bật.
+
+TRIỂN KHAI: chép đè 4 file -> pm2 restart bot. Đã node --check toàn bộ, JSON parse OK.
+
+============ D. SỬA CÂU TRẢ LỜI "HÀNG GỬI TỪ ĐÂU" ============
+buildShipOriginReply (dòng ~621): khách hỏi kho/nơi gửi hàng (ngữ cảnh ship online) nhưng câu cũ
+kèm vế "Chị ghé cơ sở nào tiện cho mình cũng được nha" - lạc quẻ, khách không hỏi chuyện ghé showroom.
+Câu mới: "Dạ hàng bên em được gửi từ kho Bắc Giang ạ. Đơn của mình được giao tận nơi, chị được kiểm
+hàng trước khi thanh toán nha" - đúng trọng tâm + chốt nhẹ lợi ích kiểm hàng.

@@ -1,0 +1,33 @@
+========================================
+  SUA_LOI_v24 — Mys.P BOT  (tích luỹ từ v17)
+========================================
+Deploy: copy 3 file .js đè vào C:\AI_HTK_BOT_V5 -> Ctrl-C -> node bot_worker_api_v3.js
+FILE THAY ĐỔI: bot_worker_api_v3.js, ai_intent.js, color_utils.js
+LƯU Ý: KHÔNG đè ad_product_map.json (tự sửa trên máy shop).
+
+================= MỚI Ở v24 =================
+[Phuong Pham — KHÁCH CŨ ĐẶT THÊM] (gate AD hậu-đơn ~5469):
+   - LỖI cũ: conv đã có đơn (everOrdered/shopConfirmedOrderInHistory) mà quay lại từ AD -> bot LUÔN
+     tag CHỜ XL giao người thật -> BỎ LỠ khách cũ muốn mua THÊM mẫu mới (Phuong Pham gửi ảnh Camellia
+     + "cho c giá" nhưng bị giao người thật).
+   - SỬA: thêm _newModelShoppingNow = (khách GỬI ẢNH mẫu lượt này) + (text KHÔNG hỏi về đơn cũ:
+     khi nào nhận/đổi-trả/hoàn/đơn của mình...). Nếu đúng -> KHÔNG tag CHỜ XL, cho chạy xuống nhánh
+     báo giá mẫu mới (nhánh dưới đã có guard orderedByCode chặn báo lại mẫu ĐÃ đặt).
+   - Kết quả:
+     * Khách cũ gửi ảnh mẫu MỚI + hỏi giá -> BÁO GIÁ mẫu mới (mua thêm). ✅
+     * Khách cũ + ảnh + "khi nào nhận hàng / đổi trả" -> GIAO NGƯỜI THẬT. ✅
+     * Khách cũ click ad KHÔNG ảnh -> vẫn giao người thật (ranh giới an toàn, chưa nới).
+   - Log mới khi nới: "[đặt thêm] Khách đã có đơn nhưng gửi ẢNH mẫu mới + không hỏi đơn cũ -> ... cho báo giá."
+
+================= ĐÃ CÓ TỪ v23 =================
+[MRAD5171] mã chiến dịch -> mặc định ảnh XANH NHẠT (khách không xin màu khác); khách gửi ảnh -> không ghim
+   ảnh khách chụp (thuần xanh nhạt). *** NHỚ DEPLOY: log đúng phải có "MÃ CHIẾN DỊCH -> mặc định màu xanh nhạt".
+   *** Đổi tên file lỗi "MRAD5171--XANH NHẠT.13-jpg" -> "MRAD5171 -XANH NHẠT-13.jpg".
+
+================= ĐÃ CÓ TỪ v21/v20/v19 =================
+[Duyên Phận+SIZE CŨ] tư vấn=chốt + ưu tiên size cũ (+2kg). [Khoai Khoai] COMMENT người thật -> bot đứng ngoài.
+[1] Tách khách CŨ/MỚI. [2] ai_intent "bn/bnn"=hỏi giá. [3] Ngoc Lan màu->đúng mẫu. [4] Hải Kiên retry. [5] Đặng Vân ảnh lặp.
+[Hong Nhung] thêm ad_product_map.json: "1568946478120178": "MRKVX6335"
+
+================= CHỜ LOG =================
+[Nguyet] câu tư vấn size lặp 2 lần -> cần log đoạn xử Nguyet.

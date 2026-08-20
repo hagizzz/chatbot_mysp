@@ -1,0 +1,420 @@
+========================= SỬA LỖI v34 =========================
+(Cộng dồn: đã bao gồm hết v33 — GREETING fix, 2 câu đổi-hàng mới, kịch bản màu v32)
+
+----------------------------------------------------------------
+[MỚI v34] Cụm "Bắt đầu" + ảnh mẫu -> KHÔNG gửi gallery 10 mẫu thừa
+----------------------------------------------------------------
+HIỆN TƯỢNG (ca Rose Pham):
+  - Khách bấm "Bắt đầu" lúc 20:32:22 -> Pancake giao RIÊNG lượt này (chưa kèm ảnh).
+  - Bot: imageCount=0, fromAd=false -> gửi GALLERY 10 mẫu MỚI.
+  - ~20s sau (20:32:42) khách mới gửi "Bn ạ" + ảnh Giannal -> bot báo giá 890k + 3 ảnh.
+  => Khách bị nhận CẢ HAI: gallery 10 mẫu (thừa) + giá Giannal.
+
+GỐC RỄ:
+  - Pancake TÁCH cụm khởi đầu thành nhiều lượt; ảnh về SAU "Bắt đầu" vài-chục giây ở lượt riêng.
+  - Lúc gửi gallery, bot CHƯA có ảnh, KHÔNG có tín hiệu ad (fromAd=false) -> không biết khách sắp gửi mẫu.
+  - Tín hiệu duy nhất là THỜI GIAN -> phải CHỜ xem ảnh có tới không.
+
+CÁCH SỬA (KHÔNG đứng chờ/block — hoãn rồi đi xử conv khác, lát quay lại):
+  1) Tách hàm sendGetStartedGallery(cid, mem) — gom phần build + gửi gallery 10 mẫu mới
+     (lọc isNew & !hết hàng, xáo trộn, ghim MGKVX6310 lên đầu, buildGallery maxModels:10).
+  2) Nhánh "Bắt đầu" (isGetStartedOnly + imageCount===0): THAY "gửi ngay" bằng HOÃN:
+       - đặt hẹn vào pendingFollowups { kind:"GS_GALLERY", delay:22000 };
+       - markProcessed + return -> KHÔNG gửi gì lúc này, vòng poll đi xử conv khác.
+       - log: 'Tin CHỈ "Bắt đầu" -> HOÃN gallery 22s ...'
+  3) Trong sweepFollowups, thêm nhánh xử info.kind==="GS_GALLERY":
+       - Đặt SAU guard "khách vừa nhắn tiếp" (lastCustomerMsgAt>custAt) -> khách gửi ảnh/mẫu
+         trong lúc chờ thì gallery bị HUỶ ở đó, vòng poll thường báo giá mẫu.
+       - Đặt TRƯỚC guard "đọc lại Pancake/ép xử lại" (guard đó coi "Bắt đầu" là tin chưa trả -> sẽ huỷ nhầm).
+       - 2 lớp huỷ phụ: newGallerySent/orderClosed/botHandoffAt; hoặc đã có mẫu (currentProduct/quotedProducts).
+       - Qua hết -> sendGetStartedGallery -> set newGallerySent.
+       - log: '[Bắt đầu] hết hạn chờ ~22s, khách KHÔNG gửi ảnh/mẫu -> GỬI gallery 10 mẫu'.
+
+KẾT QUẢ MONG ĐỢI:
+  - Khách "Bắt đầu" + (vài giây sau) ảnh/mẫu  -> CHỈ báo giá+ảnh mẫu đó, KHÔNG còn gallery thừa.
+  - Khách CHỈ "Bắt đầu" (không gửi gì)         -> chờ ~22s rồi nhận gallery 10 mẫu (như cũ, chỉ trễ hơn).
+
+ĐÁNH ĐỔI / RỦI RO:
+  - Khách chỉ bấm "Bắt đầu" sẽ phải CHỜ ~22s mới thấy gallery (im lặng lúc đầu). Grace 22s vì
+    khoảng cách "Bắt đầu -> ảnh" của ca thật tới ~20s; ngắn hơn sẽ không bắt kịp.
+  - Đây là VÙNG TIMING/QUEUE (từng gây crash) -> ĐÃ node --check, NHƯNG cần TEST TRAFFIC THẬT.
+  - Follow/hẹn nằm trong RAM -> nếu pm2 restart trong lúc đang chờ 22s thì gallery hoãn bị MẤT
+    (khách "Bắt đầu" lúc đó sẽ không nhận gallery). Hiếm, chấp nhận được.
+  - Chỉnh grace: sửa GS_GALLERY_DELAY (đang 22000ms) trong nhánh "Bắt đầu".
+
+----------------------------------------------------------------
+[Nhắc lại — đã có từ v33, vẫn trong bản này]
+----------------------------------------------------------------
+  - GREETING: tin chỉ là lời chào -> KHÔNG đẩy người thật (hết gắn AI-CHỜ XL oan ca Thanh Stubborn).
+  - 2 câu CHÍNH SÁCH ĐỔI (nhãn asksExchangePolicy @ + asksExchangeIfNotLike) -> đổi thành:
+      "Dạ chị yên tâm, bên em hỗ trợ đổi trong 15 ngày nha. Mình chỉ cần giữ sản phẩm chưa qua
+       sử dụng và còn nguyên tem mác là đổi thoải mái ạ, có gì không vừa ý chị cứ nhắn em hỗ trợ liền."
+    (2 câu đổi khác — @7152 và @8296 "ĐỔI size/mẫu...chưa hỗ trợ hoàn tiền" — GIỮ NGUYÊN.)
+  - Kịch bản MÀU (COLOR_ASK) bản v32: 1 màu / >=2 màu (gửi ảnh thật từng màu) / 0 màu (kiểm).
+
+================== CÁCH TRIỂN KHAI ==================
+  1) Copy 4 file .js trong zip đè vào C:\AI_HTK_BOT_V5
+       bot_worker_api_v3.js, ai_intent.js, color_utils.js, pancake_reader.js
+     (KHÔNG đụng ad_product_map.json)
+  2) pm2 restart bot   (đổi .js BẮT BUỘC restart; restart làm MẤT follow đang hẹn trong RAM)
+  3) Xác nhận: pm2 status -> online, ↺ tăng.
+
+================== TEST v34 (traffic thật) ==================
+  Lấy nick phụ bấm "Bắt đầu" rồi VÀI GIÂY SAU gửi 1 ảnh mẫu. Lọc log:
+    powershell "Select-String -Path $env:USERPROFILE\.pm2\logs\bot-out.log -Pattern 'Bắt đầu|GS_GALLERY|HOÃN gallery|GỬI gallery|HUỶ gallery' | Select-Object -Last 20"
+  Mong đợi thấy:
+    - 'Tin CHỈ "Bắt đầu" -> HOÃN gallery 22s ...'
+    - rồi (khi gửi ảnh) KHÔNG có dòng 'GỬI gallery 10 mẫu'  -> thay vào đó là Báo giá mẫu.
+    - nếu chỉ "Bắt đầu" không gửi gì: sau ~22s có '[Bắt đầu] hết hạn chờ ... GỬI gallery 10 mẫu'.
+
+================== PENDING (việc phía mày) ==================
+  - DATA Olyra (MR0SV6361 = set chấm bi): thêm 3-5 ảnh Olyra rõ nét vào thư mục Drive nhận diện
+    (tên file prefix MR0SV6361) -> pm2 stop bot -> python update_index.py -> pm2 start bot.
+    (Vision đã ra Olyra #1 score 0.9393 nhưng gap 0.0545 < 0.06 nên bị loại; thêm ảnh để nới gap.)
+  - MERGE (không ghi đè) các entry ad_product_map.json LIVE (Plena, OCELIA...) — đừng overwrite.
+
+----------------------------------------------------------------
+[MỚI v34 - bổ sung] ĐỊA CHỈ: tỉnh viết tắt / suy từ quận-phường -> KHÔNG hỏi xác nhận
+----------------------------------------------------------------
+HIỆN TƯỢNG (ca Hana Bùi): khách ghi "...quận hồng bàng hp" -> bot HỎI LẠI
+  "Địa chỉ này ở Hải Phòng đúng không chị? ... xác nhận giúp em..." (thừa, làm chậm chốt đơn).
+
+GỐC RỄ:
+  - explicitProvince (vn_address.js) chỉ có sẵn viết tắt HN/HCM-SG/ĐN -> "hp","bn"... KHÔNG nhận là tỉnh RÕ.
+  - Quan trọng hơn: tỉnh SUY ĐƯỢC từ quận/phường (inferred, vd "hồng bàng"->Hải Phòng) bị xem là "chưa chắc"
+    -> isDeliverableAddress đòi tỉnh RÕ -> addressGapReply đi HỎI xác nhận, dù chỉ có 1 tỉnh duy nhất.
+
+CÁCH SỬA (2 lớp):
+  (1) vn_address.js / explicitProvince: thêm viết tắt tỉnh PHỔ BIẾN, ÍT nhập nhằng -> nhận là tỉnh RÕ:
+        hp,hd -> Hải Phòng ; bn,bg -> Bắc Ninh ; nd,nb -> Ninh Bình ; tb,hy -> Hưng Yên ;
+        vp -> Phú Thọ ; tq -> Tuyên Quang ; ct -> Cần Thơ   (map theo tỉnh MỚI sau sáp nhập 1/7/2025)
+      KHÔNG thêm mã trùng 2 tỉnh (QN=Quảng Ninh/Quảng Nam, TN=Thái Nguyên/Tây Ninh, LC=Lào Cai/Lai Châu)
+      -> mấy mã đó vẫn để luồng hỏi (hoặc tự suy từ quận/phường).
+  (2) bot_worker_api_v3.js:
+      - isDeliverableAddress: chấp nhận (t.province || t.inferred) -> SUY ĐƯỢC 1 tỉnh DUY NHẤT = ĐỦ, khỏi hỏi.
+      - addressGapReply: BỎ nhánh hỏi xác nhận khi inferred. CHỈ còn hỏi khi MƠ HỒ (ambiguous: khu vực
+        trùng nhiều tỉnh) -> "khu vực này có ở vài tỉnh... chị ở tỉnh nào ạ?".
+      (Handler cũ xử lời "đúng rồi" cho câu xác nhận tỉnh @ ~6784 thành code chết vô hại — không gãy gì.)
+
+KẾT QUẢ:
+  - "...hồng bàng hp" / "...hồng bàng" (không viết tắt) -> nhận Hải Phòng, ĐI THẲNG chốt đơn, KHÔNG hỏi.
+  - Khu vực trùng nhiều tỉnh -> VẪN hỏi "ở tỉnh/thành nào" (đúng, vì thật sự không xác định được).
+  - An toàn: câu TÓM TẮT ĐƠN vẫn in đầy đủ tỉnh -> khách thấy, sai thì sửa.
+
+  *** DEPLOY v34 GIỜ LÀ 5 FILE (thêm vn_address.js) ***
+    bot_worker_api_v3.js, ai_intent.js, color_utils.js, pancake_reader.js, vn_address.js
+  Muốn thêm/bớt viết tắt tỉnh: sửa danh sách trong explicitProvince (vn_address.js).
+
+----------------------------------------------------------------
+[MỚI v34 - bổ sung 2] CÂU CHỐT/LÊN ĐƠN: địa chỉ ghi CHUẨN, bung viết tắt tỉnh
+----------------------------------------------------------------
+YÊU CẦU: câu chốt xác nhận (dùng để TẠO ĐƠN) phải ghi tỉnh ĐẦY ĐỦ, KHÔNG viết tắt.
+  Khách viết tắt -> bot tự viết hoàn thiện ra.
+SỬA: thêm hàm addrForOrder(addr):
+  - cleanAddress (dọn rác) như cũ, RỒI: xác định tỉnh (explicit/viết tắt hoặc suy từ quận-phường),
+    bỏ token viết tắt tỉnh ở cuối, nối ", <Tên tỉnh đầy đủ>". Đã có tên tỉnh đầy đủ -> giữ nguyên.
+  Dùng addrForOrder ở: buildOrderConfirmation ("- Địa chỉ: ...") và noiNhanAddr ("gửi về địa chỉ ...").
+VÍ DỤ:
+  "...quận hồng bàng hp"  -> "...quận hồng bàng, Hải Phòng"
+  "...quận hồng bàng"     -> "...quận hồng bàng, Hải Phòng"
+  "123 trần phú bn"       -> "123 trần phú, Bắc Ninh"
+
+----------------------------------------------------------------
+[MỚI v34 - bổ sung 3] NHẬN DIỆN AD KHÔNG CẦN TOKEN FB (ca Nguyễn Thảo / Giannal)
+----------------------------------------------------------------
+HIỆN TƯỢNG: khách bấm ad Giannal -> "Giá của chiếc váy là bao nhiêu?" -> bot hỏi
+  "Dạ chị nhắn giúp em tên mẫu..." thay vì báo giá Giannal.
+
+GỐC RỄ (3 tầng):
+  1) Lượt tin tới qua WEBHOOK -> ad_ids CHƯA gắn -> data.fromAd=FALSE -> cả khối ADS không chạy.
+  2) hasModelNameToken("Giá của chiếc váy...") TRẢ TRUE NHẦM (cue khớp "gia"/"vay") -> nhánh (a3c2)
+     tóm trước -> hỏi tên mẫu, KHÔNG kịp chờ ad_ids.
+  3) Đọc bài ad tịt vì ad chạy bằng DARK POST (bài ẩn) -> không có trong list + _fetchPostDirect trả null.
+     (Câu log "cũ hơn 120 ngày" chỉ là mặc định khi không thấy -> GÂY HIỂU LẦM, không phải lý do thật.)
+
+LÀM RÕ — CÁCH NHẬN DIỆN AD KHÔNG CẦN TOKEN FB (đã có sẵn trong code):
+  Chuỗi resolve mẫu của ad (khối ADS): 0) khách gõ tên  1) mã trong TÊN ad (CẦN token FB)
+  2) tên dẫn đầu trong CAPTION  3) VISION ẢNH creative ad (KHÔNG cần token)  4) map tay.
+  -> (3) vision ảnh ad là cách KHÔNG cần token, ĐÃ chạy được (ca khác: "VISION ẢNH BÀI AD -> MRVX588").
+     Pancake thường có trả ảnh creative (photo=có) -> vision đọc ra mẫu. Token FB chỉ là LỚP THÊM cho chắc.
+
+SỬA (token-free): thêm nhánh (a3c1) NGAY TRƯỚC (a3c2):
+  - ĐK: chưa ra mẫu + imageCount=0 + data.fromAd=FALSE + chưa hoãn + không comment/người thật/đơn/nhạy cảm
+        + câu HỎI GIÁ + có từ "váy/đầm/áo/set/mẫu/cái/chiếc/này/đó...".
+  - HÀNH ĐỘNG: HOÃN 1 NHỊP (clearProcessing, KHÔNG markProcessed) -> nhịp poll sau lấy conv từ LIST
+    (CÓ ad_ids) -> fromAd=true -> khối ADS đọc caption + VISION ẢNH ad -> ra mẫu, báo giá. Hoãn TỐI ĐA 1 lần.
+  - Nhịp sau VẪN không có ad / không ra mẫu -> rơi xuống (a3c2)/gallery như cũ (không kẹt).
+
+LƯU Ý THẬT:
+  - Nhánh này giúp bot CHỜ + thử vision ảnh ad (thay vì hỏi tên ngay). Có RA mẫu hay không còn tuỳ
+    Pancake CÓ trả ảnh creative của ad đó không. Có ảnh -> vision (Giannal vision rất khoẻ) -> ra.
+    Không ảnh + dark post -> vẫn phải dùng map tay (lưới đỡ cuối).
+  - ĐÂY LÀ VÙNG HANDLER/ADS + TIMING (clearProcessing/defer) — TỪNG CRASH. Đã node --check, CẦN TEST TRAFFIC THẬT.
+  - FB_ADS_TOKEN: KHÔNG bắt buộc. Nếu sau này có token ổn định (System User) thì path (1) "mã trong tên ad"
+    cho kết quả CHÍNH XÁC nhất (khỏi phụ thuộc vision). Không có token vẫn chạy bằng vision ảnh.
+
+TEST: khách bấm ad -> soi log:
+  powershell "Select-String -Path $env:USERPROFILE\.pm2\logs\bot-out.log -Pattern 'HOÃN 1 nhịp đợi ad_ids|ADS GATE|VISION ẢNH|QUẢNG CÁO adId|RA MGKVX6310|CHƯA RA MẪU' | Select-Object -Last 20"
+  Mong đợi: 'HOÃN 1 nhịp...' -> nhịp sau 'ADS GATE fromAd=true' -> 'VISION ẢNH BÀI AD -> ...' hoặc 'RA <mã>'.
+  Nếu thấy 'CHƯA RA MẪU' dù fromAd=true -> Pancake KHÔNG trả ảnh ad đó -> báo tao để tính cách khác.
+
+----------------------------------------------------------------
+[MỚI v34 - bổ sung 4] Khách bấm AD gửi "." / chào suông -> phải BÁO GIÁ, không dội gallery
+----------------------------------------------------------------
+HIỆN TƯỢNG (ca Thuỷ Trần PB): bấm ad Giannal (MGKVX6310) -> gửi "." -> bot DỘI GALLERY 10 mẫu
+  thay vì báo giá Giannal.
+
+GỐC RỄ: "." tới qua WEBHOOK -> ad_ids chưa gắn -> data.fromAd=FALSE -> bot tưởng "ping trống/chào suông"
+  -> nhánh gallery (a3d) bắn 10 mẫu. (Cùng họ lỗi webhook-fromAd-false như ca Nguyễn Thảo.)
+  v34 trước mới chặn "Bắt đầu" (GS_GALLERY) + "giá+váy" (a3c1), CHƯA chặn "." (đi nhánh a3d riêng).
+
+SỬA: nhánh a3d (mở đầu trống / hỏi giá chung) -> THAY "dội gallery NGAY" bằng HOÃN gallery ~22s qua
+  cùng bộ GS_GALLERY (đã có ở bổ sung 1). Trong 22s: nhịp poll sau lấy từ LIST (CÓ ad_ids) -> fromAd=true
+  -> khối ADS đọc/vision ra mẫu -> BÁO GIÁ; sweep thấy đã có currentProduct -> HUỶ gallery.
+  Vẫn trống thật (không ad) -> hết 22s mới dội gallery 10 mẫu.
+
+ĐÁNH ĐỔI: khách chào suông "." / hỏi "giá váy bao nhiêu" CHUNG CHUNG (không ad thật) sẽ chờ ~22s
+  mới thấy gallery. Đa số mở-đầu kiểu này LÀ người bấm ad -> chờ để báo giá đúng mẫu là đáng.
+
+*** CẢNH BÁO: v34 giờ có 3 chỗ HOÃN/DEFER (GS_GALLERY cho "Bắt đầu" + a3d; a3c1 cho giá+váy) đều ở
+    VÙNG TIMING/QUEUE TỪNG CRASH. Đã node --check hết, NHƯNG BẮT BUỘC test traffic thật kỹ. Lỗi -> revert. ***
+
+----------------------------------------------------------------
+[TÍNH NĂNG MỚI] GỬI VIDEO khi khách XIN VIDEO / xin xem mẫu thật (GĐ1)
+----------------------------------------------------------------
+ĐÃ TEST: up video Drive -> Pancake OK (HTTP 200, type=VIDEO, ra content_id). Pancake NHẬN video.
+
+PIPELINE (giống ảnh, tách riêng, KHÔNG đụng hash_index/clip_index/ảnh):
+  1) upload_videos.py (CHẠY TAY 1 lần): kéo MỌI video trong thư mục Drive (cùng folder ảnh) ->
+     up Pancake -> lưu content_id theo MÃ vào video_index.json. Tên file: tiền tố = mã mẫu
+     (vd "MRVX559 model Thùy Dương.mp4" -> MRVX559). Idempotent: chạy lại chỉ up video MỚI.
+       python upload_videos.py              -> up video mới
+       python upload_videos.py --refresh    -> up lại tất cả (làm mới content_id)
+  2) product_videos.js (module bot): đọc video_index.json, tra content_id video theo mã.
+     Hot-reload khi file đổi. Không có file/không có mã -> trả false/null (KHÔNG ném lỗi).
+  3) bot_worker_api_v3.js: thêm require product_videos + 1 NHÁNH (đặt trước khối "lo lắng/nhắn nhủ"):
+     khách XIN VIDEO (regex: video|clip|review | "mẫu thật" | "mặc thật" | "lên người/lên dáng" |
+     "ngoài đời") + đang khoá 1 mẫu CÓ video + không ảnh/không human/không orderClosed
+     -> gửi video mẫu đó bằng content_id (kèm câu "Dạ em gửi chị video mẫu này lên người thật...").
+     Mẫu KHÔNG có video -> KHÔNG chặn, rớt xuống luồng thường. Lỗi gửi -> try/catch, cũng rớt xuống.
+
+AN TOÀN: tính năng TỰ TẮT đến khi có video_index.json. Chưa chạy upload_videos.py -> hasVideo()=false
+  -> nhánh không bao giờ bắn -> bot hành xử y như cũ. Deploy code trước, populate sau, không rủi ro.
+
+*** LƯU Ý DEPLOY: PHẢI copy product_videos.js vào C:\AI_HTK_BOT_V5 cùng lúc với bot_worker_api_v3.js.
+    Thiếu product_videos.js -> require lỗi -> bot KHÔNG khởi động. ***
+
+CHƯA XÁC NHẬN: bước GỬI video vào hội thoại (content_ids) -> khách có thấy video CHẠY thật không.
+  Up đã chắc; gửi dùng CÙNG cơ chế content_ids như ảnh (ảnh đang chạy tốt) nên rất khả năng OK.
+  NÊN chạy test_video.py kèm conv_id 1 lần để mắt thấy video hiện trong hội thoại trước khi tin hẳn.
+
+----------------------------------------------------------------
+[SỬA video] Khách xin VIDEO mà bot gửi ẢNH -> thêm NHÃN AI riêng VIDEO_REQ
+----------------------------------------------------------------
+HIỆN TƯỢNG (Linh Ngân): "MRVX559 gửi c xem video" -> AI gắn nhãn IMAGE_REQ -> bot gửi ẢNH (3 tấm),
+  KHÔNG gửi video. Dù mẫu MRVX559 ĐÃ có video trong index.
+
+GỐC: chưa dạy AI nhãn video -> "xin video" bị quăng vào IMAGE_REQ -> handler gửi ảnh chạy, cướp lượt.
+
+SỬA (đúng triết lý "AI quyết nhãn, CODE tra kịch bản"):
+  1) ai_intent.js: THÊM nhãn VIDEO_REQ + dạy AI phân biệt (video/clip/mẫu thật/lên người/ngoài đời -> VIDEO_REQ,
+     KHÔNG phải IMAGE_REQ; kể cả khi câu có "gửi xem" hoặc kèm mã). Đặt VIDEO_REQ ƯU TIÊN cao hơn IMAGE_REQ.
+  2) bot_worker_api_v3.js: bỏ nhánh video cũ (đặt ở khối 7272, có thể không tới đúng lúc); thêm CHỐT VIDEO
+     đặt NGAY TRƯỚC handler gửi ảnh (~9283): _ai("VIDEO_REQ") (chính) HOẶC regex (phụ) + mẫu CÓ video -> gửi video.
+     Mẫu không có video -> KHÔNG chặn (rớt xuống ảnh/giá). Đặt trước handler ảnh -> không bị cướp lượt.
+
+LƯU Ý: ai_intent.js là .js -> PHẢI pm2 restart bot mới ăn nhãn mới.
+
+----------------------------------------------------------------
+[SỬA tạo đơn TRÙNG] Khách ĐÃ có đơn (NV chốt tay / trước restart) -> bot CHỐT LẠI
+----------------------------------------------------------------
+HIỆN TƯỢNG (Linh Ngân): khách đã đặt Váy Féline (đơn đã có), nhắn hậu-đơn ("mấy ngày nhận hàng",
+  "giao chuẩn nha", "chào e") -> bot lại "Cảm ơn chị đã đặt hàng + Féline..." = TẠO/XÁC NHẬN ĐƠN TRÙNG.
+
+GỐC: bot chỉ nhớ đơn NÓ tự tạo, lưu RAM (mem.orderedByCode/everOrdered). Mà:
+  - Đơn do NHÂN VIÊN chốt tay -> KHÔNG nằm trong RAM bot.
+  - pm2 restart (hôm nay restart nhiều lần) -> XOÁ RAM -> bot quên đơn đã tạo.
+  -> Guard "đã có đơn" không có gì để dựa -> ORDER_CLOSE chốt lại.
+
+SỬA: thêm orderedInThread(messages, productInfo) — QUÉT LỊCH SỬ HỘI THOẠI tìm câu xác nhận đơn
+  (bot/NV: "Cảm ơn...đã đặt hàng" | "đang được tạo trên hệ thống" | block COD+SĐT+Địa chỉ) + MẪU KHỚP.
+  Đọc từ messages -> BỀN qua restart + bắt được đơn NV chốt tay.
+  Tại handler ORDER_CLOSE (status="done"): nếu orderedInThread -> KHÔNG tạo trùng, chỉ trấn an
+  "Dạ đơn của mình em vẫn giữ nguyên nha chị...". KHỚP MẪU nên KHÔNG chặn nhầm khi khách đặt THÊM mẫu KHÁC.
+
+LƯU Ý: AI gắn nhãn không hẳn sai; gốc là bot "mù" đơn cũ/đơn NV + mất RAM khi restart. Fix này
+  đọc lịch sử nên hết phụ thuộc RAM. Vẫn nên test traffic thật + bắt log nếu còn tạo trùng.
+
+----------------------------------------------------------------
+[SỬA gắn thẻ thừa] Khách HẬU-ĐƠN từ AD hỏi mẫu mới/size -> bot bị GIAO NGƯỜI THẬT (kẹt AI-CHỜ XL)
+----------------------------------------------------------------
+HIỆN TƯỢNG (Hoàng Thu Thủy / Lê T.Ngọc Lê): khách đã đặt đơn + hội thoại từ AD -> hỏi gì cũng bị
+  gắn AI-CHỜ XL, bot đứng ngoài (kể cả câu CÓ kịch bản: "Bộ này bn", "1m63 56kg").
+
+GỐC: luật [FIX Hoang Quynh Nga] @5584: fromAd + lịch sử hậu-đơn + tin không phải ack -> GIAO NGƯỜI THẬT.
+  Exception chỉ có cho GỬI ẢNH mẫu mới (_newModelShoppingNow), KHÔNG có cho hỏi bằng CHỮ -> chặn cả
+  câu hỏi mẫu mới/size hợp lệ.
+
+SỬA: thêm điều kiện _ordQuestionNow vào @5584 -> CHỈ giao người thật khi tin HIỆN TẠI hỏi về ĐƠN CŨ
+  (khi nào nhận/giao/ship, đổi size, hoàn hàng, "đơn của mình"...). Câu hỏi MẪU MỚI/size/chung -> KHÔNG
+  giao người, để bot trả kịch bản.
+  -> Lê (hỏi hàng) vẫn giao người (đúng); Hoàng Thu Thủy (hỏi mẫu mới/size) bot tự trả.
+
+LƯU Ý: nếu Hoàng Thu Thủy vẫn bị gắn thẻ sau fix này -> ca bả đi ĐƯỜNG KHÁC, cần log lượt gắn thẻ
+  (TAG AI-CHỜ XL -Context 25,2) để tìm đúng nhánh.
+
+----------------------------------------------------------------
+[SỬA SAI SIZE + SAI MÀU đơn] (Shuixian Yu - PHOM - Giannal)
+----------------------------------------------------------------
+LỖI 1 - SIZE: khách tự khai 57kg + "M" (khách quen mặc M). Bot tư vấn "57kg -> L" rồi LÊN ĐƠN L,
+  bỏ qua M dù khách khẳng định M 2 lần.
+  GỐC: @9769 logic [FIX Duyên Phận]: size khách khai LỆCH size cân nặng >~3kg -> ĐÈ size khách bằng
+    size bảng (tư vấn M chốt L).
+  SỬA: khách TỰ KHAI size (sizeFromCustomer===true) -> TÔN TRỌNG ý khách, cân nặng CHỈ gợi ý.
+    Chốt đúng size khách chốt (M). Câu: "Dạ chị quen mặc size M thì em lên đơn size M cho mình nha ạ."
+
+LỖI 2 - MÀU: khách chỉ bám màu HỒNG suốt (ad/ảnh 1 màu, không hỏi màu khác). Đơn ra MÀU KEM +
+  xác nhận THIẾU màu.
+  GỐC: cổng ORDER_CLOSE @6915 chốt khi !_multiInterest nhưng QUÊN bắt màu khách bám vào đơn ->
+    chosenColorForCode rỗng -> đơn để trống màu -> ảnh lấy màu ĐẦU sheet (kem).
+  SỬA: (a) BẮT màu khách bám (askedImageColor/lastSentImageColor/sourceColorByCode/colorByCode) vào
+    orderColorByCode trước khi chốt (sao y cổng tryCloseFromState ~1457). (b) _needColorC giờ = nhiều màu
+    && CHƯA có màu chốt -> nếu sau bước bắt-màu VẪN không ra màu -> HỎI "chị lấy màu nào", KHÔNG lên đơn
+    thiếu màu/màu kem. -> khách bám hồng = đơn HỒNG; không rõ màu = HỎI (không chốt bừa).
+
+LƯU Ý: cả 2 ở vùng CHỐT ĐƠN (rủi ro cao) -> test traffic thật. Log mong đợi:
+  "TÔN TRỌNG khách, CHỐT M" và "[màu đơn] khách bám 1 màu hồng -> lên đơn đúng màu đó".
+
+----------------------------------------------------------------
+[SỬA câu KHEN sai chỗ] khách "Ok" mà bot ra câu "được hỗ trợ chị là em vui..." (câu khen)
+----------------------------------------------------------------
+GỐC: nhánh "câu ấm sau chốt" @7404, biến _praise tính cả _ai("POST_ORDER_CHITCHAT") = khen. Khách "Ok"
+  (AI gắn POST_ORDER_CHITCHAT) -> _praise=true -> ra câu khen dù khách KHÔNG khen.
+SỬA: _praise chỉ tính khen THẬT (isPostOrderChitChat từ-khen / isFriendlyRemark / regex khen), BỎ nhãn
+  POST_ORDER_CHITCHAT + loại trừ bare-ack ("ok/vâng"). -> "Ok" rơi vào câu cảm ơn/khép nhẹ, không khen bừa.
+
+----------------------------------------------------------------
+[BỔ SUNG kịch bản POST_ORDER_CHITCHAT] khách "ok/vâng" sau chốt -> "Dạ vâng ạ"
+----------------------------------------------------------------
+Nhánh "câu ấm sau chốt" @~7405: khách chỉ ack ("ok/vâng") hoặc nhãn POST_ORDER_CHITCHAT = kết thúc
+  hội thoại -> đáp GỌN "Dạ vâng ạ" (thay câu dài). Tin CÓ nội dung (không phải ack) vẫn câu cảm ơn +
+  trấn an đơn. Ack lần 2 -> IM (logic _postChotClosed cũ giữ nguyên).
+
+----------------------------------------------------------------
+[DẠY AI nhãn POST_ORDER_CHITCHAT cho "ok/vâng" hậu-đơn]
+----------------------------------------------------------------
+ai_intent.js: thêm dòng dạy: khi đơn ĐÃ tạo/xác nhận mà khách chỉ ack ngắn ("ok/vâng/ừ/dạ rồi/ok chị")
+  -> POST_ORDER_CHITCHAT (kết thúc), KHÔNG đọc nhầm thành ORDER_CLOSE/xác nhận/nghiệp vụ (đơn đã có rồi).
+  Phân biệt rõ với "ok/vâng" trả lời câu xác nhận tỉnh/địa chỉ KHI đơn CHƯA tạo (= ORDER_CLOSE).
+  -> khớp với kịch bản code "Dạ vâng ạ" vừa thêm. (Code vẫn bắt bằng isBareAck nên chạy dù nhãn lệch;
+  dạy AI để nhãn sạch + tránh đọc nhầm nghiệp vụ.)
+
+----------------------------------------------------------------
+[SỬA: khách CHỌN CƠ SỞ bị đọc thành ĐỊA CHỈ GIAO] (Chu Nguyet)
+----------------------------------------------------------------
+HIỆN TƯỢNG: khách "Cho chị xin địa chỉ cửa hàng lúc nào có chị qua" -> bot trả 3 cơ sở + hỏi "gần
+  showroom nào?". Khách đáp "Bà triệu" (chọn cơ sở) -> bot đọc thành ĐỊA CHỈ GIAO -> xin sđt lên đơn. SAI.
+GỐC: lượt 1 AI gắn ĐÚNG (STORE_ADDRESS). Nhưng sau khi hỏi "gần showroom nào?", bot KHÔNG nhớ đang
+  chờ khách chọn cơ sở -> lượt sau "Bà triệu" rớt sang luồng địa-chỉ-giao.
+SỬA: (a) gắn cờ mem.pendingShowroomChoice khi bot trả showroom. (b) handler sớm (sau latestText, trước
+  luồng đơn): nếu đang chờ + khách đáp tên cơ sở/tỉnh (matchShowroom) -> trả CHI TIẾT CƠ SỞ + mời qua
+  shop, XOÁ địa-chỉ bắt nhầm, KHÔNG xin sđt. Không khớp cơ sở -> để luồng thường. (c) dạy AI: tên địa danh
+  sau câu "gần showroom nào" = STORE_ADDRESS (is_address=false), đừng đọc thành ADDRESS/ORDER_CLOSE.
+  matchShowroom: Bà Triệu/HN -> CS HN; Nguyễn Trãi/Q1/HCM -> CS HCM; Huỳnh Thúc Kháng/Bắc Ninh -> CS BN.
+
+----------------------------------------------------------------
+[ĐỔI câu showroom] 3 cơ sở -> 2 showroom (bỏ Bắc Ninh) + câu mời mới
+----------------------------------------------------------------
+SHOWROOMS còn 2 (HN Bà Triệu, HCM Nguyễn Trãi), địa chỉ rút gọn. buildShopAddressReply đổi text:
+  "Bên em có 2 showroom... Chị tiện qua cơ sở nào em nhắn NV chuẩn bị sẵn mẫu... Còn nếu bận thì chốt
+  online, ship tận nơi, kiểm hàng trước khi thanh toán." matchShowroom bỏ nhánh Bắc Ninh (không còn CS).
+
+----------------------------------------------------------------
+[BỔ SUNG cơ sở: Bắc Giang (văn phòng) + Vinh/Nghệ An/Phú Thọ (đã đóng)]
+----------------------------------------------------------------
+Gộp logic vào showroomReplyFor(text) (thay matchShowroom), dùng chung cho lượt hỏi đầu + lượt chọn cơ sở:
+ - Hỏi "Bắc Giang" -> "có cơ sở Bắc Giang ạ, chỗ này là VĂN PHÒNG không trưng đủ mẫu như showroom HN/NT,
+   chị cứ ghé, em đưa từng mẫu thử" + 📍 01 Huỳnh Thúc Kháng, KĐT phía Nam, Phường Bắc Giang, Bắc Ninh.
+ - Hỏi "Vinh/Nghệ An/Phú Thọ" -> "hiện có showroom HN + HCM; còn cơ sở <X> không còn hoạt động nữa ạ."
+ - Hỏi "Bà Triệu/HN" / "Nguyễn Trãi/HCM" -> chi tiết cơ sở đó + mời qua.
+ - Hỏi CHUNG -> danh sách 2 showroom (buildShopAddressReply) + chờ khách chọn (pendingShowroomChoice).
+STORE_ADDRESS handler: hỏi đích danh -> trả đúng nơi (không set pendingShowroomChoice); hỏi chung -> list + chờ chọn.
+
+----------------------------------------------------------------
+[FLOW khách SẼ GHÉ showroom] (3 bước)
+----------------------------------------------------------------
+Sau khi bot cho địa chỉ + khách nói sẽ ghé:
+ B1 (wantsVisitShowroom): "gần Bà Triệu sẽ ghé" -> showroomVisitReply: xác nhận cơ sở + xin size GIỮ HÀNG
+    + hỏi "hôm nào ghé". 2 biến thể: chưa biết size (xin size) / đã biết size (dùng {size}). set showroomVisitAsked.
+ B2 (mentionsVisitTime & !cantCome): "mai e qua"/"thứ 7"/"chiều nay" -> GIAO NGƯỜI THẬT (giữ hàng, tiếp đón).
+ B3 (chưa chốt giờ / bận): "bận chưa qua được"/"chưa biết khi nào" -> thuyết phục "ghé thử / hoặc ship tận
+    nơi kiểm hàng trước khi thanh toán".
+ _cantCome chặn "hôm nay bận chưa qua được" KHỎI bị tính là hẹn giờ -> vào B3 (không giao người nhầm).
+ Hàm phụ: wantsVisitShowroom, mentionsVisitTime, showroomVisitReply. State: mem.showroomVisitAsked (2h).
+LƯU Ý: flow mới nhiều bước + nhận diện ngôn ngữ -> CẦN test traffic thật. Log: "Khách báo SẼ GHÉ",
+  "hẹn giờ ghé showroom -> GIAO NGƯỜI THẬT", "chưa chốt giờ ghé -> thuyết phục".
+
+----------------------------------------------------------------
+[DẠY AI: nhãn STORE_VISIT cho "khách SẼ GHÉ cửa hàng"]
+----------------------------------------------------------------
+ai_intent.js: thêm nhãn STORE_VISIT (khách BÁO/HẸN SẼ GHÉ xem trực tiếp). Dạy: "gần Bà Triệu sẽ ghé" /
+  "mai qua xem trực tiếp" / "tiện qua thử" / "chiều nay e qua" -> STORE_VISIT (is_address=FALSE, wants_order=FALSE).
+  KHÁC STORE_ADDRESS (chỉ HỎI địa chỉ). Kèm giờ/ngày cụ thể vẫn STORE_VISIT (code lo hẹn lịch). Đừng đọc
+  địa danh trong câu này thành ADDRESS giao. Thêm STORE_VISIT vào priority (> STORE_ADDRESS).
+bot_worker: _ai/_aiOr chỉ có SAU khi AI đọc (~6319) nên handler showroom regex ở đầu (~latestText) chỉ
+  dùng regex. Thêm BACKUP sau 6319: nếu AI gắn STORE_VISIT mà regex sớm hụt -> vào B1 (xin size giữ hàng
+  + hỏi hôm nào). -> regex (nhanh, đầu) + nhãn AI (backup) cùng dẫn vào luồng ghé showroom.
+
+----------------------------------------------------------------
+[ĐỔI HƯỚNG: showroom flow AI-PRIMARY (AI gắn nhãn -> code trả theo nhãn)]
+----------------------------------------------------------------
+Trước: handler showroom đặt TRƯỚC khi AI đọc (~latestText) -> chạy regex, BỎ QUA AI (ngược mô hình).
+Giờ: GỠ khối regex sớm, chuyển TOÀN BỘ flow showroom xuống SAU khi AI đọc (@6272, sau _ai/_aiOr).
+ - (1) state showroomVisitAsked: mentionsVisitTime & !cantCome -> GIAO NGƯỜI THẬT; còn lại -> thuyết phục.
+ - (2) _aiOr(wantsVisitShowroom, "STORE_VISIT") -> xin size giữ hàng + hỏi hôm nào ghé.
+ - (3) pendingShowroomChoice + _aiOr(showroomReplyFor, "STORE_ADDRESS") -> trả đúng cơ sở.
+ _aiOr = AI sống thì NHÃN AI quyết (bỏ regex); AI chết thì regex đỡ. -> đúng "AI gắn nhãn, code trả theo nhãn".
+ Đặt @6272 nằm TRƯỚC order flow (@7078) -> "Bà triệu/sẽ ghé" không lọt vào luồng xin sđt lên đơn.
+ STORE_ADDRESS hỏi-đầu vẫn ở @9368 (set pendingShowroomChoice). Phân tích: "Bà triệu" KHÔNG khớp pattern
+ bắt-địa-chỉ @2680 nên không cần đặt sớm để chặn -> dời xuống an toàn.
+
+----------------------------------------------------------------
+[MAP gắn MÀU cho bài ad — định dạng "MÃ|Màu"]
+----------------------------------------------------------------
+Vì sao Giannal "biết mẫu mà sai màu": MAP chỉ map id_bài->MÃ (không có màu). Mẫu ra từ MAP nên không
+  chạy vision màu; ad không trả ảnh creative; caption tắt -> hết nguồn màu -> gửi ĐỦ màu -> lòi kem.
+SỬA: VALUE trong ad_product_map.json giờ nhận "MÃ|Màu" (vd "MGKVX6310|Hồng"). lookupAdProduct vẫn trả MÃ
+  (cắt phần |Màu); thêm lookupAdColor trả Màu. Khối ad-màu: nếu khách KHÔNG xin màu -> ƯU TIÊN màu MAP
+  (trước vision/creative). Không có "|Màu" -> như cũ (gửi đủ màu). Tương thích ngược, không cần tắt/bật bot
+  (JSON hot-reload). Bài Giannal 1555383752809784 đã gắn |Hồng.
+DÙNG: bài ad 1 màu -> thêm "|Màu" (vd "...|Kem"). Bài nhiều màu -> để trống màu (gửi đủ). Test: log
+  'Ad: MÀU từ MAP = "Hồng"'.
+
+----------------------------------------------------------------
+[FIX bot bỏ đói TIN CŨ — chỉ trả tin mới]
+----------------------------------------------------------------
+GỐC: vòng poll có MAX_PER_CYCLE=3 (chỉ trả 3 hội thoại/nhịp) + danh sách 'fresh' sort MỚI-trước.
+  Chạy ad -> tin mới liên tục >=3/nhịp -> 3 suất luôn bị tin MỚI ăn hết -> tin cũ (khách chờ) nằm
+  dưới đáy KHÔNG bao giờ tới lượt -> "chỉ trả tin từ lúc bot bật, tin cũ bỏ". (Log: mỗi nhịp 120 conv
+  -> 16 cần xử, y nguyên 16 conv lặp mãi.)
+SỬA: (1) sort 'fresh' -> KHÁCH ĐANG CHỜ (seen=false & khách nhắn cuối, bot chưa trả) lên TRƯỚC, trong
+  nhóm đó phục vụ CŨ-trước (FIFO) -> khách chờ lâu nhất luôn trong suất xử, hàng đợi rút cũ->mới, không
+  bỏ đói. (2) MAX_PER_CYCLE 3->5 (rút nhanh hơn; 400ms/khách giữ dưới 5 req/s, tính riêng mỗi page).
+LƯU Ý: đây là HOT PATH (vòng poll) -> phải xem traffic thật. Nếu Pancake bóp 429 -> hạ cap về 4/3.
+
+----------------------------------------------------------------
+[FIX vòng lặp HOÃN gallery — conv kẹt không thoát (Lanh Nguyen "....")]
+----------------------------------------------------------------
+TRIỆU CHỨNG: mở đầu trống/không ảnh/không mã -> bot log "HOÃN gallery 22s đợi ad_ids" LẶP MÃI mỗi vòng,
+  không bao giờ gửi, không thoát; còn ăn 1 suất MAX_PER_CYCLE mỗi vòng.
+GỐC: conv seen=false + khách nhắn cuối -> mỗi vòng poll RE-XỬ lại "...." (cơ chế "khách đang chờ" bỏ qua
+  "đã xử"); đầu vòng cancelFollowup() GIẾT cái hẹn GS_GALLERY trước khi nó chín; rồi đặt hẹn 22s MỚI ->
+  timer reset vô hạn -> kẹt.
+SỬA: kiểm "tới hạn" INLINE ngay trong poll (đầu khối mở-đầu-trống), không phụ thuộc cái hẹn dễ bị giết:
+  _gsDeferAt đã quá 22s + khách không bấm ad/gửi mẫu -> GỬI gallery NGAY (bot thành người nhắn cuối ->
+  hết "khách đang chờ" -> rớt khỏi vòng lặp). Chưa tới hạn -> chờ, KHÔNG đặt lại timer, return false (nhường
+  suất). -> thoát vòng lặp + trả tự do suất xử cho conv khác.
+
+[CẢNH BÁO ngoài lề] Log có: getConversations 'Invalid access_token' (error_code 102) cho page PHOM
+  615738195133683 -> TOKEN PHOM trong pages.json HẾT HẠN/SAI -> page PHOM KHÔNG được lấy hội thoại.
+  Cần lấy lại token PHOM mới bỏ vào pages.json (không phải lỗi code).

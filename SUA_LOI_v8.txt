@@ -1,0 +1,55 @@
+========================================
+   BẢN SỬA LỖI v8 - 2026-06-27 (gộp v7 + 2 lỗi mới)
+========================================
+
+CHÉP ĐÈ vào C:\AI_HTK_BOT_V5 (Replace), TẮT bot mở lại:
+   - bot_worker_api_v3.js   (đã sửa)
+   - catalog_cache.js       (từ v7, có dò tên mẫu gần đúng)
+Chạy: node bot_worker_api_v3.js
+
+>>> LƯU Ý: log mày gửi đang chạy bản CŨ (v17/v36) - CHƯA có các fix này.
+    Phải chép đè rồi mở lại mới có tác dụng.
+
+----------------------------------------
+LỖI 4 (MỚI) — Khách hỏi "có quần luôn không" nhưng bot đi BÁO GIÁ
+(ca Thuthanh Pham: "Có quần luôn hả hay mình phải mặc thêm")
+----------------------------------------
+- Vì sao:
+  (1) Bộ dò "hỏi có quần/lót bên trong" (asksInnerLining) chỉ bắt câu có chữ
+      "trong" -> câu "có quần luôn... phải mặc thêm" bị trượt.
+  (2) Nhãn AI = PRODUCT_DETAIL_QA + mẫu chưa báo giá -> luật cứng "BÁO GIÁ + ảnh"
+      chạy TRƯỚC, nuốt mất câu hỏi của khách.
+- Đã sửa (bot_worker_api_v3.js):
+  * Mở rộng asksInnerLining: bắt thêm "có quần luôn (không/hả/hay)", "phải mặc
+    thêm", "có kèm quần", "có sẵn quần". (Test 7 ca PASS, không bắt nhầm hỏi giá/size/ship.)
+  * Cổng PRODUCT_DETAIL_QA: nếu là CÂU HỎI THUỘC TÍNH trả lời được (quần/lót bên
+    trong, đệm ngực, co giãn) -> KHÔNG báo giá ở đây, để chảy xuống handler trả lời
+    ĐÚNG câu khách ("Dạ mẫu này có lớp lót/quần bên trong ạ...").
+
+----------------------------------------
+LỖI 5 (MỚI) — Khách "Bắt đầu" rồi gửi ẢNH, bot dội 10 mẫu mới ĐÈ lên ảnh
+(ca Diễm Thanh Hương: "Tại sao có hình ảnh rồi lại đi gửi mẫu mới?")
+----------------------------------------
+- Vì sao: khách gõ "Bắt đầu" + "ơi" trước, bot trúng luật "mở đầu trống -> dội 10
+  mẫu mới" và bắn LIỀN. Ảnh + "M xin giá" tới ở nhịp SAU -> khách thấy 10 mẫu lạ
+  đè lên ảnh mình vừa gửi.
+- Đã sửa (bot_worker_api_v3.js, nhánh "mở đầu trống"):
+  * HOÃN 1 nhịp: nếu tin khách còn "tươi" (<9 giây) + chưa hoãn lần nào -> bỏ lượt
+    này, để nhịp poll sau gom đủ ảnh. Có ảnh -> nhận diện + báo giá ĐÚNG mẫu; nếu
+    vẫn trống thật -> nhịp sau mới dội gallery. Hoãn TỐI ĐA 1 lần (không kẹt vòng lặp).
+
+----------------------------------------
+NHẮC LẠI 3 LỖI v7 (đã có trong bản này)
+----------------------------------------
+- Lỗi 1 (Mai Thanh Lê): "Alisse"~"Galisse" gõ sai -> giờ khớp gần đúng, báo giá;
+  không chắc thì hỏi lại tên/ảnh, KHÔNG dội 10 mẫu.
+- Lỗi 2 (Chuột Xinh): địa chỉ dính "3 m cần mặc" -> đã dọn sạch.
+- Lỗi 3 (Giang Dao): đơn đã gửi, khách "Ok" -> không hỏi lại size nữa.
+
+----------------------------------------
+GHI CHÚ
+----------------------------------------
+- 2 file đều qua node --check.
+- Theo dõi log vài hội thoại đầu sau khi chạy thật:
+  * Ca có quần: thấy handler trả "có lớp lót/quần bên trong" thay vì báo giá.
+  * Ca "Bắt đầu" + ảnh: thấy dòng "HOÃN 1 nhịp gom thêm ảnh/tin" rồi báo giá mẫu trong ảnh.

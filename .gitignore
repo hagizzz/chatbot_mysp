@@ -1,0 +1,47 @@
+# ===== Bí mật =====
+.env
+.env.*
+!.env.example
+google-service-account.json
+fb_ads_tokens.json
+pages.json
+
+# ===== Phụ thuộc =====
+node_modules/
+__pycache__/
+*.pyc
+.venv/
+
+# ===== Mô hình / chỉ mục lớn (tái tạo được bằng build_*.py) =====
+*.npz
+*.traineddata
+hash_index.json
+celeb_index.json
+
+# ===== Dữ liệu chạy thật (theo máy, không đưa vào git) =====
+conversation_memory.json
+conversation_memory.db
+conversation_memory.db-*
+processed_messages.json
+orders_state.json
+pending_followups.json
+bot_dup_sent.json
+ad_learned_map.json
+video_index.json
+data/
+
+# ===== Log =====
+log*.txt
+botlog/
+*.log
+soi_nhan_log.txt
+lichsu_log.txt
+
+# ===== Bản sao lưu / rác tạm =====
+*.bak
+*.bak-*
+*.orig
+*.tmp
+dump.txt
+fresh.txt
+raw.txt

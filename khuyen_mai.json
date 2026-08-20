@@ -1,0 +1,13 @@
+{
+  "_huong_dan": "Chương trình KM (SHOWROOM-ONLY, chế độ KÍN): bot KHÔNG chủ động nhắc chương trình ở bất kỳ đâu (kể cả khi khách hỏi địa chỉ cửa hàng — tránh khách online ở xa thấy thiệt mà hủy đơn). Khách HỎI THẲNG về sale -> trả lời trung thực nhưng NGUỘI (cau_gioi_thieu/cau_online: xác nhận ưu đãi tại showroom, KHÔNG hô 50%, không mời ghé, chốt bằng lợi ích online). Mức 50% chỉ nhân viên tại quầy nói. Hết het_han tự tắt.",
+  "default": {
+    "ten": "Sale sinh nhật thương hiệu tròn 5 tuổi",
+    "het_han": "2026-07-31T23:59:59+07:00",
+    "ap_dung_toan_bo": false,
+    "che_do_sale_gon": false,
+    "cau_gioi_thieu": "Dạ chương trình ưu đãi bên em hiện đang áp dụng khi mua trực tiếp tại showroom ạ, đơn online chưa áp dụng chị nha. Online mình vẫn được kiểm hàng trước khi thanh toán, ưng ý mới nhận nên chị cứ yên tâm đặt ạ 🥰",
+    "cau_online": "Dạ chương trình ưu đãi bên em hiện đang áp dụng khi mua trực tiếp tại showroom ạ, đơn online chưa áp dụng chị nha. Online mình vẫn được kiểm hàng trước khi thanh toán, ưng ý mới nhận nên chị cứ yên tâm đặt ạ 🥰"
+  },
+  "che_do_chi_bao_gia": false,
+  "_huong_dan_chi_bao_gia": "che_do_chi_bao_gia=false: bot hoạt động ĐẦY ĐỦ (mọi handler, AI-QUYẾT, tư vấn chất liệu/size/màu, follow-up...). Gạt true khi muốn quay lại chế độ CHỈ báo giá + gửi ảnh, sửa file không cần restart."
+}

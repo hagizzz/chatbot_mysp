@@ -1,0 +1,26 @@
+============================================================
+GÓI: SỬA "CHƯA THỬ ĐÃ BÁO KHÔNG GỬI ĐƯỢC ẢNH" (comment)
+============================================================
+
+2 FILE - copy ĐÈ vào C:\AI_HTK_BOT_V5: ai_intent.js, bot_worker_api_v3.js
+
+VẤN ĐỀ (ca Phạm Thu Quỳnh - tin từ bình luận):
+  - Bot báo giá xong, đến phần gửi ẢNH mẫu.
+  - Code CŨ: nếu "cửa sổ 24h chưa mở" (khách mới comment, chưa nhắn inbox)
+    -> KHÔNG thử gửi, phán luôn "HOÃN gửi ảnh" + gắn thẻ AI-XL ảnh.
+  - Nhưng THỰC TẾ gửi ảnh qua private_reply VẪN ĐƯỢC (chữ đã gửi được thì ảnh cũng gửi được)
+    -> "chưa cả thử đã báo không gửi được" là SAI.
+
+ĐÃ SỬA:
+  - LUÔN THỬ gửi ảnh trước.
+  - Chỉ khi gửi HỤT THẬT (ngoài cửa sổ 24h thật / mẫu thiếu ảnh / lỗi) mới gắn thẻ
+    AI-XL ảnh (nợ ảnh) -> khách nhắn inbox thì gửi + tự gỡ thẻ.
+  - Lớp gửi ảnh đã tự xử #10 (ngoài cửa sổ) = dừng, không spam -> thử là an toàn.
+
+GÓI NÀY ĐÃ GỘP tất cả fix trước (log 429, phoneMatch, địa chỉ AI, sđt, đa mẫu,
+  kịch bản sale, chặn đọc ad sai GIAVELLE, ảnh chỉ báo 1 mẫu Palia).
+
+CÁCH CHẠY: đè 2 file -> bấm start_bot.bat.
+
+KIỂM TRA (log): tin từ bình luận -> giờ sẽ THỬ gửi ảnh. Gửi được thì KHÔNG còn
+  dòng "HOÃN gửi ảnh". Chỉ khi gửi hụt thật mới thấy "THỬ gửi ảnh ... CHƯA được".

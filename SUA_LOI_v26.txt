@@ -1,0 +1,37 @@
+========================================
+  SUA_LOI_v26 — Mys.P BOT  (tích luỹ từ v17)
+========================================
+Deploy: copy 3 file .js đè vào C:\AI_HTK_BOT_V5 -> Ctrl-C -> node bot_worker_api_v3.js
+FILE THAY ĐỔI: bot_worker_api_v3.js, ai_intent.js, color_utils.js
+LƯU Ý: KHÔNG đè ad_product_map.json.
+
+================= MỚI Ở v26 =================
+[Hoàng Yến] gate hậu-đơn (5481) TAG CHỜ XL DÙ tin cuối là của SHOP/người thật:
+   - LỖI: gate "Conv TỪ AD + hậu-đơn -> giao người thật" THIẾU guard shopRepliedAfterLastCustomer.
+     Khi người thật (Công Nguyễn) đã nhắn cuối (đang lo đơn hoàn của khách) -> bot vẫn nhảy vào tag
+     AI-CHỜ XL (vô nghĩa, người thật đang xử rồi).
+   - SỬA: thêm "&& !shopRepliedAfterLastCustomer(data.messages)" vào gate. Người thật/bot nhắn cuối
+     -> KHÔNG tag, nhường xuống anti-loop @5727 -> [BỎ QUA] (chống lặp).
+   - Khách nhắn cuối + hậu-đơn (vd Nguyễn Thúy An, shopReplied=false) -> gate VẪN tag đúng (giao người thật).
+
+================= ĐÃ CÓ TỪ v25 =================
+[THẺ GIỮ] Thêm 2 thẻ -> AI ĐỨNG NGOÀI (giao người thật) như CHỜ XL:
+   - Hàng đổi (id=166): khách muốn ĐỔI hàng sau khi đã nhận đơn.
+   - Đang hoàn (id=177): khách muốn HOÀN/HỦY đơn.
+   HOLD_TAG_IDS = [183, 185, 166, 177]; tên thẻ cũng nhận "hàng đổi"/"đang hoàn".
+   Conv có 1 trong 4 thẻ này -> bot im, giao người thật (log: "Còn thẻ giữ (...Hàng đổi/Đang hoàn) -> ... AI đứng ngoài").
+
+================= ĐÃ CÓ TỪ v24 =================
+[Phuong Pham — KHÁCH CŨ ĐẶT THÊM] khách đã có đơn + gửi ẢNH mẫu mới + không hỏi đơn cũ -> BÁO GIÁ mẫu mới
+   (không giao người thật). Hỏi về đơn cũ (khi nào nhận/đổi/hoàn) -> giao người thật.
+
+================= ĐÃ CÓ TỪ v23 =================
+[MRAD5171] mã chiến dịch -> mặc định ảnh XANH NHẠT. *** NHỚ deploy + đổi tên file "MRAD5171--XANH NHẠT.13-jpg".
+
+================= ĐÃ CÓ TỪ v21/v20/v19 =================
+[Duyên Phận+SIZE CŨ] tư vấn=chốt + size cũ +2kg. [Khoai Khoai] COMMENT người thật -> bot đứng ngoài.
+[1] Tách khách CŨ/MỚI. [2] ai_intent "bn/bnn"=hỏi giá. [3] Ngoc Lan màu->đúng mẫu. [4] Hải Kiên retry. [5] Đặng Vân ảnh lặp.
+[Hong Nhung] thêm ad_product_map.json: "1568946478120178": "MRKVX6335"
+
+================= CHỜ LOG =================
+[Nguyet] câu tư vấn size lặp 2 lần -> cần log đoạn xử Nguyet.
