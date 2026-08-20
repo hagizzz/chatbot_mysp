@@ -18,8 +18,17 @@ const { fold } = require("./pos_client");
 // -> tránh lệch tiền khi SP đang SALE, và không ra 0đ với SP chỉ có originalPrice.
 const { getPrice } = require("./product_reply_rules");
 
-// ---- ĐỌC bộ nhớ bot tư vấn (chỉ đọc) ----
+// ---- ĐỌC bộ nhớ bot tư vấn (CHỈ ĐỌC) ----
+// Từ GĐ0: đọc MỘT dòng trong SQLite thay vì parse cả file 830 KB cho mỗi hội thoại.
+// SQLite bật WAL nên tiến trình này đọc được trong lúc bot tư vấn đang ghi.
+// Node cũ không có node:sqlite -> tự quay về đọc file JSON như trước.
+let _store = null;
+try { require("node:sqlite"); _store = require("./conversation_store"); } catch (_) {}
+
 function readConsultMemory(conversationId) {
+  if (_store) {
+    try { return _store.docChiDoc(conversationId); } catch (_) { /* rơi xuống cách cũ */ }
+  }
   try {
     const all = JSON.parse(fs.readFileSync(CONSULT_MEMORY_FILE, "utf8"));
     return all[String(conversationId)] || null;
