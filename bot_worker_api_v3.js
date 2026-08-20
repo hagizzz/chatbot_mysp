@@ -1,4 +1,4 @@
-require("dotenv").config();
+require("./env_boot");   // nạp .env theo BOT_ENV (thật/thử) — phải ở dòng đầu
 
 console.log("[BUILD] patched-2026-07-01: inspect-đuôi-linh-hoạt + regex ktra/đk + nhãn INSPECT_REQUEST/TRYON_REQUEST + price PRICE_OBJECTION 2 câu");
 

@@ -13,6 +13,7 @@
 //   Chạy:  node order_worker.js
 //   (Bật/tắt độc lập với bot tư vấn — KHÔNG ghi đè conversation_memory.json.)
 // ============================================================================
+require("./env_boot");   // nạp .env theo BOT_ENV (thật/thử) — phải trước mọi require đọc process.env
 const cfg = require("./order_config");
 const { getConversations, readConversation } = require("./pancake_reader");
 const pageReg = require("./page_registry");
