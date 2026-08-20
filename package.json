@@ -10,7 +10,8 @@
     "test": "node --test \"test/*.test.js\"",
     "ca-vang": "node test/trich_ca_vang.js",
     "thong-ke": "node thong_ke.js 7 --ly-do",
-    "chuyen-bo-nho": "node chuyen_bo_nho_sang_sqlite.js"
+    "chuyen-bo-nho": "node chuyen_bo_nho_sang_sqlite.js",
+    "do-anh": "node do_do_nhan_dien_anh.js"
   },
   "dependencies": {
     "dotenv": "^16.4.5",

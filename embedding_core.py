@@ -60,6 +60,13 @@ def load_index():
 
 
 def load_image(url):
+    # Đường dẫn TỆP trên máy (dùng cho bộ đo độ nhận diện: test/anh_thu/*.jpg).
+    # Nhận cả "file://..." lẫn đường dẫn trần. Không có mạng vẫn đo được.
+    u = str(url or "")
+    if not u.lower().startswith(("http://", "https://")):
+        p = u[7:] if u.lower().startswith("file://") else u
+        return Image.open(p).convert("RGB")
+
     # Thử lại tối đa 3 lần - tải nhiều ảnh liên tiếp dễ rớt 1-2 tấm
     last = None
     for attempt in range(3):

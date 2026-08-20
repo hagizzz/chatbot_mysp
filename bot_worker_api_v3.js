@@ -2,6 +2,7 @@ require("./env_boot");   // nạp .env theo BOT_ENV (thật/thử) — phải �
 const turnLog = require("./turn_log");   // log có cấu trúc mỗi lượt (nền cho mục 9.4 + 9.5)
 const dieuTiet = require("./dieu_tiet");   // [GĐ1] chạy song song theo hội thoại + giữ nhịp gọi Pancake
 const nguonHoiThoai = require("./nguon_hoi_thoai");   // [GĐ1 · mục 3.5] ký hiệu nguồn: quảng cáo / bình luận / nhắn thẳng
+const giamSat = require("./giam_sat");   // [GĐ1] canh bot đứng hình / im lặng / lỗi dày
 dieuTiet.bocFetch();                       // mọi lời gọi pages.fm tự xếp hàng theo page (chống 429)
 const MAX_MOI_NHIP = Number(process.env.MAX_MOI_NHIP || 30);   // trần số hội thoại xử trong MỘT nhịp poll
 
@@ -12526,6 +12527,7 @@ async function processOnce() {
       //   Nhờ vậy throttle tự nhả, vòng kế lấy được danh sách MỚI -> đọc kịp tin mới.
       const _bo = Math.min(30000, POLL_MS * Math.pow(2, Math.min(convFailStreak, 3)));
       nextPollAt = Date.now() + _bo;
+      giamSat.xongVongPoll(0);   // vòng vẫn chạy, chỉ là Pancake từ chối -> KHÔNG phải đứng hình
       if (Date.now() - _lastFailLog > 30000) {
         _lastFailLog = Date.now();
         console.log(`Pancake đang từ chối (429/lỗi) -> GIÃN nhịp ${Math.round(_bo / 1000)}s cho throttle nhả (đã ${convFailStreak} lần). Hết bóp là chạy ngay.`);
@@ -12733,8 +12735,15 @@ async function processOnce() {
           conversationId: conv.id,
           pageId: pageRegistry.pageIdFromConv(conv.id) || String(conv.id).split("_")[0],
           kenh: String(conv.type || "").toUpperCase().includes("COMMENT") ? "COMMENT" : "INBOX"
-        }, () => processOneConversation(conv))
+        }, async () => {
+          let ok = false, loi = false;
+          try { ok = await processOneConversation(conv); }
+          catch (e) { loi = true; throw e; }
+          finally { giamSat.xongMotLuot({ daTraLoi: !!ok, loi }); }
+          return ok;
+        })
       ), { toiDa: dieuTiet.SONG_SONG, dungSau: MAX_MOI_NHIP });
+    giamSat.xongVongPoll(_dangXu.length);
   } catch (err) {
     console.log("Lỗi processOnce:", err.message);
   } finally {
@@ -12744,6 +12753,7 @@ async function processOnce() {
 
 async function main() {
   console.log("BOT API V3 RUNNING (gửi ảnh 1 lần + khóa size)...");
+  giamSat.batDauCanhGac();   // [GĐ1] canh đứng hình / im lặng / lỗi dày; đứng hình thì thoát để .bat mở lại
   // ===== [SỔ BÀI ADS 2026-07-07] Đồng bộ TOÀN BỘ ads của tài khoản QC -> map tự học, TRƯỚC khi khách bấm =====
   // Cấu hình: FB_ADS_ACCOUNT_IDS trong .env (vd: act_123,act_456) hoặc file fb_ads_accounts.json.
   // Chạy lúc khởi động + lặp 4 tiếng. Tên ad "MÃMẪU-postid-..." -> bóc mã có trong catalog -> ghi
