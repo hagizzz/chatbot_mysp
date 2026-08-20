@@ -47,3 +47,4 @@ fresh.txt
 raw.txt
 test/ca_vang/tra_cuu_conv.local.json
 *.local.json
+data/
