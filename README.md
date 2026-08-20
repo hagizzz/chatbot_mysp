@@ -80,7 +80,53 @@ Soi một khách cụ thể mà không đụng khách khác:
 WATCH_IDS=<conversationId> DUMP_CONV=<conversationId> node bot_worker_api_v3.js
 ```
 
-## 6. Bản đồ mã nguồn
+## 6. Kiểm tra trước mỗi lần phát hành
+
+```bash
+npm test                      # 52 test, offline, ~2 giây — chạy TRƯỚC mọi lần đè bản mới
+npm run thong-ke              # bot trả bao nhiêu tin, nhường người thật bao nhiêu ca, tốn bao nhiêu tiền AI
+```
+
+Xem `test/README.md`. Bộ test không gọi Pancake, không gọi OpenAI, không đụng dữ liệu khách.
+
+## 7. Vận hành
+
+### Chạy song song
+
+Bot xử nhiều hội thoại cùng lúc (mặc định 6), mỗi hội thoại có khoá riêng nên không bao giờ
+bị hai luồng xử cùng lúc. Nhịp gọi Pancake được giữ theo **từng page** để không tự chuốc 429.
+
+```bash
+SONG_SONG=1 node bot_worker_api_v3.js      # quay về xử tuần tự như trước GĐ1
+```
+
+### Giám sát
+
+`giam_sat.js` canh ba kiểu hỏng mà tiến trình vẫn sống nhưng khách không được trả lời:
+
+| Kiểu | Dấu hiệu | Bot làm gì |
+|---|---|---|
+| Đứng hình | vòng quét ngừng chạy > 3 phút | tự thoát để `start_bot.bat` mở lại |
+| Im lặng | **có việc** mà > 15 phút không trả lời ai | cảnh báo (nghi token hỏng / bộ lọc sai) |
+| Lỗi dày | > 30% lượt kết thúc bằng lỗi | cảnh báo |
+
+Nhịp tim ghi ở `data/nhip_tim.json`. Đặt `CANH_BAO_WEBHOOK` để đẩy cảnh báo ra Slack/Telegram.
+
+### Nhận tin tức thời
+
+Đặt `WEBHOOK_PULL_URL` + `WEBHOOK_PULL_TOKEN` để Pancake đẩy tin real-time; vòng poll 4 giây
+vẫn chạy làm lưới dự phòng.
+
+### Đo độ nhận diện ảnh
+
+Ngưỡng mặc định `CLIP_MIN_SCORE=0.80` / `CLIP_MIN_GAP=0.04` **chưa từng được đo**. Đo rồi hãy đặt:
+
+```bash
+python tao_anh_thu.py 40      # sinh 200 ảnh thử (cắt / chụp màn hình / chụp lại / mờ / lệch màu)
+npm run do-anh                # đo + đề xuất ngưỡng giữ số ca "khẳng định nhầm mẫu" bằng 0
+```
+
+## 8. Bản đồ mã nguồn
 
 | Tệp | Việc |
 |---|---|
@@ -94,10 +140,14 @@ WATCH_IDS=<conversationId> DUMP_CONV=<conversationId> node bot_worker_api_v3.js
 | `order_worker.js` + `order_*.js` + `pos_client.js` | lên đơn POS |
 | `knowledge_loader.js` | nạp kịch bản từ Google Doc + tab "AI AGENT" |
 | `conversation_store.js` | bộ nhớ hội thoại (SQLite) |
-| `turn_log.js` | log có cấu trúc mỗi lượt |
+| `turn_log.js` | log có cấu trúc mỗi lượt (nền cho thống kê + chi phí AI) |
+| `dieu_tiet.js` | chạy song song theo hội thoại + giữ nhịp gọi Pancake |
+| `nguon_hoi_thoai.js` | ký hiệu nguồn: quảng cáo / bình luận / nhắn thẳng |
+| `giam_sat.js` | canh bot đứng hình / im lặng / lỗi dày |
+| `adapter_hoa.js` | nối sang hệ thống của bạn Hoà (đang chạy dữ liệu giả) |
 | `env_boot.js` | nạp biến môi trường theo `BOT_ENV` |
 
-## 7. Quy ước làm việc
+## 9. Quy ước làm việc
 
 - **Không chép đè file nữa.** Mọi thay đổi đi qua git: nhánh → sửa → chạy test phát lại → gộp.
 - Chạy test hồi quy trước mỗi lần phát hành: `npm test`.
