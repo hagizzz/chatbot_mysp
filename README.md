@@ -8,6 +8,9 @@ Quy trình hiểu ý khách 3 tầng: [`QUY_TRINH_HYBRID.md`](QUY_TRINH_HYBRID.m
 
 ---
 
+> **Mới vào dự án?** Đọc [`docs/BAT_DAU_TU_DAU.md`](docs/BAT_DAU_TU_DAU.md) trước —
+> dự án này là gì, đang ở đâu, đang thiếu gì, làm gì trước.
+
 ## 1. Cần có trước
 
 | Thứ | Bản | Ghi chú |
