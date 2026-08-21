@@ -59,7 +59,9 @@ module.exports = {
 
   // ---- VÒNG LẶP ----
   POLL_MS: Number(process.env.ORDER_POLL_MS || 15000),   // mỗi 15s quét 1 lần (đơn không cần nhanh như chat)
-  DRY_RUN: String(process.env.ORDER_DRY_RUN || "").toLowerCase() === "true", // true = KHÔNG gọi POS thật, chỉ in payload
+  // Nhận mọi cách viết bật: 1 / true / yes / on. Trước đây chỉ nhận "true" nên
+  // env_boot.js đặt ORDER_DRY_RUN="1" cho staging mà không hề có tác dụng -> vẫn tạo đơn thật.
+  DRY_RUN: ["1", "true", "yes", "on"].includes(String(process.env.ORDER_DRY_RUN || "").trim().toLowerCase()), // bật = KHÔNG gọi POS thật, chỉ in payload
 
   // ---- FILE DỮ LIỆU RIÊNG (TÁCH BIỆT với conversation_memory.json) ----
   ORDERS_STATE_FILE: "./orders_state.json",

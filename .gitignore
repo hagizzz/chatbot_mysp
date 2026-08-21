@@ -2,6 +2,7 @@
 .env
 .env.*
 !.env.example
+!.env.staging.example
 google-service-account.json
 fb_ads_tokens.json
 pages.json
