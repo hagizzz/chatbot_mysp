@@ -71,7 +71,9 @@ function moDB() {
     `),
     demCho: db.prepare(`SELECT COUNT(*) AS n FROM hang_doi_don WHERE shop_id = ? AND trang_thai = 'cho'`),
     xem: db.prepare(`SELECT * FROM hang_doi_don WHERE shop_id = ? AND conversation_id = ?`),
-    donCu: db.prepare(`DELETE FROM hang_doi_don WHERE shop_id = ? AND trang_thai = 'xong' AND sua_luc < ?`),
+    // <= chứ không phải <: donCu(0) nghĩa là "dọn mọi dòng đã xong", kể cả dòng
+    // vừa xong trong cùng một mili-giây. Dùng < thì kết quả phụ thuộc đồng hồ.
+    donCu: db.prepare(`DELETE FROM hang_doi_don WHERE shop_id = ? AND trang_thai = 'xong' AND sua_luc <= ?`),
   };
   return db;
 }
