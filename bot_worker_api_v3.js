@@ -5,6 +5,13 @@ const nguonHoiThoai = require("./nguon_hoi_thoai");   // [GĐ1 · mục 3.5] ký
 const giamSat = require("./giam_sat");   // [GĐ1] canh bot đứng hình / im lặng / lỗi dày
 dieuTiet.bocFetch();                       // mọi lời gọi pages.fm tự xếp hàng theo page (chống 429)
 const MAX_MOI_NHIP = Number(process.env.MAX_MOI_NHIP || 30);   // trần số hội thoại xử trong MỘT nhịp poll
+// [CHẠY THỬ] Danh sách trắng hội thoại. Trống = chạy bình thường.
+const CHI_XU_LY_IDS = new Set(
+  String(process.env.CHI_XU_LY_IDS || "").split(",").map(s => s.trim()).filter(Boolean)
+);
+if (CHI_XU_LY_IDS.size) {
+  console.log(`[chạy thử] CHI_XU_LY_IDS: bot CHỈ xử lý ${CHI_XU_LY_IDS.size} hội thoại, bỏ qua tất cả phần còn lại.`);
+}
 
 console.log("[BUILD] patched-2026-07-01: inspect-đuôi-linh-hoạt + regex ktra/đk + nhãn INSPECT_REQUEST/TRYON_REQUEST + price PRICE_OBJECTION 2 câu");
 
@@ -12585,6 +12592,11 @@ async function processOnce() {
       }
     }
     const fresh = (convData.conversations || [])
+      // [CHẠY THỬ] Danh sách trắng: khai CHI_XU_LY_IDS thì bot CHỈ đụng vào đúng
+      // mấy hội thoại này, mọi hội thoại khác bị bỏ qua hoàn toàn (không đọc, không
+      // trả lời, không gắn thẻ). Để trống = chạy bình thường.
+      // Khác hẳn WATCH_IDS — WATCH_IDS chỉ in thêm log, KHÔNG chặn xử lý.
+      .filter(c => !CHI_XU_LY_IDS.size || CHI_XU_LY_IDS.has(String(c.id)))
       .filter(c => c.seen === false || khachDangCho(c) || forceRecheckConvs.has(String(c.id)))
       // CHƯA ĐỌC + khách nhắn cuối = khách ĐANG CHỜ -> xử BẤT KỂ cũ/mới (tin nhắn trước khi bot bật vẫn phải trả).
       // Các conv khác (đã đọc, hoặc force-recheck) thì vẫn giới hạn 24h để khỏi quét vô hạn.
