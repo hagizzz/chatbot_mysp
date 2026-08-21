@@ -50,8 +50,15 @@ function ensureWorker() {
   if (proc) return;
 
   readyPromise = new Promise((res, rej) => { readyResolve = res; readyReject = rej; });
+  // Worker ảnh chết trước khi có ai chờ (thiếu numpy/open_clip, python hỏng...) thì
+  // readyPromise bị từ chối mà không ai bắt -> Node giết luôn CẢ TIẾN TRÌNH BOT.
+  // Gắn sẵn chỗ bắt rỗng: callWorker vẫn nhận lỗi qua Promise.race bên dưới,
+  // còn bot thì chỉ mất khả năng nhận diện ảnh chứ không chết theo.
+  readyPromise.catch(() => {});
 
-  proc = spawn("python", ["embedding_worker.py"], { cwd: __dirname });
+  // PYTHON_BIN: máy nào dùng "py", hoặc python trong venv, thì khai lại trong .env.
+  const PYTHON_BIN = String(process.env.PYTHON_BIN || "python").trim() || "python";
+  proc = spawn(PYTHON_BIN, ["embedding_worker.py"], { cwd: __dirname });
 
   proc.stdout.setEncoding("utf8");
   proc.stdout.on("data", chunk => {
@@ -67,19 +74,30 @@ function ensureWorker() {
   proc.stderr.setEncoding("utf8");
   proc.stderr.on("data", d => process.stdout.write("[vision] " + d));
 
-  proc.on("exit", code => {
-    console.log("[vision] worker thoát, code:", code);
+  // Một chỗ dọn dẹp duy nhất cho MỌI kiểu chết của worker.
+  // Trước đây "error" (không có python trên máy) chỉ ghi log mà không từ chối
+  // readyPromise -> mỗi ảnh treo đủ READY_RACE_MS = 60 giây rồi mới chịu thua.
+  let daHaGuc = false;
+  const haGuc = (lyDo) => {
+    if (daHaGuc) return;
+    daHaGuc = true;
     proc = null;
     workerReady = false;
-    if (readyReject) readyReject(new Error("worker exited"));
+    if (readyReject) readyReject(new Error(lyDo));
     for (const [, finish] of pending) {
       try { finish({ ok: false, reason: "WORKER_DOWN" }); } catch (_) {}
     }
     pending.clear();
+  };
+
+  proc.on("exit", code => {
+    console.log("[vision] worker thoát, code:", code);
+    haGuc("worker exited");
   });
 
   proc.on("error", err => {
-    console.log("[vision] worker lỗi spawn:", err.message);
+    console.log(`[vision] không mở được worker ảnh: ${err.message}. Bot chạy tiếp, tạm thời KHÔNG nhận diện được ảnh.`);
+    haGuc("worker spawn failed: " + err.message);
   });
 }
 
