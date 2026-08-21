@@ -18,6 +18,7 @@ const cfg = require("./order_config");
 const { getConversations, readConversation } = require("./pancake_reader");
 const pageReg = require("./page_registry");
 const { hasTag, addTag, removeTag } = require("./conversation_tags");
+const hangDoiDon = require("./hang_doi_don");
 const { resolveVariant, matchProvince, resolveCommune, createOrder, updateOrder, confirmOrder, getShops, getOrdersByPhone, getOrderById } = require("./pos_client");
 const { reportUrgent, markProcessed, markCod, markResult, listOpenOrders, nowVN } = require("./urgent_sheet");
 const { writeQuaShop, nowVN: nowVNQS } = require("./quashop_sheet");
@@ -118,6 +119,17 @@ function calcShipCod(totalPrice) {
 }
 
 // Xử lý 1 hội thoại có thẻ AI chốt: dựng kế hoạch ĐƠN -> tạo từng đơn POS (mỗi tin chốt = 1 đơn, nhiều món).
+// ---------------------------------------------------------------------------
+// Xử lý xong một hội thoại: RÚT KHỎI HÀNG ĐỢI (nguồn thật) rồi mới gỡ thẻ 182
+// (chỉ còn là nhãn cho nhân viên nhìn). Thứ tự này quan trọng: gỡ thẻ hỏng thì
+// vòng sau cũng không lên đơn lại, vì hàng đợi đã ghi xong.
+// ---------------------------------------------------------------------------
+async function xongMotHoiThoai(convId, lyDo) {
+  try { hangDoiDon.xong(convId, lyDo); }
+  catch (e) { console.log(`[ĐƠN] ⚠ không rút được ${convId} khỏi hàng đợi: ${e.message}`); }
+  try { await removeTag(convId, cfg.TAG_AI_CHOT); } catch (_) {}
+}
+
 async function handleConversation(conv) {
   const convId = conv.id || conv.conversation_id;
   if (!convId) return;
@@ -129,7 +141,7 @@ async function handleConversation(conv) {
   const plan = buildOrderPlan(convId, detail);
 
   if (!plan.confirmed) {
-    console.log(`[ĐƠN] ${convId}: có thẻ AI chốt nhưng CHƯA thấy tin chốt (cod) -> chờ.`);
+    console.log(`[ĐƠN] ${convId}: đã báo chốt nhưng CHƯA thấy tin chốt (cod) -> chờ.`);
     return;
   }
 
@@ -147,7 +159,7 @@ async function handleConversation(conv) {
       if (!_recorded(convId, order.sig)) { try { await addConversationNote(convId, `[AI chưa lên đơn] Không nhận diện được tỉnh/thành từ địa chỉ: "${order.address}" — nhờ anh/chị bổ sung tỉnh/thành.`); } catch (_) {} }
       store.recordOrder(convId, order.sig, { status: "blocked", reason: "không nhận diện tỉnh/thành", address: order.address });
       await addTag(convId, cfg.TAG_THIEU_DIACHI);
-      await removeTag(convId, cfg.TAG_AI_CHOT);
+      await xongMotHoiThoai(convId, "không nhận diện được tỉnh/thành");
       allOk = false;
       continue;
     }
@@ -311,7 +323,7 @@ async function handleConversation(conv) {
     // Đơn đã tạo NHƯNG thiếu Phường/Xã -> gắn "Thiếu địa chỉ" để NV vào điền nốt.
     if (addressIncomplete) {
       await addTag(convId, cfg.TAG_THIEU_DIACHI);
-      await removeTag(convId, cfg.TAG_AI_CHOT);
+      await xongMotHoiThoai(convId, `đã tạo ${plan.orders.length} đơn, thiếu Phường/Xã`);
       console.log(`[ĐƠN] ${convId}: ✅ đã tạo ${plan.orders.length} đơn nhưng THIẾU Phường/Xã -> gắn "Thiếu địa chỉ" (${cfg.TAG_THIEU_DIACHI}) để NV điền.`);
       return;
     }
@@ -320,7 +332,7 @@ async function handleConversation(conv) {
       return;
     }
     await addTag(convId, cfg.TAG_AI_DA_XACNHAN);
-    await removeTag(convId, cfg.TAG_AI_CHOT);
+    await xongMotHoiThoai(convId, `đã lên ${plan.orders.length} đơn`);
     console.log(`[ĐƠN] ${convId}: 🎯 đã lên ${plan.orders.length} đơn -> đổi thẻ AI chốt -> AI- Đã xác nhận.`);
   }
 }
@@ -595,17 +607,66 @@ async function handleQuaShop(conv) {
   }
 }
 
+// DON_NGUON: lấy tín hiệu "hội thoại đã chốt" từ đâu.
+//   bang   = chỉ hàng đợi SQLite (bot ghi vào). Sạch nhất.
+//   the    = chỉ thẻ 182 trên Pancake. Cách cũ, để quay lui nếu có sự cố.
+//   ca_hai = cả hai, gộp lại và bỏ trùng. MẶC ĐỊNH.
+// Mặc định là ca_hai vì nhân viên đang có thói quen GẮN TAY thẻ 182 để nhờ bot
+// lên đơn — bỏ đường đó đi mà không báo là cắt mất một quy trình đang chạy.
+const DON_NGUON = String(process.env.DON_NGUON || "ca_hai").trim().toLowerCase();
+const DUNG_BANG = DON_NGUON === "bang" || DON_NGUON === "ca_hai";
+const DUNG_THE  = DON_NGUON === "the"  || DON_NGUON === "ca_hai";
+const CANH_BAO_SAU_LAN = Number(process.env.DON_CANH_BAO_SAU_LAN || 40);   // 40 x 15s = 10 phút
+
 async function tick() {
-  let data;
+  // ---- 1) HÀNG ĐỢI TRƯỚC, và KHÔNG phụ thuộc Pancake còn sống hay không ----
+  // Đây là điểm mấu chốt: trước đây Pancake lỗi là cả vòng này thoát sớm,
+  // đơn nằm im. Giờ hàng đợi vẫn chạy dù Pancake có trục trặc.
+  const tuBang = [];
+  if (DUNG_BANG) {
+    try {
+      for (const r of hangDoiDon.layCho(200)) tuBang.push(String(r.conversation_id));
+    } catch (e) { console.log("[ĐƠN] ⚠ đọc hàng đợi lỗi:", e.message); }
+  }
+
+  let data = null;
   try { data = await getConversations(1); }
-  catch (e) { console.log("[ĐƠN] lấy hội thoại lỗi:", e.message); return; }
-  if (!data || data.success !== true) { console.log("[ĐƠN] API hội thoại chưa OK, bỏ vòng này."); return; }
+  catch (e) { console.log("[ĐƠN] lấy hội thoại lỗi:", e.message); }
+  const capDuocPancake = !!(data && data.success === true);
+  if (!capDuocPancake && !tuBang.length) {
+    console.log("[ĐƠN] API hội thoại chưa OK và hàng đợi rỗng -> bỏ vòng này.");
+    return;
+  }
+  if (!capDuocPancake) console.log("[ĐƠN] ⚠ Pancake chưa OK, nhưng vẫn chạy tiếp bằng hàng đợi.");
 
-  const convs = data.conversations || [];
-  const tagged = convs.filter(c => hasTag(c, cfg.TAG_AI_CHOT));
-  console.log(`[ĐƠN] tổng ${convs.length} hội thoại | có thẻ AI chốt (${cfg.TAG_AI_CHOT}): ${tagged.length}`);
+  const convs = capDuocPancake ? (data.conversations || []) : [];
+  const theoId = new Map(convs.map(c => [String(c.id), c]));
 
-  for (const c of tagged) {
+  // Gộp hai nguồn, bỏ trùng, giữ nguyên thứ tự: hàng đợi trước (cũ trước).
+  const canXu = new Map();
+  for (const id of tuBang) canXu.set(id, theoId.get(id) || { id });
+  let soTuThe = 0;
+  if (DUNG_THE) {
+    for (const c of convs) {
+      if (!hasTag(c, cfg.TAG_AI_CHOT)) continue;
+      if (canXu.has(String(c.id))) continue;
+      canXu.set(String(c.id), c);
+      soTuThe++;
+    }
+  }
+
+  console.log(`[ĐƠN] tổng ${convs.length} hội thoại | hàng đợi: ${tuBang.length} | thêm từ thẻ ${cfg.TAG_AI_CHOT}: ${soTuThe} | sẽ xử: ${canXu.size}`);
+
+  for (const [convId, c] of canXu) {
+    // Đếm số lần thử để hội thoại kẹt mãi không im lặng trôi qua.
+    if (DUNG_BANG) {
+      try {
+        const lan = hangDoiDon.danhDauDaThu(convId);
+        if (lan === CANH_BAO_SAU_LAN) {
+          console.log(`[ĐƠN] ⚠ ${convId} đã thử ${lan} lần mà chưa lên được đơn -> nhờ người thật xem.`);
+        }
+      } catch (_) {}
+    }
     try { await handleConversation(c); }
     catch (e) { console.log("[ĐƠN] xử lý hội thoại lỗi:", e.message); }
     await sleep(300);
@@ -653,6 +714,14 @@ async function main() {
     console.log("CẢNH BÁO: chưa cấu hình PANCAKE_TAG_AI_DA_XACNHAN -> sẽ lên đơn nhưng KHÔNG tự đổi thẻ. (chạy `node list_tags.js` lấy id)");
   }
   if (cfg.DRY_RUN) console.log("CHẾ ĐỘ DRY_RUN: chỉ in payload, KHÔNG gọi POS thật.");
+
+  console.log(`[ĐƠN] nguồn tín hiệu chốt: DON_NGUON=${DON_NGUON} (bảng=${DUNG_BANG ? "có" : "không"}, thẻ ${cfg.TAG_AI_CHOT}=${DUNG_THE ? "có" : "không"})`);
+  if (DUNG_BANG) {
+    try {
+      hangDoiDon.donCu(30);   // dọn dòng 'xong' cũ hơn 30 ngày cho bảng khỏi phình
+      console.log(`[ĐƠN] hàng đợi đang chờ: ${hangDoiDon.demCho()} hội thoại.`);
+    } catch (e) { console.log("[ĐƠN] ⚠ mở hàng đợi lỗi:", e.message); }
+  }
 
   // ĐA-PAGE: nạp toàn bộ page (pages.json / PANCAKE_USER_ACCESS_TOKEN / .env 1-page).
   try { await pageReg.init(); }

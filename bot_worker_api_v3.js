@@ -39,7 +39,29 @@ async function pullWebhookIds() {
   } catch (e) { return []; }
 }
 const { getAgentRuleMap } = require("./knowledge_loader");
-const { sendInboxMessage: _sendInboxMessage, replyComment: _replyComment, sendPrivateReply: _sendPrivateReply, sendInboxImages: _sendInboxImages, sendInboxContentIds: _sendInboxContentIds, sendInboxImageUrl: _sendInboxImageUrl, sendInboxImageUrls: _sendInboxImageUrls, sendInboxMessageWithImages: _sendInboxMessageWithImages, tagChoXuLyVaUnread, tagXuLyAnh, tagXuLyAnhVaUnread, untagXuLyAnh, tagDonUuTienVaUnread, tagGuiDonGap, tagAiChot, addConversationNote, delay } = require("./pancake_sender");
+const { sendInboxMessage: _sendInboxMessage, replyComment: _replyComment, sendPrivateReply: _sendPrivateReply, sendInboxImages: _sendInboxImages, sendInboxContentIds: _sendInboxContentIds, sendInboxImageUrl: _sendInboxImageUrl, sendInboxImageUrls: _sendInboxImageUrls, sendInboxMessageWithImages: _sendInboxMessageWithImages, tagChoXuLyVaUnread, tagXuLyAnh, tagXuLyAnhVaUnread, untagXuLyAnh, tagDonUuTienVaUnread, tagGuiDonGap, tagAiChot: _tagAiChotGoc, addConversationNote, delay } = require("./pancake_sender");
+
+const hangDoiDon = require("./hang_doi_don");
+
+// ---------------------------------------------------------------------------
+// "Hội thoại này chốt rồi" — báo cho order_worker.
+// TRƯỚC: chỉ gắn thẻ 182 lên Pancake, và chính cái thẻ đó là dây điện giữa hai
+// tiến trình -> Pancake hỏng hoặc nhân viên gỡ nhầm thẻ là MẤT ĐƠN.
+// GIỜ: ghi vào bảng SQLite TRƯỚC (bền, không qua mạng), rồi mới gắn thẻ.
+// Thẻ 182 vẫn gắn để nhân viên nhìn, nhưng gắn hụt cũng không mất đơn nữa.
+// Giữ nguyên tên tagAiChot để 16 chỗ gọi bên dưới không phải sửa.
+// ---------------------------------------------------------------------------
+async function tagAiChot(conversationId) {
+  try {
+    const pageId = require("./page_registry").pageIdFromConv(conversationId)
+      || String(conversationId).split("_")[0];
+    hangDoiDon.them(conversationId, { pageId });
+  } catch (e) {
+    // Ghi hàng đợi hỏng là chuyện NẶNG: đơn sẽ không được lên. Phải kêu to.
+    console.log(`[ĐƠN] ⚠ KHÔNG ghi được vào hàng đợi lên đơn cho ${conversationId}: ${e.message} -> chỉ còn trông vào thẻ 182.`);
+  }
+  return _tagAiChotGoc(conversationId);
+}
 
 // Lưu id mọi tin bot gửi -> để phân biệt tin của BOT với tin NGƯỜI THẬT (cùng danh nghĩa Page).
 const botSentIds = new Set();

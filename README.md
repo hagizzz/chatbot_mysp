@@ -129,6 +129,23 @@ python tao_anh_thu.py 40      # sinh 200 ảnh thử (cắt / chụp màn hình 
 npm run do-anh                # đo + đề xuất ngưỡng giữ số ca "khẳng định nhầm mẫu" bằng 0
 ```
 
+### Tín hiệu "hội thoại đã chốt"
+
+`bot_worker` chốt xong thì **ghi vào bảng `hang_doi_don` (SQLite)** rồi mới gắn thẻ 182.
+`order_worker` đọc bảng đó để lên đơn. Thẻ 182 vẫn gắn, nhưng chỉ còn là nhãn cho
+nhân viên nhìn — gắn hụt cũng không mất đơn nữa.
+
+Trước đây chính cái thẻ là dây điện giữa hai tiến trình, nên Pancake trục trặc hoặc
+nhân viên gỡ nhầm thẻ là đơn im lặng biến mất.
+
+Đổi nguồn tín hiệu bằng `DON_NGUON` trong `.env`:
+
+| Giá trị | Nghĩa |
+|---|---|
+| `ca_hai` | **mặc định** — cả bảng lẫn thẻ, bỏ trùng. Giữ được thói quen nhân viên gắn tay thẻ 182 để nhờ bot lên đơn. |
+| `bang` | chỉ bảng SQLite. Sạch nhất, nhưng gắn tay thẻ 182 sẽ không còn tác dụng. |
+| `the` | chỉ thẻ Pancake. Cách cũ, để quay lui nếu có sự cố. |
+
 ## 8. Bản đồ mã nguồn
 
 | Tệp | Việc |
@@ -143,6 +160,7 @@ npm run do-anh                # đo + đề xuất ngưỡng giữ số ca "kh�
 | `order_worker.js` + `order_*.js` + `pos_client.js` | lên đơn POS |
 | `knowledge_loader.js` | nạp kịch bản từ Google Doc + tab "AI AGENT" |
 | `conversation_store.js` | bộ nhớ hội thoại (SQLite) |
+| `hang_doi_don.js` | hàng đợi lên đơn giữa `bot_worker` và `order_worker` (SQLite, không qua Pancake) |
 | `turn_log.js` | log có cấu trúc mỗi lượt (nền cho thống kê + chi phí AI) |
 | `dieu_tiet.js` | chạy song song theo hội thoại + giữ nhịp gọi Pancake |
 | `nguon_hoi_thoai.js` | ký hiệu nguồn: quảng cáo / bình luận / nhắn thẳng |
