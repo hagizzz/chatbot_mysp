@@ -17,7 +17,7 @@ test("worker ảnh chết -> bot vẫn sống, chỉ trả về không nhận đ
   const ra = execFileSync(
     process.execPath,
     ["-e", `
-      const v = require("./vision_resolver");
+      const v = require("./loi/san_pham/vision_resolver");
       v.resolveImage({ url: "file:///khong-co-that.jpg" })
         .then(r => { console.log("KETQUA:" + (r && r.ok === false ? "khong-nhan-duoc" : "bat-ngo")); })
         .catch(e => { console.log("KETQUA:nem-loi:" + e.message); });

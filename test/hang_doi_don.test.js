@@ -12,7 +12,7 @@ const THU_MUC = fs.mkdtempSync(path.join(os.tmpdir(), "hangdoi-"));
 process.env.MEMORY_DB = path.join(THU_MUC, "thu.db");
 process.env.SHOP_ID = "test";
 
-const hd = require("../hang_doi_don");
+const hd = require("../loi/don/hang_doi_don");
 
 after(() => {
   hd.dong();
@@ -78,7 +78,7 @@ test("id rỗng không làm sập, cũng không tạo rác", () => {
 test("tiến trình khác ghi vào -> tiến trình này đọc thấy ngay", () => {
   const { execFileSync } = require("node:child_process");
   execFileSync(process.execPath, ["-e", `
-    const hd = require(${JSON.stringify(path.join(__dirname, "..", "hang_doi_don.js"))});
+    const hd = require(${JSON.stringify(path.join(__dirname, "..", "loi/don/hang_doi_don.js"))});
     hd.them("PAGE_TIEN_TRINH_KHAC", { pageId: "PAGE" });
     hd.dong();
   `], { env: { ...process.env }, encoding: "utf8", timeout: 20000 });

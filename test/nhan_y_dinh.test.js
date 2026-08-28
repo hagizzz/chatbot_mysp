@@ -13,8 +13,8 @@ const assert = require("node:assert");
 const fs = require("fs");
 const path = require("path");
 
-const { detectIntent } = require("../intent_detector");
-const { routeBatch, NGUONG_CHAC } = require("../intent_router");
+const { detectIntent } = require("../loi/ai/intent_detector");
+const { routeBatch, NGUONG_CHAC } = require("../loi/ai/intent_router");
 
 const F = path.join(__dirname, "ca_vang", "nhan_y_dinh.json");
 const ca = fs.existsSync(F) ? JSON.parse(fs.readFileSync(F, "utf8")) : [];

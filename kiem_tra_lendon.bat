@@ -8,7 +8,7 @@ echo   KIEM TRA TRUOC KHI LEN DON (preflight)
 echo   Chi DOC - khong tao don, khong doi the.
 echo ============================================
 echo.
-node kiem_tra_lendon.js
+node cong_cu\kiem_tra_lendon.js
 
 echo.
 echo (Bam phim bat ky de dong cua so nay)

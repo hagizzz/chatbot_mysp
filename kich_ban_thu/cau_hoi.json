@@ -1,0 +1,141 @@
+{
+  "nhom": "Phủ câu hỏi — mỗi câu một hội thoại riêng",
+  "kich_ban": [
+    {
+      "ten": "Chất liệu — váy này vải gì em, mặc mùa hè có nóng không",
+      "luot": [
+        {
+          "khach": "váy này vải gì em, mặc mùa hè có nóng không"
+        }
+      ]
+    },
+    {
+      "ten": "Tư vấn size theo cân — chị cao 1m58 nặng 55kg thì mặc size nào em",
+      "luot": [
+        {
+          "khach": "chị cao 1m58 nặng 55kg thì mặc size nào em"
+        }
+      ]
+    },
+    {
+      "ten": "Đổi trả — shop cho đổi trả trong bao lâu ạ",
+      "luot": [
+        {
+          "khach": "shop cho đổi trả trong bao lâu ạ"
+        }
+      ]
+    },
+    {
+      "ten": "Giao hàng — ship về Đà Nẵng mấy ngày tới em, phí bao nhiêu",
+      "luot": [
+        {
+          "khach": "ship về Đà Nẵng mấy ngày tới em, phí bao nhiêu"
+        }
+      ]
+    },
+    {
+      "ten": "Cửa hàng — shop có cửa hàng ở đâu để chị qua thử không",
+      "luot": [
+        {
+          "khach": "shop có cửa hàng ở đâu để chị qua thử không"
+        }
+      ]
+    },
+    {
+      "ten": "Thanh toán — bên em cho ship cod hay phải chuyển khoản trước",
+      "luot": [
+        {
+          "khach": "bên em cho ship cod hay phải chuyển khoản trước"
+        }
+      ]
+    },
+    {
+      "ten": "Còn hàng — mẫu này còn size L không em",
+      "luot": [
+        {
+          "khach": "mẫu này còn size L không em"
+        }
+      ]
+    },
+    {
+      "ten": "Bán sỉ — shop có bán sỉ không, lấy 10 cái giá thế nào",
+      "luot": [
+        {
+          "khach": "shop có bán sỉ không, lấy 10 cái giá thế nào"
+        }
+      ]
+    },
+    {
+      "ten": "Dịp mặc — váy này mặc đi ăn cưới có hợp không em",
+      "luot": [
+        {
+          "khach": "váy này mặc đi ăn cưới có hợp không em"
+        }
+      ]
+    },
+    {
+      "ten": "Bảo quản — váy này giặt máy được không hay phải giặt tay",
+      "luot": [
+        {
+          "khach": "váy này giặt máy được không hay phải giặt tay"
+        }
+      ]
+    },
+    {
+      "ten": "Mở màn + hỏi chất liệu",
+      "luot": [
+        {
+          "khach": "mẫu CAMELLIA này vải gì em, mặc mùa hè có nóng không"
+        }
+      ]
+    },
+    {
+      "ten": "Đồng kiểm — cho chị kiểm tra hàng trước khi thanh toán nhé",
+      "luot": [
+        {
+          "khach": "cho chị kiểm tra hàng trước khi thanh toán nhé"
+        }
+      ]
+    },
+    {
+      "ten": "Mở màn + hỏi còn hàng",
+      "luot": [
+        {
+          "khach": "mẫu CAMELLIA còn size L không em"
+        }
+      ]
+    },
+    {
+      "ten": "Mở màn + hỏi ship",
+      "luot": [
+        {
+          "khach": "mẫu CAMELLIA này ship về Đà Nẵng bao lâu em"
+        }
+      ]
+    },
+    {
+      "ten": "Dáng người — chị bụng hơi to mặc mẫu này có che được không",
+      "luot": [
+        {
+          "khach": "chị bụng hơi to mặc mẫu này có che được không"
+        }
+      ]
+    },
+    {
+      "ten": "Khiếu nại — lần trước chị mua bị lỗi đường chỉ, giờ tính sao đây",
+      "luot": [
+        {
+          "khach": "lần trước chị mua bị lỗi đường chỉ, giờ tính sao đây"
+        }
+      ]
+    },
+    {
+      "ten": "Xin bớt giá — bớt cho chị 50k được không em",
+      "luot": [
+        {
+          "khach": "bớt cho chị 50k được không em"
+        }
+      ]
+    }
+  ]
+}

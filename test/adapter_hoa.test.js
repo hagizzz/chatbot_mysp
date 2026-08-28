@@ -7,7 +7,7 @@
 // ============================================================================
 const test = require("node:test");
 const assert = require("node:assert");
-const { quyetDinhChuyenKhoan, CHO_TOI_DA_MS } = require("../adapter_hoa");
+const { quyetDinhChuyenKhoan, CHO_TOI_DA_MS } = require("../loi/don/adapter_hoa");
 
 test("khớp đủ tiền -> bot tự xác nhận", () => {
   const r = quyetDinhChuyenKhoan({ trang_thai: "khop_du", so_tien: 390000 });

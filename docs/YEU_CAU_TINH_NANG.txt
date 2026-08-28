@@ -1,0 +1,335 @@
+SO TRANG: 7
+
+===== TRANG 1 =====
+YÊU	CẦU	TÍNH	NĂNG
+Chatbot	tư	vấn	bán	hàng
+1.	Mục	tiêu
+Bot	trả	lời	khách	hàng	trên	Facebook	thay	nhân	viên	ở	những	tình	huống	chắc	chắn,	nhường	lại	cho	người	thật	ở	những
+tình	huống	khó	hoặc	không	có	dữ	liệu	để	trả	lời.
+Bốn	kết	quả	mong	đợi:
+Trả	lời	khách	nhanh,	không	để	khách	chờ
+,	kể	cả	ngoài	giờ	làm	việc
+Không	bao	giờ	nói	sai
+	—	thà	im	còn	hơn	nói	bậy	mất	khách
+Nhân	viên	chỉ	phải	xử	lý	những	ca	thật	sự	cần	người
+Đóng	gói	bán	được	cho	shop	khác	dùng
+Bot	không	chỉ	dùng	cho	shop	mình	mà	sẽ	được	bán	ra	ngoài.	Đây	là	sản	phẩm	thu	tiền	chính,	nên	ngay	từ	đầu	phải	thiết	kế
+cho	nhiều	shop	cùng	dùng	—	xem	mục	9.
+2.	Nguyên	tắc	không	được	phá
+Đây	là	những	nguyên	tắc	đã	thống	nhất.	Mọi	thay	đổi	phải	giữ	được.
+1.	
+Chắc	mới	trả	lời.	Mơ	hồ	thì	không	trả	lời
+	—	nhường	người	thật.
+2.	
+Không	bịa.
+	Chỉ	dùng	dữ	liệu	có	trong	danh	mục.	Thiếu	dữ	liệu	hoặc	không	chắc	thì	giao	người	thật.
+3.	
+Bám	đúng	một	sản	phẩm.
+	Bot	không	tự	gợi	ý	mẫu	khác,	trừ	khi	khách	chủ	động	hỏi,	hoặc	khi	mẫu	đang	tư	vấn	đã	hết
+hàng	—	lúc	đó	mới	chuyển	hướng	gợi	ý	các	mẫu	tương	tự.
+4.	
+Đã	có	size,	màu,	địa	chỉ,	số	điện	thoại	trong	lịch	sử	thì	tuyệt	đối	không	hỏi	lại.
+5.	
+Chốt	đơn	phải	đủ	bốn	thông	tin:
+	số	điện	thoại,	địa	chỉ,	màu	sắc	và	size.
+6.	
+Gắn	thẻ	phải	đúng.
+	Mỗi	thẻ	có	một	ý	nghĩa	riêng,	bot	gắn	đúng	thẻ	cho	đúng	tình	huống	—	không	gắn	bừa,	không	bỏ
+sót,	không	gắn	thừa.	Nhân	viên	lọc	theo	thẻ	để	làm	việc,	thẻ	sai	là	bỏ	sót	khách	hoặc	làm	nhầm	việc.	Cách	quản	lý	thẻ
+xem	mục	6.
+7.	
+Tình	huống	nhạy	cảm	luôn	giao	người	thật:
+	chuyển	khoản	không	khớp	được,	khiếu	nại	hàng	lỗi,	đòi	hoàn	tiền,	hủy
+đơn,	đổi	địa	chỉ	sau	khi	lên	đơn,	hỏi	tình	trạng	vận	đơn,	khách	cáu	giận,	ảnh	không	khớp	chắc	chắn,	hỏi	thông	tin	nội	bộ.
+3.	Quy	tắc	nghiệp	vụ	đang	áp	dụng
+Phần	này	mô	tả	cách	bot	đang	chạy	hiện	nay,	đúc	kết	từ	thực	tế	bán	hàng.
+Giữ	nguyên,	sửa	lại	hay	làm	theo	cách	khác	đều	được,	miễn	là	
+không	phá	nguyên	tắc	ở	mục	2
+	và	kết	quả	cho	khách	tốt
+hơn.	Thấy	chỗ	nào	chưa	hợp	lý	thì	đề	xuất,	không	cần	làm	theo	cho	bằng	được.
+3.1.	Hiểu	đúng	ý	khách
+Bot	xử	lý	tin	khách	theo	ba	bước:
+Bước
+Làm	gì
+Không	chắc	thì
+1
+Nhận	diện	nhanh	bằng	quy	tắc
+Đẩy	xuống	bước	2
+2
+AI	đọc	hiểu,	chỉ	nhả	nhãn	ý	định
+Giao	người	thật
+3
+Trả	lời	bằng	mẫu	câu	và	dữ	liệu	thật
+Giao	người	thật
+Từ	bước	2	trở	đi,	hễ	không	chắc	là	
+giao	người	thật
+,	không	đoán,	không	trả	lời	nửa	vời.
+Ràng	buộc	bắt	buộc	với	AI:
+Chỉ	được	nhả	
+một	nhãn	trong	danh	sách	cố	định
+,	không	trả	về	văn	bản	tự	do
+Phải	trích	được	bằng	chứng	trong	lời	khách	cho	nhãn	nó	chọn
+Không	chắc	thì	trả	
+KHÔNG_RÕ
+	và	giao	người	thật,	tuyệt	đối	không	đoán
+Luôn	kiểm	chứng	lại	dữ	liệu	dù	AI	nói	gì
+
+===== TRANG 2 =====
+3.2.	Nhớ	thông	tin	khách	đã	cung	cấp
+Mỗi	hội	thoại	phải	nhớ	được:	size,	màu,	số	điện	thoại,	địa	chỉ,	mẫu	đang	tư	vấn,	các	mẫu	đã	báo	giá,	giai	đoạn	hội	thoại.
+Khách	đã	cho	rồi	thì	tuyệt	đối	không	hỏi	lại.
+3.3.	Bot	ngừng	khi	có	thẻ	chờ	xử	lý
+Hội	thoại	được	gắn	thẻ	
+chờ	người	thật	xử	lý
+	thì	bot	ngừng,	để	nhân	viên	làm	việc	mà	không	bị	bot	chen	vào.
+3.4.	Nhận	diện	ảnh	khách	gửi
+Khách	gửi	ảnh	sản	phẩm,	bot	nhận	ra	đó	là	mẫu	nào	rồi	tư	vấn
+Không	chắc	chắn	thì	không	đoán	bừa
+	—	giao	người	thật
+Khách	gõ	tên	mẫu	thì	ưu	tiên	tên	khách	gõ,	không	ưu	tiên	kết	quả	nhận	diện	ảnh
+Ảnh	từ	quảng	cáo	hoặc	bình	luận:	gửi	lại	đúng	ảnh	màu	mà	bài	quảng	cáo	đang	chạy
+Khách	gửi	nhiều	ảnh	cùng	lúc	vẫn	phải	trả	lời	đủ,	không	được	im	lặng
+3.5.	Nhận	diện	nguồn	tin	nhắn
+Khách	nhắn	tới	từ	nhiều	nguồn	khác	nhau.	Bot	phải	nhận	ra	nguồn	để	tư	vấn	đúng,	và	
+hiển	thị	ký	hiệu	nguồn	cho	nhân
+viên	biết	tin	đến	từ	đâu
+.
+Các	nguồn	cần	nhận	diện:
+Nguồn
+Bot	cần	làm	gì
+Khách	trả	lời	quảng	cáo
+Biết	khách	đang	xem	quảng	cáo	mẫu	nào,	báo	giá	đúng	mẫu	đó
+Khách	bình	luận	dưới	bài	viết
+Biết	bài	viết	đó	đang	bán	mẫu	nào,	tư	vấn	đúng	mẫu
+Khách	nhắn	trực	tiếp
+Xử	lý	theo	kịch	bản	shop	đã	khai
+Khách	gửi	ảnh
+Nhận	diện	ảnh	ra	mẫu,	rồi	xử	lý	theo	kịch	bản
+Dù	đến	từ	nguồn	nào,	sau	khi	xác	định	được	mẫu	thì	bot	đều	
+men	theo	kịch	bản	shop	đã	khai
+	để	tư	vấn.	Nguồn	chỉ	giúp
+bot	biết	khách	đang	quan	tâm	mẫu	nào,	không	thay	đổi	cách	tư	vấn.
+Yêu	cầu	bắt	buộc:
+	mỗi	hội	thoại	phải	có	
+ký	hiệu	rõ	ràng	cho	biết	tin	đến	từ	nguồn	nào
+	—	đến	từ	quảng	cáo,	từ	bình
+luận,	hay	nhắn	thẳng.	Nhân	viên	nhìn	vào	là	biết	ngay,	không	phải	đoán.
+Ví	dụ	1	—	khách	trả	lời	quảng	cáo
+Khách	bấm	vào	quảng	cáo	rồi	nhắn	"Xin	giá".	Bot	phải	biết	quảng	cáo	đó	đang	chạy	mẫu	nào	để	báo	giá	đúng,	thay	vì	hỏi
+lại	khách	xem	mẫu	nào.
+Ví	dụ	2	—	khách	bình	luận	dưới	bài	viết
+Khách	bình	luận	dưới	bài	đăng	mẫu	Giannal.	Bot	nhận	ra	bài	viết	đó	bán	mẫu	nào,	báo	giá	và	tư	vấn	size	luôn.
+
+===== TRANG 3 =====
+3.6.	Báo	giá	và	tư	vấn	size
+Khách	đang	trả	lời	hoặc	đang	chốt	thì	không	báo	giá	lại
+Khách	hỏi	có	size	không	thì	trả	lời	có	đủ	size	và	hỏi	lại	khách	mặc	size	bao	nhiêu
+Khách	xin	bảng	size	thì	gửi	ảnh	bảng	size
+3.7.	Xử	lý	địa	chỉ	khách	gửi
+Khách	hiếm	khi	gửi	địa	chỉ	đầy	đủ	và	đúng	chuẩn.	Bot	phải	
+tự	hoàn	thiện	phần	còn	thiếu
+,	không	bắt	khách	gõ	lại	cho
+đủ.
+Khách	gửi	tên	tỉnh	hoặc	thành	phố	→	tự	biết	thuộc	khu	vực	nào
+Khách	gửi	số	nhà	và	tên	đường	→	tự	tra	ra	phường,	quận,	tỉnh
+Khách	gửi	thiếu	hoặc	gõ	sai	chính	tả,	viết	tắt,	không	dấu	→	vẫn	khớp	được	về	đúng	địa	danh	chuẩn
+Địa	chỉ	chuẩn	hóa	xong	phải	khớp	với	danh	mục	địa	chỉ	của	đơn	vị	vận	chuyển,	để	lên	đơn	không	bị	lỗi
+Chỉ	hỏi	lại	khách	khi	thật	sự	không	tra	ra	được.	Tra	ra	nhiều	khả	năng	thì	đưa	ra	để	khách	chọn,	thay	vì	bắt	khách	gõ	lại	từ
+đầu.
+3.8.	Lên	đơn
+Chốt	đơn	khi	đủ	số	điện	thoại,	địa	chỉ,	màu	và	size
+Khách	nói	"ship	về	đấy"	thì	hiểu	là	địa	chỉ	cũ;	không	tìm	được	địa	chỉ	cũ	thì	hỏi	lại
+Khách	đặt	thêm	mẫu	thì	
+chỉ	hỏi	thông	tin	của	mẫu	mới
+,	giữ	nguyên	địa	chỉ	và	số	điện	thoại	đã	có
+Mẫu	mới	thêm	vào,	không	ghi	đè	mẫu	cũ
+Đơn	cũ	đã	chốt	và	xác	nhận	rồi	thì	không	xác	nhận	lại,	không	nhắc	tổng	đơn.
+	Chỉ	xác	nhận	phần	mới	đặt	thêm
+Tín	hiệu	chốt	đơn.
+	Phải	có	một	tín	hiệu	rõ	ràng	báo	cho	hệ	thống	biết	hội	thoại	này	đã	chốt,	để	
+tự	động	lên	đơn
+,	không
+cần	nhân	viên	tạo	tay.
+Đủ	bốn	thông	tin	và	khách	xác	nhận	đồng	ý	mua	→	phát	tín	hiệu	chốt
+Hệ	thống	nhận	tín	hiệu	thì	tự	tạo	đơn	với	đúng	mẫu,	màu,	size,	tên,	số	điện	thoại	và	địa	chỉ	đã	chuẩn	hóa
+Tạo	đơn	xong	báo	lại	cho	khách	và	gắn	thẻ	tương	ứng
+Thiếu	bất	kỳ	thông	tin	nào	thì	không	phát	tín	hiệu,	không	tạo	đơn	nửa	vời
+3.9.	Không	làm	chậm	nhau
+Một	khách	gửi	ảnh	không	được	làm	mọi	khách	khác	phải	chờ.	Bot	phục	vụ	nhiều	hội	thoại	cùng	lúc.
+
+===== TRANG 4 =====
+4.	Năm	tính	năng	tạo	khác	biệt	cho	ngành	thời	trang
+Đây	là	phần	khiến	bot	khác	hẳn	các	bot	chung	chung	ngoài	thị	trường.	Năm	tính	năng	dưới	đây	dựa	trên	dữ	liệu	riêng	của
+shop,	đối	thủ	không	sao	chép	được.
+4.1.	Tư	vấn	size	từ	số	đo	và	lịch	sử	mua
+Đây	là	nỗi	đau	lớn	nhất	của	bán	quần	áo	online,	cũng	là	lý	do	khách	bỏ	giỏ	nhiều	nhất.
+Nhớ	chiều	cao,	cân	nặng,	số	đo	của	khách	qua	các	lần	mua
+Nhớ	khách	từng	mua	mẫu	nào,	size	nào
+Đối	chiếu	form	của	mẫu	đang	tư	vấn	với	mẫu	khách	từng	mua,	rồi	tư	vấn	theo	kinh	nghiệm	thật
+4.2.	Giảm	tỷ	lệ	hoàn	ngay	từ	lúc	tư	vấn
+Hệ	thống	theo	dõi	vận	chuyển	cho	biết	
+mẫu	nào	hay	bị	hoàn	và	vì	lý	do	gì
+.	Bot	dùng	chính	dữ	liệu	đó	để	tư	vấn	tốt	hơn.
+Mẫu	hay	bị	hoàn	vì	chật	thì	chủ	động	nhắc	khách	cân	nhắc	lên	size
+Mẫu	hay	bị	hoàn	vì	khách	chê	chất	thì	mô	tả	chất	kỹ	hơn	ngay	từ	đầu
+Thống	kê	được	tỷ	lệ	hoàn	trước	và	sau	khi	dùng	bot
+Đây	là	tính	năng	quan	trọng,	tạo	cải	tiến	rõ	rệt	so	với	các	bên	khác.
+4.3.	Nhận	ra	khách	quen
+Khách	từng	mua	rồi	mà	bot	chào	như	người	lạ	là	mất	điểm.
+Nhận	ra	khách	đã	mua	bao	nhiêu	lần
+Nhớ	gu	của	khách:	màu	hay	chọn,	kiểu	dáng	hay	mua,	mức	giá	thường	mua
+Nhớ	phản	hồi	lần	trước:	khen	chất,	chê	size,	đổi	hàng
+Tư	vấn	khách	quen	khác	hẳn	khách	mới
+4.4.	Ảnh	thật	của	khách	đã	mua
+Khách	rất	hay	hỏi	"có	ảnh	thật	không".	Ảnh	khách	cũ	mặc	thuyết	phục	hơn	mọi	lời	tư	vấn.
+Shop	lưu	được	ảnh	phản	hồi	của	khách	cũ	theo	từng	mẫu
+Khách	hỏi	ảnh	thật	thì	bot	gửi	ngay,	không	phải	chờ	người
+4.5.	Nhắc	lại	khách	bỏ	giữa	chừng
+Khách	hỏi	giá	rồi	im,	bot	nhắn	lại	để	kéo	khách	quay	lại.
+Toàn	bộ	phần	này	do	shop	tự	thiết	lập,	và	bật	tắt	được:
+Shop	chọn	có	dùng	tính	năng	bám	khách	hay	không
+Shop	tự	đặt	sau	bao	lâu	thì	nhắc	lần	đầu,	bao	lâu	thì	nhắc	lần	hai
+Shop	tự	viết	nội	dung	từng	câu	nhắc
+Shop	tự	đặt	số	lần	nhắc	tối	đa
+Shop	tự	khai	trường	hợp	nào	thì	ngừng	nhắc	—	ví	dụ	khách	đã	chốt	đơn	hoặc	đã	từ	chối
+Bot	chỉ	chạy	theo	đúng	những	gì	shop	đã	khai,	không	tự	quyết	nhắc	bao	nhiêu	lần.
+5.	Nơi	đặt	câu	lệnh	và	kịch	bản
+Đây	là	yêu	cầu	quan	trọng	nhất	về	lâu	dài,	và	cũng	là	điều	kiện	để	bán	được	sản	phẩm.
+Phải	có	một	nơi	để	người	dùng	tự	đặt	và	chỉnh	câu	lệnh,	kịch	bản,	giọng	văn	theo	ý	của	họ.	Bot	men	theo
+những	thông	tin	đó	mà	tư	vấn.
+Yêu	cầu:
+Người	dùng	sửa	được	mà	không	cần	đụng	vào	code,	không	cần	lập	trình	viên
+Mỗi	shop	có	bộ	câu	lệnh	và	kịch	bản	riêng,	không	dùng	chung
+Sửa	xong	áp	dụng	được	ngay
+Lưu	lại	các	phiên	bản	cũ,	sửa	hỏng	thì	quay	lui	được
+Có	chỗ	thử	nghiệm:	gõ	một	câu	khách	mẫu,	xem	bot	phản	ứng	thế	nào,	trước	khi	áp	dụng	thật
+Phải	có	quy	tắc	rõ	ràng:	bot	đọc	những	gì	ở	đây	và	làm	theo	cái	nào.
+	Người	dùng	đọc	vào	là	biết	viết	gì	ở	đâu	thì
+bot	mới	hiểu,	không	phải	mò.
+
+===== TRANG 5 =====
+6.	Thẻ	hội	thoại
+Thẻ	chia	làm	hai	nhóm.
+6.1.	Thẻ	hệ	thống
+Bot	cần	một	số	thẻ	để	làm	việc.	Nhóm	này	có	sẵn	khi	shop	mới	bắt	đầu:
+Cần	người	thật	xử	lý
+Ảnh	không	nhận	diện	được
+Tình	huống	nhạy	cảm
+Shop	
+đổi	được	tên	hiển	thị	và	màu
+	cho	hợp	cách	gọi	của	mình,	nhưng	
+không	xóa	được
+	—	xóa	là	bot	mất	chỗ	báo,	và
+không	thống	kê	được	nữa.
+6.2.	Thẻ	của	shop
+Shop	tự	tạo,	tự	đặt	tên,	tự	đổi	màu,	xóa	lúc	nào	cũng	được.	Đây	là	thẻ	phục	vụ	quy	trình	riêng	của	từng	shop,	không	giới
+hạn	số	lượng.
+6.3.	Dạy	bot	gắn	thẻ	của	shop
+Shop	khai	được:	gặp	ý	định	nào	thì	gắn	thẻ	nào.	Ví	dụ	shop	tạo	thẻ	"khách	hỏi	giá	sỉ",	rồi	khai	rằng	gặp	ý	định	hỏi	giá	sỉ	thì
+gắn	thẻ	đó.
+Bot	làm	theo	mà	không	cần	lập	trình	viên	sửa	gì.
+7.	Xác	nhận	khách	đã	chuyển	khoản
+Hệ	thống	quản	trị	hội	thoại	sẽ	kết	nối	với	ngân	hàng	và	tự	đối	soát	tiền	về.	Bot	chỉ	
+đọc	kết	quả	đối	soát
+	rồi	trả	lời	khách,
+bot	không	tự	kiểm	tra	tiền.
+Kết	quả	đối	soát
+Bot	làm	gì
+Khớp	chắc	chắn,	đủ	tiền
+Xác	nhận	với	khách,	chuyển	đơn	sang	trạng	thái	đã	thanh	toán
+Chưa	thấy	tiền	về
+Báo	khách	chờ	trong	giây	lát	rồi	kiểm	tra	lại.	Tiền	liên	ngân	hàng	có	khi	chậm	vài	phút
+Chờ	quá	lâu	vẫn	không	thấy	tiền
+Giao	người	thật
+Thiếu	tiền,	thừa	tiền,	không	khớp	được
+Giao	người	thật
+,	tuyệt	đối	không	tự	xác	nhận
+8.	Kết	nối	với	hệ	thống	quản	trị	hội	thoại
+Song	song	với	dự	án	này,	bạn	Hòa	đang	xây	hệ	thống	quản	trị	hội	thoại	mới.	Bot	sẽ	chạy	trên	hệ	thống	đó.
+Hai	bên	cần	thống	nhất	cách	gọi	qua	lại	trước	khi	bắt	tay	làm.	Trong	lúc	chờ,	mỗi	bên	tự	làm	phần	mình	với	dữ	liệu	giả,
+không	ngồi	đợi	nhau.
+9.	Chuẩn	bị	để	đóng	gói	bán	ra	ngoài
+Bot	sẽ	được	bán	cho	các	shop	khác.	Các	yêu	cầu	dưới	đây	phải	tính	từ	đầu.
+9.1.	Tách	dữ	liệu	theo	từng	shop
+Đây	là	yêu	cầu	quan	trọng	nhất	của	mục	này.
+Mỗi	shop	có	không	gian	riêng:	danh	mục	sản	phẩm,	kịch	bản,	câu	lệnh,	lịch	sử	hội	thoại,	thống	kê
+Tuyệt	đối	không	có	đường	nào	để	shop	này	nhìn	thấy	dữ	liệu	hay	kịch	bản	của	shop	kia
+Kịch	bản	bán	hàng	là	tài	sản	riêng	của	từng	shop,	lộ	ra	là	mất	khách
+9.2.	Shop	mới	tự	bắt	đầu	được
+Shop	tự	nối	danh	mục	sản	phẩm	của	họ
+Shop	tự	sửa	kịch	bản,	giọng	văn	và	câu	lệnh	của	mình
+Không	cần	bên	mình	cài	đặt	thủ	công	cho	từng	shop
+Có	bộ	kịch	bản	mẫu	để	shop	mới	bắt	đầu	ngay,	rồi	sửa	dần	theo	ý	họ
+
+===== TRANG 6 =====
+9.3.	Bật	tắt	theo	shop	và	theo	Page
+Bật	hoặc	tắt	bot	cho	từng	shop
+Trong	một	shop,	bật	tắt	riêng	cho	từng	Page	—	một	shop	có	thể	có	nhiều	Page,	không	phải	Page	nào	cũng	dùng	bot
+Đặt	được	hạn	mức	dùng	thử:	cho	dùng	miễn	phí	một	số	lượng	nhất	định,	hết	thì	tự	dừng
+9.4.	Cho	thấy	giá	trị	bot	mang	lại
+Người	ta	chỉ	trả	tiền	khi	nhìn	thấy	bot	làm	được	việc.	Phải	thống	kê	được:
+Bot	đã	trả	lời	bao	nhiêu	tin	thay	nhân	viên
+Số	hội	thoại	bot	xử	lý	trọn	vẹn,	không	cần	người	can	thiệp
+Số	đơn	phát	sinh	từ	hội	thoại	có	bot	tham	gia
+Số	ca	bot	nhường	người	thật,	và	vì	lý	do	gì
+9.5.	Theo	dõi	chi	phí	AI	theo	từng	shop
+Chi	phí	gọi	AI	tăng	theo	lượng	dùng.	Phải	biết	mỗi	shop	tiêu	bao	nhiêu	để	tính	giá	bán,	và	đặt	được	hạn	mức	chặn	khi	vượt
+ngưỡng.
+10.	Chế	độ	bán	tự	động
+Ngoài	chế	độ	bot	tự	trả	lời,	phải	có	thêm	
+chế	độ	bán	tự	động
+:	bot	không	gửi	tin	cho	khách	mà	
+gợi	ý	câu	trả	lời	để
+nhân	viên	chọn
+.
+Shop	bật	chế	độ	nào	tùy	họ.	Shop	mới	chưa	tin	bot	thì	dùng	bán	tự	động	trước,	quen	rồi	mới	chuyển	sang	tự	động	hoàn
+toàn.
+Chế	độ
+Bot	làm	gì
+Tự	động
+Bot	tự	trả	lời	khách	trong	những	ca	chắc	chắn
+Bán	tự	động
+Bot	đưa	2–3	phương	án,	nhân	viên	chọn	rồi	gửi
+Tắt
+Bot	không	tham	gia
+Yêu	cầu	với	chế	độ	bán	tự	động:
+Gợi	ý	là	gợi	ý,	
+không	bao	giờ	tự	gửi
+Đưa	2–3	phương	án	để	nhân	viên	chọn	nhanh,	thay	vì	phải	sửa
+Ghi	lại	nhân	viên	có	dùng	gợi	ý	không,	sửa	nhiều	hay	ít	—	dùng	để	đo	chất	lượng	bot
+
+===== TRANG 7 =====
+11.	Tiêu	chí	đánh	giá	hoàn	thành
+Bot	chạy	ổn	định,	liên	tục,	không	tự	sập
+Khách	gửi	nhiều	ảnh	cùng	lúc,	bot	vẫn	trả	lời	đủ
+Nhận	ra	đúng	mẫu	khi	khách	đến	từ	quảng	cáo	hoặc	từ	bình	luận
+,	không	phải	hỏi	lại	khách	xem	mẫu	nào
+Mỗi	hội	thoại	có	ký	hiệu	nguồn	rõ	ràng
+	để	nhân	viên	biết	tin	đến	từ	đâu
+Độ	nhận	diện	ảnh	cao.
+	Ảnh	sản	phẩm	đã	có	trong	hệ	thống	thì	phải	nhận	ra	được,	kể	cả	ảnh	cắt,	ảnh	chụp	màn	hình,
+ảnh	chụp	lại	từ	màn	hình	điện	thoại,	ảnh	bị	mờ	hoặc	lệch	màu
+Bot	không	hỏi	lại	thông	tin	khách	đã	cung	cấp
+Một	khách	gửi	ảnh	không	làm	chậm	khách	khác
+Bot	ngừng	khi	hội	thoại	được	gắn	thẻ	chờ	người	thật	xử	lý
+Chốt	đơn	đủ	bốn	thông	tin:	số	điện	thoại,	địa	chỉ,	màu	và	size
+Khách	gửi	địa	chỉ	thiếu,	viết	tắt	hoặc	sai	chính	tả	vẫn	tra	ra	được	địa	danh	chuẩn
+,	không	bắt	khách	gõ	lại
+Địa	chỉ	chuẩn	hóa	khớp	với	danh	mục	của	đơn	vị	vận	chuyển,	lên	đơn	không	lỗi
+Đủ	điều	kiện	chốt	thì	hệ	thống	tự	lên	đơn,	không	cần	nhân	viên	tạo	tay
+Người	dùng	tự	sửa	được	câu	lệnh	và	kịch	bản,	sửa	xong	áp	dụng	ngay,	quay	lui	được
+Có	quy	tắc	rõ	ràng	cho	biết	bot	đọc	gì	và	làm	theo	cái	nào
+Shop	tự	tạo	thẻ	riêng	và	dạy	được	bot	gắn	thẻ	đó
+Thẻ	hệ	thống	không	xóa	được,	nhưng	đổi	được	tên	và	màu
+Khớp	chuyển	khoản	chắc	chắn	thì	bot	xác	nhận,	không	chắc	thì	giao	người	thật
+Tư	vấn	được	size	dựa	trên	số	đo	và	lịch	sử	mua	của	khách
+Nhận	ra	khách	quen	và	tư	vấn	khác	khách	mới
+Gửi	được	ảnh	thật	của	khách	cũ	theo	từng	mẫu
+Bật	tắt	được	tính	năng	bám	khách,	shop	tự	đặt	thời	điểm,	nội	dung	và	số	lần	nhắc
+Thống	kê	được	tỷ	lệ	hoàn	theo	mẫu	và	lý	do	hoàn
+Chuyển	được	giữa	ba	chế	độ:	tự	động,	bán	tự	động,	tắt
+Chế	độ	bán	tự	động	đưa	được	2–3	phương	án,	không	tự	gửi
+Hai	shop	khác	nhau	dùng	cùng	hệ	thống,	không	shop	nào	thấy	được	dữ	liệu	và	kịch	bản	của	shop	kia
+Shop	mới	tự	nối	danh	mục	và	tự	sửa	kịch	bản	được
+Thống	kê	được	số	tin	bot	xử	lý	và	chi	phí	AI	theo	từng	shop
+Mọi	nguyên	tắc	ở	mục	2	vẫn	được	giữ	nguyên

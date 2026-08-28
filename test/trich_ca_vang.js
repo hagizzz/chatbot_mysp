@@ -72,10 +72,16 @@ const RE_KHACH = /Khách:\s*(.+?)\s*\|\s*Conv:\s*(\S+)/;
 const RE_TIN = /Tin:\s*(text|image):\s*(.*)$/;
 
 function tuLog() {
+  // [DỌN 27/08/2026] Mấy tệp log này trước nằm rải ở thư mục GỐC, lẫn giữa mã nguồn
+  // và trông y như rác — suýt bị dọn nhầm. Chúng là DỮ LIỆU NGUỒN của bộ ca vàng
+  // (log hội thoại THẬT), nay nằm gọn ở test/log_that/. Vẫn đọc cả thư mục gốc để
+  // không mất ca nào nếu ai đó thả log mới vào đấy theo thói quen cũ.
+  const THU_MUC_LOG = path.join(__dirname, "log_that");
+  const laLog = f => /\.txt$/i.test(f);
   const files = [
+    ...(fs.existsSync(THU_MUC_LOG)
+      ? fs.readdirSync(THU_MUC_LOG).filter(laLog).map(f => path.join(THU_MUC_LOG, f)) : []),
     ...fs.readdirSync(GOC).filter(f => /^log\d*\.txt$/.test(f)).map(f => path.join(GOC, f)),
-    ...["ngockoy.txt", "ngockoy2.txt", "tl.txt", "ln.txt", "ln2.txt", "vid.txt", "pp.txt", "mona2.txt", "mona3.txt"]
-      .map(f => path.join(GOC, f)).filter(fs.existsSync),
     ...(fs.existsSync(path.join(GOC, "botlog"))
       ? fs.readdirSync(path.join(GOC, "botlog")).map(f => path.join(GOC, "botlog", f)) : [])
   ];

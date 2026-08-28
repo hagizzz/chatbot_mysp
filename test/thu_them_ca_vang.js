@@ -18,9 +18,9 @@
 require("../env_boot");
 const fs = require("fs");
 const path = require("path");
-const { getConversations, getMessages, normalizeMessages } = require("../pancake_reader");
-const { detectIntent } = require("../intent_detector");
-const { routeBatch } = require("../intent_router");
+const { getConversations, getMessages, normalizeMessages } = require("../loi/pancake/pancake_reader");
+const { detectIntent } = require("../loi/ai/intent_detector");
+const { routeBatch } = require("../loi/ai/intent_router");
 
 const MUC_TIEU = Number(process.argv.find(a => /^\d+$/.test(a)) || 200);
 const DUNG_AI = process.argv.includes("--ai");
@@ -70,7 +70,7 @@ const { che, cheConvId } = require("./che_du_lieu");
         };
         if (DUNG_AI) {
           try {
-            const { classifyIntent } = require("../ai_intent");
+            const { classifyIntent } = require("../loi/ai/ai_intent");
             const lab = await classifyIntent({ text });
             if (lab && lab.ok) ca.mong.nhanAI = lab.kind;
           } catch (_) {}

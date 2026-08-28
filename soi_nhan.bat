@@ -8,7 +8,7 @@ echo ============================================================
 echo.
 
 rem  Tham so 1 = conversation_id (bo trong -> mac dinh hoi thoai trong link ban gui)
-node soi_nhan.js %1 > soi_nhan_log.txt 2>&1
+node cong_cu\soi_nhan.js %1 > soi_nhan_log.txt 2>&1
 
 echo.
 echo ==== KET QUA (da luu vao soi_nhan_log.txt) ====

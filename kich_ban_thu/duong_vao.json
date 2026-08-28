@@ -1,0 +1,67 @@
+{
+  "nhom": "Đường vào — quảng cáo / bình luận / nhắn thẳng",
+  "kich_ban": [
+    {
+      "ten": "Từ QUẢNG CÁO (ad_id) — hỏi giá",
+      "nguon": {
+        "loai": "quang_cao",
+        "adId": "120254257724490550"
+      },
+      "luot": [
+        {
+          "khach": "váy này bao nhiêu tiền em"
+        }
+      ]
+    },
+    {
+      "ten": "Từ QUẢNG CÁO (ad_id + post_id) — hỏi chất liệu",
+      "nguon": {
+        "loai": "quang_cao",
+        "adId": "120249331667250373",
+        "postId": "1496705998498847"
+      },
+      "luot": [
+        {
+          "khach": "váy này vải gì em, mặc mùa hè có nóng không"
+        }
+      ]
+    },
+    {
+      "ten": "Từ BÌNH LUẬN dưới bài — hỏi giá",
+      "nguon": {
+        "loai": "binh_luan",
+        "postId": "1555383752809784",
+        "caption": "GIANNAL DRESS — Váy thiết kế tay bồng, chất liệu tơ óng nhẹ, lên dáng cực tôn."
+      },
+      "luot": [
+        {
+          "khach": "váy này bao nhiêu tiền vậy shop"
+        }
+      ]
+    },
+    {
+      "ten": "ĐỐI CHỨNG — nhắn thẳng, không quảng cáo không bài",
+      "nguon": {
+        "loai": "nhan_thang"
+      },
+      "luot": [
+        {
+          "khach": "váy này bao nhiêu tiền em"
+        }
+      ]
+    },
+    {
+      "ten": "Từ BÌNH LUẬN — bài không nêu rõ tên mẫu",
+      "nguon": {
+        "loai": "binh_luan",
+        "postId": "1555383752809784",
+        "caption": "Về hàng rồi các nàng ơi, inbox shop nhé ❤️"
+      },
+      "luot": [
+        {
+          "khach": "váy này bao nhiêu tiền vậy shop"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,322 @@
+{
+  "_doc": "Kịch bản GỐC — mọi shop kế thừa. Shop chỉ khai phần KHÁC ở kich_ban/<shopId>.json. Ngăn 'prompt' là luật dạy AI, shop KHÔNG đè được.",
+  "cau": {
+    "sale_program__khi_ket_thuc_chuong_trinh": {
+      "cau": "khi kết thúc chương trình",
+      "bien": [],
+      "mo_ta": "saleProgram (bot_worker_api_v3.js:938)"
+    },
+    "discount__gia_dang_la_niem_yet": {
+      "cau": "Dạ giá đang là niêm yết rồi chị nha, bên em hiếm khi giảm giá, mà {nmSale}thiết kế làm số lượng ít nên nhanh hết size mình thích ạ. {tailNo}",
+      "bien": [
+        "nmSale",
+        "tailNo"
+      ],
+      "mo_ta": "buildDiscountReply (bot_worker_api_v3.js:915)"
+    },
+    "discount__shop_it_khi_sale_lam": {
+      "cau": "Dạ shop ít khi sale lắm chị ạ, chờ giảm thì gần như không có ạ, mà {nmSale}là hàng thiết kế số lượng có hạn, để lâu dễ hết size mình ưng lắm. {tailNo}",
+      "bien": [
+        "nmSale",
+        "tailNo"
+      ],
+      "mo_ta": "buildDiscountReply (bot_worker_api_v3.js:914)"
+    },
+    "discount__ben_em_hiem_khi_giam": {
+      "cau": "Dạ bên em hiếm khi giảm giá lắm chị ạ, nên chờ sale thì gần như không có, mà {nmSale}là hàng thiết kế số lượng ít, để lâu dễ hết size mình thích. {tailNo}",
+      "bien": [
+        "nmSale",
+        "tailNo"
+      ],
+      "mo_ta": "buildDiscountReply (bot_worker_api_v3.js:913)"
+    },
+    "discount__mac_size_bao_nhieu_de_2": {
+      "cau": "Chị mặc size bao nhiêu để em check hàng cho mình ạ?",
+      "bien": [],
+      "mo_ta": "buildDiscountReply (bot_worker_api_v3.js:894)"
+    },
+    "discount__dang_giam_kha_sau_chi": {
+      "cau": "Dạ {nameTxt}đang giảm khá sâu{sp} chị nha, mức này tốt lắm rồi ạ. {tail}",
+      "bien": [
+        "nameTxt",
+        "sp",
+        "tail"
+      ],
+      "mo_ta": "buildDiscountReply (bot_worker_api_v3.js:887)"
+    },
+    "discount__dang_uu_dai_sau_do": {
+      "cau": "Dạ {nameTxt}đang ưu đãi sâu đó chị{sp} ạ, giá này hời lắm rồi ạ. {tail}",
+      "bien": [
+        "nameTxt",
+        "sp",
+        "tail"
+      ],
+      "mo_ta": "buildDiscountReply (bot_worker_api_v3.js:886)"
+    },
+    "discount__hien_dang_duoc_uu_dai": {
+      "cau": "Dạ {nameTxt}hiện đang được ưu đãi{sp} ạ, đang giảm rất sâu chị nha 🥰 {tail}",
+      "bien": [
+        "nameTxt",
+        "sp",
+        "tail"
+      ],
+      "mo_ta": "buildDiscountReply (bot_worker_api_v3.js:885)"
+    },
+    "discount__mac_size_bao_nhieu_de": {
+      "cau": "Chị mặc size bao nhiêu để em check hàng cho mình ạ?",
+      "bien": [],
+      "mo_ta": "buildDiscountReply (bot_worker_api_v3.js:878)"
+    },
+    "discount__xin_phep_giu_gia_uu": {
+      "cau": "Dạ em xin phép giữ giá ưu đãi này giúp chị ạ, mức này là tốt rồi. Mua nhiều em hỗ trợ freeship cho mình nhe",
+      "bien": [],
+      "mo_ta": "buildDiscountReply (bot_worker_api_v3.js:869)"
+    },
+    "discount__gia_nay_da_la_uu": {
+      "cau": "Dạ giá này đã là ưu đãi sâu rồi chị ạ, em không giảm thêm được; bù lại chị mua 2 mẫu em ưu tiên gói kỹ và freeship cho mình nha",
+      "bien": [],
+      "mo_ta": "buildDiscountReply (bot_worker_api_v3.js:868)"
+    },
+    "discount__mua_nhieu_thi_ben_em": {
+      "cau": "Dạ mua nhiều thì bên em vẫn freeship cho mình ạ, còn giá đang là mức ưu đãi tốt nhất rồi nên em không giảm thêm được nữa, mong chị thông cảm",
+      "bien": [],
+      "mo_ta": "buildDiscountReply (bot_worker_api_v3.js:867)"
+    },
+    "showroom_visit__showroom_cua_ben_em_o": {
+      "cau": "Dạ vâng, showroom {name} của bên em ở {addr} chị nha. Chị cho em xin size mình hay mặc, em giữ sẵn tại showroom vì các mẫu ở đó cũng nhanh hết hàng lắm ạ. Chị tính ghé khoảng hôm nào để em sắp xếp nhân viên giữ hàng cho mình nha?",
+      "bien": [
+        "name",
+        "addr"
+      ],
+      "mo_ta": "showroomVisitReply (bot_worker_api_v3.js:824)"
+    },
+    "showroom_visit__showroom_o_chi_nha_size": {
+      "cau": "Dạ vâng, showroom {name} ở {addr} chị nha ❤️. Size {customerSize} của mình thì em giữ sẵn tại showroom luôn nha, vì mẫu ở đó cũng nhanh hết hàng lắm ạ. Chị tính ghé khoảng hôm nào để em sắp xếp nhân viên giữ hàng cho mình nha?",
+      "bien": [
+        "name",
+        "addr",
+        "customerSize"
+      ],
+      "mo_ta": "showroomVisitReply (bot_worker_api_v3.js:822)"
+    },
+    "showroom_reply_for__ben_em_khong_con_hoat": {
+      "cau": " bên em không còn hoạt động nữa ạ.",
+      "bien": [],
+      "mo_ta": "showroomReplyFor (bot_worker_api_v3.js:782)"
+    },
+    "bank_info__chuyen_xong_gui_hinh_em": {
+      "cau": "Chị chuyển xong gửi hình em kiểm tra và lên đơn cho mình ạ",
+      "bien": [],
+      "mo_ta": "buildBankInfoReply (bot_worker_api_v3.js:736)"
+    },
+    "hang_gui_tu_dau": {
+      "cau": "Dạ hàng bên em được gửi từ kho Bắc Giang ạ. Đơn của mình được giao tận nơi, chị được kiểm hàng trước khi thanh toán nha",
+      "bien": [],
+      "mo_ta": "buildShipOriginReply (bot_worker_api_v3.js:840)"
+    },
+    "dia_chi_shop_mo": {
+      "cau": "Bên em có 2 showroom chị nha:",
+      "bien": [],
+      "mo_ta": "buildShopAddressReply (bot_worker_api_v3.js:850)"
+    },
+    "dia_chi_shop_moi": {
+      "cau": "Chị tiện qua cơ sở nào em nhắn nhân viên chuẩn bị sẵn mẫu cho mình thử nha ❤️. Còn nếu chị bận chưa qua được thì cứ chốt online, bên em ship tận nơi, cho kiểm hàng trước khi thanh toán luôn ạ.",
+      "bien": [],
+      "mo_ta": "buildShopAddressReply (bot_worker_api_v3.js:853)"
+    },
+    "hoi_size": {
+      "cau": "Dạ chị thường mặc size nào để em tư vấn cho mình nha ạ",
+      "bien": [],
+      "mo_ta": "cauHoiSize (bot_worker_api_v3.js:830)"
+    },
+    "bang_size_dan": {
+      "cau": "Dạ em gửi chị bảng size để mình tham khảo nha ạ",
+      "bien": [],
+      "mo_ta": "Câu dẫn trước khi gửi ảnh bảng size"
+    },
+    "hoi_mau__nhieu_mau": {
+      "cau": "{mo} bên em có {mau} chị nha. Em gửi ảnh thật từng màu để chị dễ chọn nha ạ.",
+      "bien": [
+        "mo",
+        "mau"
+      ],
+      "mo_ta": "Khách hỏi màu, mẫu có TỪ 2 MÀU trở lên. {mo} = 'Mẫu' (khi câu giá đứng trước) hoặc 'Dạ mẫu này'. {mau} = danh sách màu. Câu giá do code dựng, không nằm ở đây. (bot_worker_api_v3.js:10894)"
+    },
+    "hoi_mau__mot_mau": {
+      "cau": "{mo} bên em làm riêng màu {mau} ạ — màu này đang rất được ưa chuộng, dễ phối đồ, hợp nhiều dáng người chị nha.",
+      "bien": [
+        "mo",
+        "mau"
+      ],
+      "mo_ta": "Khách hỏi màu, mẫu CHỈ CÓ 1 MÀU. Cố ý KHÔNG nói 'chỉ có' — nói 'làm riêng màu X' rồi thêm điểm cộng cho khách yên tâm. (bot_worker_api_v3.js:10882)"
+    },
+    "xac_nhan_lien_he_cu": {
+      "cau": "Dạ em lên đơn {size} cho mình nha. Chị xác nhận giúp em vẫn giao về {diaChi}, sđt {sdt} đúng không ạ?",
+      "bien": [
+        "size",
+        "diaChi",
+        "sdt"
+      ],
+      "mo_ta": "Khách ĐÃ TỪNG chốt đơn, giờ đặt thêm mẫu. Nguyên tắc 4 + mục 3.8 của yêu cầu: đã có sđt/địa chỉ trong lịch sử thì XÁC NHẬN lại, TUYỆT ĐỐI không xin lại từ đầu. (sizeTailForProduct)"
+    },
+    "tran_an_chat_luong": {
+      "cau": [
+        "Dạ hàng thiết kế nên chị yên tâm chất lượng nha ạ",
+        "Dạ đồ thiết kế nên form và chất đều rất đẹp, chị yên tâm nha ạ",
+        "Dạ mẫu này hàng thiết kế, chất lượng kỹ lắm chị yên tâm ạ"
+      ],
+      "bien": [],
+      "mo_ta": "Khách lăn tăn CHẤT LƯỢNG. Mảng nhiều biến thể -> code xoay vòng cho đỡ lặp. TUYỆT ĐỐI không nhắc hoàn/hủy ở đây (chỉ nói khi khách HỎI chính sách). (buildReassureReply)"
+    },
+    "tran_an_ngoai_doi": {
+      "cau": [
+        "Dạ chị yên tâm nha, hàng thiết kế nên ngoài đời nhìn cũng đẹp lắm ạ",
+        "Dạ ngoài đời mẫu này lên dáng đẹp lắm, chị yên tâm nha"
+      ],
+      "bien": [],
+      "mo_ta": "Khách hỏi 'ngoài đời có đẹp như hình không'. Xoay vòng. Trấn an NHẸ, không nhắc hoàn/hủy. (buildLooksReassure)"
+    },
+    "tran_an_hop_dang__co_so_do": {
+      "cau": "Dạ chị yên tâm ạ, mẫu này khá dễ mặc và không kén dáng đâu ạ. Với số đo của chị thì em tự tin chị mặc sẽ rất đẹp ạ",
+      "bien": [],
+      "mo_ta": "Nhãn FIT_SUITABILITY, đã có SỐ ĐO 3 vòng trong bộ nhớ. (bot_worker_api_v3.js, khối lo hợp dáng)"
+    },
+    "tran_an_hop_dang__co_thong_so": {
+      "cau": "Dạ chị yên tâm ạ, mẫu này khá dễ mặc và không kén dáng đâu ạ. Với thông số của chị thì em tự tin chị mặc sẽ rất đẹp ạ",
+      "bien": [],
+      "mo_ta": "Nhãn FIT_SUITABILITY, đã có cân nặng HOẶC size. (bot_worker_api_v3.js, khối lo hợp dáng)"
+    },
+    "tran_an_hop_dang__chua_co_gi": {
+      "cau": "Dạ chị yên tâm ạ, mẫu này khá dễ mặc và không kén dáng đâu ạ. Chị cho em xin chiều cao, cân nặng em tư vấn cho mình nhe",
+      "bien": [],
+      "mo_ta": "Nhãn FIT_SUITABILITY, CHƯA có thông số nào -> trấn an + xin cao/nặng. (bot_worker_api_v3.js, khối lo hợp dáng)"
+    },
+    "tham_khao_them__co_gui_anh": {
+      "cau": "Dạ chị cứ tham khảo thêm giúp em nha ạ. Em gửi thêm vài hình để mình nhìn rõ hơn chất liệu và phom dáng nhé.",
+      "bien": [],
+      "mo_ta": "Nhãn DEFER_DECISION / khách xin xem thêm, VÀ lượt này gửi được 3 ảnh khác. Lùi nhẹ, KHÔNG gặng chốt, KHÔNG hỏi màu. (bot_worker_api_v3.js, khối tham khảo thêm)"
+    },
+    "tham_khao_them__khong_gui_anh": {
+      "cau": "Dạ chị cứ tham khảo thêm nha. Riêng mẫu này đang được khá nhiều khách bên em chọn vì phom lên rất xinh và tôn dáng ạ. Khi nào cần em tư vấn thêm chị cứ nhắn em nha.",
+      "bien": [],
+      "mo_ta": "Nhãn DEFER_DECISION / khách xin xem thêm, KHÔNG gửi được ảnh mới. Lùi nhẹ + thuyết phục mềm. (bot_worker_api_v3.js, khối tham khảo thêm)"
+    },
+    "dan_gui_anh": {
+      "cau": "Dạ em gửi chị xem ảnh {mau} nhe ạ.",
+      "bien": [
+        "mau"
+      ],
+      "mo_ta": "Câu DẪN trước loạt ảnh, dùng khi câu AI tự soạn bị cổng (a4) chặn mà lượt đó vẫn phải gửi ảnh. Giữ luồng ảnh, không để khách xin ảnh mà nhận về im lặng. (bot_worker_api_v3.js, khối (a4))"
+    },
+    "anh_thieu_dong_sheet": {
+      "cau": "Dạ mẫu này chị cho em xin ít phút để em xác nhận lại thông tin với bên kho, xong em báo chị ngay ạ.",
+      "bien": [],
+      "mo_ta": "Vision NHẬN RA mã nhưng mã đó chưa có dòng trong Sheet -> chưa có giá để báo. Nói thật với khách thay vì im lặng, đồng thời gắn thẻ AI-XL ảnh cho nhân viên bổ sung. TRÁNH cụm 'kiểm tra ... rồi báo' vì isWaitHandoffMsg sẽ nuốt tin. (bot_worker_api_v3.js, nhánh THIẾU DÒNG SHEET)"
+    },
+    "anh_thieu_dong_sheet__co_dip": {
+      "cau": "Dạ mẫu này em xác nhận lại thông tin với bên kho rồi báo chị ngay ạ. Chuyện {dip} thì em hỏi luôn bạn tư vấn xem mẫu có hợp không rồi phản hồi chị cùng lúc nha.",
+      "bien": [
+        "dip"
+      ],
+      "mo_ta": "Như anh_thieu_dong_sheet nhưng khách có nêu DỊP. Nhắc lại đúng dịp để khách thấy câu hỏi chính của mình được nghe. KHÔNG có dòng Sheet nên tuyệt đối không phán mẫu hợp hay không hợp."
+    },
+    "hop_dip__mau_nay": {
+      "cau": "Dạ mẫu này là {loai}{chatVe} ạ. Chị mặc {dip} thì mẫu này được nha, dáng lên gọn gàng và lịch sự lắm ạ.",
+      "bien": [
+        "loai",
+        "chatVe",
+        "dip"
+      ],
+      "mo_ta": "Khách hỏi 'mẫu NÀY mặc đi <dịp> được không'. Nêu chủng loại + chất liệu LẤY TỪ DÒNG SHEET (có thật), rồi mới tới nhận định. Shop muốn nói dè dặt hơn hoặc chắc hơn thì sửa Ở ĐÂY. Sheet chỉ có cột dịp cho ĐI BIỂN; các dịp khác không có dữ liệu nên nhận định là lời của shop, không phải của dữ liệu."
+    },
+    "lo_khong_giong_anh": {
+      "cau": [
+        "Dạ ảnh bên em là hàng thật tự chụp chứ không lấy trên mạng đâu ạ. Với lại đơn của mình được kiểm hàng trước khi thanh toán, chị mở ra xem ưng rồi mới trả tiền nha. Nếu về mà không ưng thì bên em hỗ trợ đổi trong 15 ngày ạ.",
+        "Dạ chị yên tâm nha, ảnh là bên em tự chụp mẫu thật chứ không lấy trên mạng ạ. Khi shipper giao, chị được mở ra kiểm trước khi thanh toán, ưng mới lấy nha. Về rồi mà không ưng thì em hỗ trợ đổi trong 15 ngày ạ."
+      ],
+      "bien": [],
+      "mo_ta": "Nhãn RISK_RECOURSE — khách lo 'mua về mà không giống thế thì sao'. Khách hỏi QUYỀN LỢI, nên câu trấn an suông là né câu hỏi. Ba ý bắt buộc, đúng thứ tự: (1) ảnh thật shop tự chụp, (2) ĐƯỢC KIỂM HÀNG TRƯỚC KHI THANH TOÁN — đây mới là câu trả lời thẳng cho 'thì sao', (3) đổi trong 15 ngày. Ở đây được phép nhắc đổi/trả vì khách ĐANG HỎI về nó — khác tran_an_ngoai_doi (khách chỉ lăn tăn, tuyệt đối không mời chào đổi trả). Số 15 ngày lấy theo kich_ban/mysp.json -> so_lieu.dia_chi_doi_hang.so_ngay_doi; shop khác số ngày khác thì sửa câu ở đây. Mảng nhiều biến thể -> code xoay vòng cho đỡ lặp.",
+      "_nguon": "docs/KE_HOACH_AI_SOAN_CAU.md bước 1 — dựng 27/08/2026 sau khi đo thấy AI gắn nhầm câu này thành SIZE_ADVICE"
+    },
+    "chuyen_nguoi_that": {
+      "cau": "Dạ phần này em nhờ bạn phụ trách xử lý giúp mình rồi phản hồi chị ngay ạ.",
+      "bien": [],
+      "mo_ta": "Bot nhường người thật nhưng KHÔNG được im — câu giữ khách trong lúc chờ. Tránh cụm 'chờ em kiểm tra' vì isWaitHandoffMsg sẽ nuốt."
+    },
+    "doc_lai_don__mo_dau": {
+      "cau": "Dạ em đọc lại đơn cho chắc nha chị:",
+      "mo_ta": "Câu mở đầu BẢN ĐỌC LẠI ĐƠN — bot đọc lại đơn cho khách soát TRƯỚC khi lên đơn. Mấy dòng món/địa chỉ/tiền bên dưới do code dựng. (bot_worker_api_v3.js buildDocLaiDon)"
+    },
+    "doc_lai_don__nhieu_noi_giao": {
+      "cau": "Mấy món này giao về {so} nơi khác nhau nên bên em tách thành {so} đơn ạ.",
+      "bien": [
+        "so"
+      ],
+      "mo_ta": "Chỉ chèn khi đơn có TỪ 2 NƠI GIAO trở lên. {so} = số nơi giao = số đơn sẽ tách. (buildDocLaiDon)"
+    },
+    "doc_lai_don__hoi_chot": {
+      "cau": "Chị xem giúp em đúng chưa ạ, đúng rồi em lên đơn luôn nha!",
+      "mo_ta": "Câu cuối bản đọc lại — xin khách xác nhận. Khách gật thì bot mới phát tin chốt và gắn thẻ AI chốt. (buildDocLaiDon)"
+    },
+    "doc_lai_don__sdt": {
+      "cau": "SĐT nhận hàng: {sdt}",
+      "bien": [
+        "sdt"
+      ],
+      "mo_ta": "Dòng số điện thoại trong bản đọc lại đơn. (buildDocLaiDon)"
+    },
+    "chot_don__mau_khong_co": {
+      "cau": "Dạ {ten} bên em không có màu {mau} ạ{ds}. Chị lấy màu nào để em lên đơn cho mình nha?",
+      "bien": [
+        "ten",
+        "mau",
+        "ds"
+      ],
+      "mo_ta": "Khách xin màu mẫu KHÔNG có -> hỏi lại, TUYỆT ĐỐI không tự đổi sang màu gần giống. {ds} = ', mẫu này có kem, hồng, đen' hoặc rỗng khi sheet chưa khai màu. (nhánh thẩm định trước khi chốt)"
+    },
+    "chot_don__hoi_mau_nao": {
+      "cau": "Dạ {ten} có {ds_mau} ạ, chị lấy màu nào để em lên đơn cho mình nha?",
+      "bien": [
+        "ten",
+        "ds_mau"
+      ],
+      "mo_ta": "Sắp chốt mà mẫu nhiều màu, khách chưa nói màu -> hỏi, không đoán. (nhánh thẩm định trước khi chốt)"
+    },
+    "chot_don__xin_dia_chi_mon": {
+      "cau": "Dạ chị cho em xin địa chỉ giao {mon} với ạ, em lên đơn cho mình luôn nha!",
+      "bien": [
+        "mon"
+      ],
+      "mo_ta": "Đơn nhiều nơi giao mà một món chưa rõ giao về đâu -> xin riêng địa chỉ món đó, KHÔNG mượn địa chỉ món khác. {mon} = tên mẫu + màu. (nhánh thẩm định trước khi chốt)"
+    },
+    "doi_tra__phi_nho_nhan_vien": {
+      "cau": "Riêng khoản phí đổi thì em nhờ bạn phụ trách xác nhận lại với mình cho chắc nha ạ.",
+      "mo_ta": "Khách hỏi PHÍ đổi/trả — kịch bản không khai ai chịu phí. Trả phần có dữ liệu (đổi 15 ngày, tem mác) rồi chèn câu này + gắn thẻ để NV chốt phần phí. Khai được phí thì sửa câu này lại cho gọn."
+    }
+  },
+  "prompt": {},
+  "cai_dat": {
+    "_doc": "CÔNG TẮC HÀNH VI. Shop đè được ở kich_ban/<shopId>.json; Sheet KHÔNG đè được. Ở ĐÂY CỐ Ý ĐỂ TRỐNG: chưa khai thì bot lấy từ .env rồi tới mặc định trong mã — shop cũ chạy y như trước. Khai một khoá ở đây là ép giá trị đó cho MỌI shop."
+  },
+  "giong": {
+    "_doc": "VĂN PHONG — CÁCH nói, không phải nói GÌ. Shop đè được ở kich_ban/<shopId>.json. Mọi giá trị dưới đây là HÀNH VI GỐC, khai ra để shop nhìn thấy mà sửa. Đổi ngăn này KHÔNG bao giờ làm sai giá/địa chỉ/đơn — đó là lý do nó an toàn cho shop tự tay chỉnh, khác hẳn so_lieu và cai_dat.",
+    "xung": "em",
+    "goi_khach": "chị",
+    "mo_dau_da": "xen_ke",
+    "_mo_dau_da": "Chữ \"Dạ\" đầu câu: luon = câu nào cũng có (trang trọng) | xen_ke = cách câu một lần (gốc) | khong = bỏ hẳn (khô, gọn).",
+    "emoji": {
+      "muc": "it",
+      "bo": [
+        "💕",
+        "🥰",
+        "😘",
+        "💖",
+        "❤️",
+        "😍",
+        "🌸",
+        "✨"
+      ]
+    },
+    "_emoji": "muc: nhieu = tin nào cũng thả | it = ~2/3 tin (gốc) | khong = tắt hẳn. bo = bộ icon xoay vòng, để trống thì dùng bộ gốc. Câu mẫu KHÔNG có icon thì bot KHÔNG bao giờ tự thêm, bất kể mức nào."
+  }
+}

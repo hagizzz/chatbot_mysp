@@ -1,0 +1,508 @@
+{
+  "nhom": "Nghiệm thu — mỗi kịch bản nhắm một bản vá",
+  "kich_ban": [
+    {
+      "ten": "Đặt thêm mẫu sau khi đã chốt đơn — KHÔNG được xin lại sđt/địa chỉ",
+      "nguon": {
+        "loai": "quang_cao",
+        "adId": "120254257724490550"
+      },
+      "luot": [
+        {
+          "khach": "váy này bao nhiêu tiền em"
+        },
+        {
+          "khach": "chị cao 1m58 nặng 53kg thì mặc size gì"
+        },
+        {
+          "khach": "lấy cho chị 1 cái nhé, 0912345678, 25 Lý Thường Kiệt, Hoàn Kiếm, Hà Nội"
+        },
+        {
+          "cho": 8
+        },
+        {
+          "khach": "tư vấn em mẫu này nữa",
+          "anh": "https://lh3.googleusercontent.com/d/1n-Zd0H34QJL7r3vf1W3L658RUfx1k5Qy=w1000"
+        },
+        {
+          "cho": 10
+        }
+      ]
+    },
+    {
+      "ten": "Hỏi chính sách liên tiếp — rào 37 nhãn câu hỏi",
+      "nguon": {
+        "loai": "quang_cao",
+        "adId": "120249331667250373"
+      },
+      "luot": [
+        {
+          "khach": "váy này bao nhiêu tiền"
+        },
+        {
+          "cho": 8
+        },
+        {
+          "khach": "shop cho đổi trả trong bao lâu ạ"
+        },
+        {
+          "cho": 8
+        },
+        {
+          "khach": "shop có cho kiểm hàng k ạ"
+        },
+        {
+          "cho": 8
+        },
+        {
+          "khach": "váy này giặt máy được không em"
+        },
+        {
+          "cho": 8
+        }
+      ]
+    },
+    {
+      "ten": "Hỏi lại cùng một câu — sổ chống-trùng không được nuốt",
+      "nguon": {
+        "loai": "quang_cao",
+        "adId": "120254257724490550"
+      },
+      "luot": [
+        {
+          "khach": "ship free không em"
+        },
+        {
+          "cho": 10
+        },
+        {
+          "khach": "chị hỏi lại, đặt 2 cái thì miễn ship cả 2 chứ"
+        },
+        {
+          "cho": 10
+        }
+      ]
+    },
+    {
+      "ten": "Giục gấp -> thẻ 185, rồi vẫn hỏi mẫu khác",
+      "nguon": {
+        "loai": "quang_cao",
+        "adId": "120254257724490550"
+      },
+      "luot": [
+        {
+          "khach": "váy này bao nhiêu"
+        },
+        {
+          "cho": 8
+        },
+        {
+          "khach": "gửi sớm cho em nhé shop, e cần gấp"
+        },
+        {
+          "cho": 8
+        },
+        {
+          "khach": "tư vấn em mẫu này với",
+          "anh": "https://lh3.googleusercontent.com/d/1M2O2-kWpCOGBWoXJnAxvlAZuuUd7eU50=w1000"
+        },
+        {
+          "cho": 12
+        }
+      ]
+    },
+    {
+      "ten": "Số đo gõ tắt — không được hỏi lại thứ khách vừa đưa",
+      "nguon": {
+        "loai": "quang_cao",
+        "adId": "120249331667250373"
+      },
+      "luot": [
+        {
+          "khach": "e cao m6, nặng 53kg thì size gì ạ"
+        },
+        {
+          "cho": 10
+        },
+        {
+          "khach": "thế còn 1m58 45kg thì sao"
+        },
+        {
+          "cho": 10
+        }
+      ]
+    },
+    {
+      "ten": "Gửi ảnh mẫu giữa lúc bot đang xin địa chỉ",
+      "nguon": {
+        "loai": "quang_cao",
+        "adId": "120254257724490550"
+      },
+      "luot": [
+        {
+          "khach": "váy này bao nhiêu"
+        },
+        {
+          "cho": 8
+        },
+        {
+          "khach": "size M nhé"
+        },
+        {
+          "cho": 8
+        },
+        {
+          "khach": "tư vấn em mẫu này với",
+          "anh": "https://lh3.googleusercontent.com/d/1L1W_jgT3ifFI9W8ZTMkIPWGS9lKdiVfV=w1000"
+        },
+        {
+          "cho": 12
+        }
+      ]
+    },
+    {
+      "ten": "Địa chỉ dính câu chat — không được nuốt vào địa chỉ",
+      "nguon": {
+        "loai": "quang_cao",
+        "adId": "120254257724490550"
+      },
+      "luot": [
+        {
+          "khach": "váy này bao nhiêu"
+        },
+        {
+          "cho": 8
+        },
+        {
+          "khach": "size M, 0912345678"
+        },
+        {
+          "cho": 8
+        },
+        {
+          "khach": "thứ 3 chị cần mặc, 15 ngõ 20 Trần Duy Hưng, Cầu Giấy, Hà Nội"
+        },
+        {
+          "cho": 12
+        }
+      ]
+    },
+    {
+      "ten": "Gửi nhiều ảnh cùng lúc — tiêu chí 11, phải trả lời đủ",
+      "nguon": {
+        "loai": "nhan_thang"
+      },
+      "luot": [
+        {
+          "khach": "tư vấn em mấy mẫu này",
+          "anh": "https://lh3.googleusercontent.com/d/1GloHgGwdWO3EiZJpw4jeSwkgS6v7Kdt-=w1000"
+        },
+        {
+          "anh": "https://lh3.googleusercontent.com/d/1M2O2-kWpCOGBWoXJnAxvlAZuuUd7eU50=w1000"
+        },
+        {
+          "anh": "https://lh3.googleusercontent.com/d/1L1W_jgT3ifFI9W8ZTMkIPWGS9lKdiVfV=w1000"
+        },
+        {
+          "cho": 15
+        }
+      ]
+    },
+    {
+      "ten": "Từ bình luận -> báo giá -> chốt đủ 4 thông tin",
+      "nguon": {
+        "loai": "binh_luan",
+        "postId": "1555383752809784",
+        "caption": "GIANNAL DRESS — Váy thiết kế tay bồng, chất tơ óng nhẹ, lên dáng cực tôn."
+      },
+      "luot": [
+        {
+          "khach": "váy này bao nhiêu tiền vậy shop"
+        },
+        {
+          "cho": 10
+        },
+        {
+          "khach": "chị 1m60 55kg lấy size nào"
+        },
+        {
+          "cho": 8
+        },
+        {
+          "khach": "ok em, 0987654321, 88 Nguyễn Trãi, Thanh Xuân, Hà Nội"
+        },
+        {
+          "cho": 12
+        }
+      ]
+    },
+    {
+      "ten": "Mấy ca phải nhường người thật — không được tự chế",
+      "nguon": {
+        "loai": "nhan_thang"
+      },
+      "luot": [
+        {
+          "khach": "lần trước chị mua bị lỗi đường chỉ, giờ tính sao đây"
+        },
+        {
+          "cho": 10
+        },
+        {
+          "khach": "chị muốn hoàn tiền"
+        },
+        {
+          "cho": 10
+        }
+      ]
+    },
+    {
+      "ten": "Gỡ thẻ nhưng CHƯA ai trả lời — bot phải vẫn im",
+      "nguon": {
+        "loai": "quang_cao",
+        "adId": "120254257724490550"
+      },
+      "luot": [
+        {
+          "khach": "lần trước chị mua bị lỗi đường chỉ, giờ tính sao đây"
+        },
+        {
+          "cho": 10
+        },
+        {
+          "goThe": 183
+        },
+        {
+          "khach": "alo shop ơi trả lời em với"
+        },
+        {
+          "cho": 12
+        }
+      ]
+    },
+    {
+      "ten": "Nhân viên trả lời RỒI gỡ thẻ — bot mới được nhận lại",
+      "nguon": {
+        "loai": "quang_cao",
+        "adId": "120254257724490550"
+      },
+      "luot": [
+        {
+          "khach": "lần trước chị mua bị lỗi đường chỉ, giờ tính sao đây"
+        },
+        {
+          "cho": 10
+        },
+        {
+          "nhanVien": "Dạ chị cho em xin mã đơn để em kiểm tra giúp mình nha"
+        },
+        {
+          "goThe": 183
+        },
+        {
+          "khach": "váy này bao nhiêu tiền em"
+        },
+        {
+          "cho": 12
+        }
+      ]
+    },
+    {
+      "ten": "Địa chỉ KHÔNG được nuốt câu 'gửi gấp cho e set này'",
+      "nguon": {
+        "loai": "quang_cao",
+        "adId": "120254257724490550"
+      },
+      "luot": [
+        {
+          "khach": "váy này bao nhiêu"
+        },
+        {
+          "cho": 8
+        },
+        {
+          "khach": "size M, 0912345678, Thanh Xuân, Hà Nội"
+        },
+        {
+          "cho": 10
+        },
+        {
+          "khach": "thế gửi gấp cho e set này nha"
+        },
+        {
+          "cho": 10
+        }
+      ]
+    },
+    {
+      "ten": "Câu báo giá + size + liên hệ phải tách thành nhiều tin",
+      "nguon": {
+        "loai": "quang_cao",
+        "adId": "120249331667250373"
+      },
+      "luot": [
+        {
+          "khach": "váy này bao nhiêu tiền"
+        },
+        {
+          "cho": 8
+        },
+        {
+          "khach": "chị 1m58 53kg, 0912345678, 25 Lý Thường Kiệt, Hoàn Kiếm, Hà Nội"
+        },
+        {
+          "cho": 14
+        }
+      ]
+    },
+    {
+      "ten": "Khách đổi ý sang mẫu khác giữa chừng",
+      "nguon": {
+        "loai": "quang_cao",
+        "adId": "120254257724490550"
+      },
+      "luot": [
+        {
+          "khach": "váy này bao nhiêu"
+        },
+        {
+          "cho": 8
+        },
+        {
+          "khach": "thôi chị thích mẫu này hơn",
+          "anh": "https://lh3.googleusercontent.com/d/1L1W_jgT3ifFI9W8ZTMkIPWGS9lKdiVfV=w1000"
+        },
+        {
+          "cho": 12
+        },
+        {
+          "khach": "mẫu này size M được không"
+        },
+        {
+          "cho": 10
+        }
+      ]
+    },
+    {
+      "ten": "Khách gõ tắt, không dấu",
+      "nguon": {
+        "loai": "nhan_thang"
+      },
+      "luot": [
+        {
+          "khach": "sp nay bn v shop"
+        },
+        {
+          "cho": 10
+        },
+        {
+          "khach": "co size L k a"
+        },
+        {
+          "cho": 10
+        }
+      ]
+    },
+    {
+      "ten": "Gọi tên mẫu nhưng gõ sai chính tả",
+      "nguon": {
+        "loai": "nhan_thang"
+      },
+      "luot": [
+        {
+          "khach": "giá thiết kế Alisse bao nhiêu ạ"
+        },
+        {
+          "cho": 12
+        },
+        {
+          "khach": "còn mẫu Gianal nữa"
+        },
+        {
+          "cho": 12
+        }
+      ]
+    },
+    {
+      "ten": "Hỏi đi hỏi lại cùng chủ đề — không được im",
+      "nguon": {
+        "loai": "quang_cao",
+        "adId": "120254257724490550"
+      },
+      "luot": [
+        {
+          "khach": "ship free không em"
+        },
+        {
+          "cho": 10
+        },
+        {
+          "khach": "thật không đấy, có mất phí gì thêm không"
+        },
+        {
+          "cho": 10
+        },
+        {
+          "khach": "thế đặt 2 cái miễn ship cả 2 chứ"
+        },
+        {
+          "cho": 10
+        }
+      ]
+    },
+    {
+      "ten": "Khách cáu giận — phải nhường người thật, không cãi",
+      "nguon": {
+        "loai": "quang_cao",
+        "adId": "120254257724490550"
+      },
+      "luot": [
+        {
+          "khach": "váy này bao nhiêu"
+        },
+        {
+          "cho": 8
+        },
+        {
+          "khach": "sao đắt thế, shop chém à"
+        },
+        {
+          "cho": 10
+        },
+        {
+          "khach": "tư vấn kiểu gì vậy, bực mình"
+        },
+        {
+          "cho": 10
+        }
+      ]
+    },
+    {
+      "ten": "Chốt đơn thiếu thông tin — không được lên đơn nửa vời",
+      "nguon": {
+        "loai": "quang_cao",
+        "adId": "120249331667250373"
+      },
+      "luot": [
+        {
+          "khach": "váy này bao nhiêu"
+        },
+        {
+          "cho": 8
+        },
+        {
+          "khach": "lấy cho chị 1 cái"
+        },
+        {
+          "cho": 10
+        },
+        {
+          "khach": "0912345678"
+        },
+        {
+          "cho": 10
+        }
+      ]
+    }
+  ]
+}

@@ -63,33 +63,73 @@ Kế hoạch dưới đây viết theo **đội 2 người, 14 tuần**.
 
 ## 3. Đối chiếu yêu cầu ↔ hiện trạng
 
+> Bản gốc yêu cầu: `docs/Yeu-cau-tinh-nang-Chatbot-MYS.pdf` (bản chữ đã bóc:
+> `docs/YEU_CAU_TINH_NANG.txt` — grep được).
+>
+> **Cập nhật 24/08/2026** sau đợt chạy thử trên page THẬT. Mấy dòng có dấu ✳ là
+> đã đổi trạng thái so với bản 19/08, kèm bằng chứng đo được chứ không phải suy đoán.
+
 | Mục trong PDF | Hiện trạng | Trạng thái | Xử lý ở |
 |---|---|---|---|
 | 2. Nguyên tắc không được phá | Đã bám sát: chắc mới trả lời, không bịa, bám 1 sản phẩm, không hỏi lại, chốt đủ 4 thông tin, giao người thật ở ca nhạy cảm | **Có** | Giữ, biến thành bộ test |
 | 3.1 Hiểu đúng ý khách (3 bước) | Đủ 3 tầng, AI chỉ nhả nhãn cố định | **Có** | — |
 | 3.2 Nhớ thông tin khách | Có, nhưng lưu bằng file JSON toàn phần | **Một phần** | GĐ0 |
 | 3.3 Ngừng khi có thẻ chờ xử lý | Có (thẻ 183/185/166/177) | **Có** | — |
-| 3.4 Nhận diện ảnh | Có CLIP + hash + OCR; **chưa từng đo độ chính xác** trên ảnh cắt/chụp màn hình/mờ | **Một phần** | GĐ1 |
-| 3.5 Nhận diện nguồn tin | Nhận được nguồn; **chưa có ký hiệu nguồn hiển thị cho nhân viên** | **Một phần** | GĐ1 |
+| 3.4 Nhận diện ảnh ✳ | CLIP + hash + OCR. **Đã đo trên page thật 24/08**: trúng 0.9945 / 0.9858 / 0.9956 với ảnh khách gửi; trượt 1 ca `LOW_CONFIDENCE` (0.8943, cách nhau 0.016 giữa 3 mẫu) → bot im + giao người, đúng nguyên tắc. Index vừa bổ sung **292 ảnh / 35 mã** (14.948 → 15.221), dọn 19 ảnh chết | **Một phần** | Còn thiếu: đo có hệ thống trên ảnh cắt/chụp màn hình/mờ (GĐ1) |
+| 3.5 Nhận diện nguồn tin ✳ | **XONG**. `nguon_hoi_thoai.js` ghi 🎯 TỪ QUẢNG CÁO / 💬 TỪ BÌNH LUẬN / ✉️ NHẮN THẲNG vào ô ghi chú Pancake. Đo 24/08 và **vá 2 lỗi**: (a) mọi khách bình luận bị dán nhãn quảng cáo — nhãn `TỪ BÌNH LUẬN` chưa từng xuất hiện lần nào; (b) ghi chú lặp 13 dòng cho một hội thoại. Sau vá: 2 quảng cáo / 2 bình luận / 1 nhắn thẳng, mỗi hội thoại 1 dòng | **Có** | — |
 | 3.6 Báo giá & tư vấn size | Có | **Có** | — |
 | 3.7 Xử lý địa chỉ | Có, khớp danh mục vận chuyển | **Có** | — |
 | 3.8 Lên đơn tự động | Có, tín hiệu chốt = gắn thẻ "AI chốt" | **Có** | Chuẩn hoá thành sự kiện ở GĐ2 |
-| 3.9 Không làm chậm nhau | Xử lý tuần tự 5 hội thoại/nhịp | **Chưa** | GĐ1 |
+| 3.9 Không làm chậm nhau ✳ | Có `SONG_SONG=<n>` chỉnh mức chạy song song (đặt 1 khi chạy thử cho log dễ đọc). Đo độ trễ thật: **12–15 giây** từ lúc khách nhắn tới lúc bot trả. Ba tầng AI chạy **nối tiếp** (không `Promise.all`), cộng ~10 giây delay cố ý rải ở 19 chỗ | **Một phần** | Rút ngắn độ trễ: GĐ1 |
 | 4.1 Size từ số đo + lịch sử mua | Chỉ có bảng size theo cân nặng | **Chưa** | GĐ5 |
 | 4.2 Giảm tỷ lệ hoàn | Không có dữ liệu hoàn | **Chưa** | GĐ5 |
 | 4.3 Nhận ra khách quen | Không có hồ sơ khách | **Chưa** | GĐ5 |
 | 4.4 Ảnh thật của khách đã mua | Không có kho ảnh feedback | **Chưa** | GĐ5 |
-| 4.5 Nhắc lại khách bỏ giữa chừng | Có cơ chế nhắc 15 giây/2 giờ nhưng **gắn cứng trong code**, shop không cấu hình được | **Một phần** | GĐ5 |
-| 5. Nơi đặt câu lệnh & kịch bản | 1 Google Doc + 1 tab Sheet dùng chung; không phiên bản, không quay lui, không sandbox | **Một phần** | GĐ2 + GĐ3 |
+| 4.5 Nhắc lại khách bỏ giữa chừng | Cơ chế nhắc 15 giây / 2 giờ vẫn **gắn cứng** (`FOLLOWUP_DELAY_MS`, stage 1/2). Shop chưa bật tắt, chưa tự đặt thời điểm/nội dung/số lần | **Một phần** | GĐ5 |
+| 5. Nơi đặt câu lệnh & kịch bản ✳ | Đã có `kho_kich_ban.js` — 4 tầng (Sheet › shop › gốc › phom code), **23 khoá** đã rút, có lưới chặn câu cụt (`vetTruocKhiGui`). Còn **~535 câu viết cứng** trong lõi. Chưa có: phiên bản/quay lui, chỗ thử nghiệm | **Một phần** | GĐ2 + GĐ3 |
 | 6. Thẻ hội thoại | ID thẻ gắn cứng; shop không tự tạo/dạy bot gắn thẻ được | **Chưa** | GĐ4 |
 | 7. Xác nhận chuyển khoản | Mọi ca chuyển khoản đều giao người thật | **Chưa** | GĐ6 |
 | 8. Kết nối hệ thống của Hoà | Chưa có hợp đồng API | **Chưa** | GĐ0 (chốt) → GĐ4/6 |
-| 9.1 Tách dữ liệu theo shop | Không có khái niệm shop | **Chưa** | GĐ2 |
+| 9.1 Tách dữ liệu theo shop ✳ | Đã có `SHOP_ID` (70 điểm dùng): CSDL riêng, kho kịch bản riêng `kich_ban/<shopId>.json`, sổ log lượt riêng. **Chưa** có rào chặn thật sự giữa các shop | **Một phần** | GĐ2 |
 | 9.2 Shop mới tự bắt đầu | Không | **Chưa** | GĐ3 + GĐ7 |
 | 9.3 Bật tắt theo shop/Page + hạn mức dùng thử | Không | **Chưa** | GĐ3 |
 | 9.4 Thống kê giá trị bot | Không | **Chưa** | GĐ6 |
-| 9.5 Chi phí AI theo shop | Không | **Chưa** | GĐ6 |
-| 10. Chế độ bán tự động | Không | **Chưa** | GĐ4 |
+| 9.5 Chi phí AI theo shop ✳ | Đã có `docs/CHI_PHI.md` + `turnLog.ai()` ghi model từng lượt. Chưa có hạn mức chặn khi vượt ngưỡng | **Một phần** | GĐ6 |
+| 10. Chế độ bán tự động ✳ | `adapter_hoa.js` đã có cửa `/api/v1/suggestions` (gợi ý, bot không tự gửi) chạy với dữ liệu giả. Chưa nối hệ thống thật, chưa có 2–3 phương án thật | **Một phần** | GĐ4 |
+
+
+### 3b. Nhật ký đối chiếu — 24/08/2026 (chạy thử trên page thật)
+
+Sáu lỗi tìm được **nhờ chạy thật**, không lỗi nào lộ ra khi chạy giả lập. Mỗi lỗi
+đều vá kèm test canh, để lần sau có trôi thì `npm test` kêu.
+
+| # | Lỗi | Vi phạm mục nào của yêu cầu | Đã vá |
+|---|---|---|---|
+| 1 | Khách bình luận bị dán nhãn 🎯 TỪ QUẢNG CÁO — nhãn 💬 TỪ BÌNH LUẬN chưa từng xuất hiện | 3.5 "mỗi hội thoại phải có ký hiệu rõ ràng cho biết tin đến từ nguồn nào" + 9.4 (số đo hiệu quả quảng cáo bị thổi lên bằng khách tự nhiên) | ✅ nhãn chỉ tin bằng chứng ad thật (`conversation.ads`/`ad_ids`), không tin cờ suy diễn của reader |
+| 2 | Ô ghi chú Pancake bị ghi lặp **13 dòng** giống hệt trong ~40 giây | 3.5 (nhân viên nhìn vào phải biết ngay, không phải lội qua rác) | ✅ lưu cờ chống-lặp ngay khi ghi |
+| 3 | Khách đưa "cao m6, nặng 53kg" → bot hỏi lại đúng chiều cao cân nặng | **Nguyên tắc 4** "đã có trong lịch sử thì tuyệt đối không hỏi lại" | ✅ thêm LUẬT SỐ ĐO vào prompt AI-QUYẾT + nới bộ dò chiều cao bắt dạng gõ tắt `m6` |
+| 4 | "tư vấn e mẫu này nữa" bị đọc thành `ORDER_CLOSE` → bot giục xin số điện thoại lên đơn | 3.1 (đọc đúng ý) + nguyên tắc 5 (chỉ chốt khi đủ 4 thông tin **và khách đồng ý mua**) | ✅ dạy prompt: ĐỘNG TỪ quyết định, không phải chữ "nữa"/"thêm" |
+| 5 | Sổ chống-trùng nuốt câu trả lời cho câu hỏi MỚI của khách → hội thoại treo hẳn, mỗi vòng poll lại nuốt tiếp | 3.4 "khách gửi nhiều ảnh cùng lúc vẫn phải trả lời đủ, **không được im lặng**" | ✅ cho qua khi tin khách mới hơn lần gửi cũ; bot tự lặp trong cùng lượt vẫn chặn |
+| 6 | Hỏi "đổi trả trong bao lâu" bị cổng HẬU MÃI nuốt, dù `buildReturnPolicyReply()` có sẵn câu | 3.1 (đọc đúng ý) | ✅ `isPolicyQuestion` nhận thêm câu hỏi THỜI HẠN; ca hậu mãi thật vẫn nhường người |
+
+Hai lỗi hạ tầng của **bộ đồ thử**, không phải của bot — nhưng đã làm chẩn đoán sai hai lần:
+
+- Khung giả lập ghi cứng `ads: []` / `ad_ids: []` → chuỗi 6 tầng suy ra mẫu từ quảng cáo
+  và đường đọc caption bài viết **chưa từng chạy lần nào**. Mọi kịch bản đều thành "khách
+  nhắn thẳng" — đúng cảnh duy nhất bot không thể biết mẫu. Đã dựng được đường vào, có test canh.
+- `WATCH_IDS` khai cả 30 hội thoại giả → mỗi vòng poll đọc tin 30 lần chỉ để in log
+  (`[REQ] 38 request/10s`), kịch bản hết 50 giây chờ mà bot chưa tới lượt → bản ghi kết
+  luận "bot câm hoàn toàn". Đã tắt.
+
+**Việc còn treo, cần phía kinh doanh:**
+
+| Việc | Chặn cái gì |
+|---|---|
+| `FB_ADS_TOKEN` hết hạn từ **18/07** (hơn 5 tuần, 4 tài khoản đọc về 0 ads) | Bản đồ tự học ad→mẫu đứng im. Khách bấm quảng cáo MỚI thì bot không tra được mẫu → hỏng đúng tiêu chí 11 "nhận ra đúng mẫu khi khách đến từ quảng cáo" |
+| Cột P (chất liệu) trong Sheet còn trống ở nhiều mã | Khách hỏi "váy này vải gì" → bot không bịa, gắn thẻ rồi im |
+| Mã `MRQN553` có ảnh trên Drive nhưng chưa có dòng trong Sheet | Bot nhận ra ảnh mà không biết tên/giá |
+| 11 tệp ảnh trên Drive tên không bắt đầu bằng mã | Script đồng bộ bỏ qua lặng lẽ |
+| Quy tắc miễn ship khi khách đặt **nhiều** sản phẩm | Câu trả lời hiện là số ít ("mẫu này"), không trả lời được "cả 2 có miễn không" |
 
 ---
 

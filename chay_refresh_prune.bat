@@ -17,9 +17,9 @@ echo Da sao luu (.bak).
 echo.
 
 echo ============================================================
-echo   DANG CHAY refresh_names.py --prune ...
+echo   DANG CHAY python\refresh_names.py --prune ...
 echo ============================================================
-python refresh_names.py --prune
+python python\refresh_names.py --prune
 if errorlevel 1 (
   echo.
   echo [LOI] Chay that bai. Kiem tra: da cai thu vien chua?

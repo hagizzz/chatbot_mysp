@@ -1,8 +1,28 @@
 require("./env_boot");   // nạp .env theo BOT_ENV (thật/thử) — phải ở dòng đầu
-const turnLog = require("./turn_log");   // log có cấu trúc mỗi lượt (nền cho mục 9.4 + 9.5)
-const dieuTiet = require("./dieu_tiet");   // [GĐ1] chạy song song theo hội thoại + giữ nhịp gọi Pancake
-const nguonHoiThoai = require("./nguon_hoi_thoai");   // [GĐ1 · mục 3.5] ký hiệu nguồn: quảng cáo / bình luận / nhắn thẳng
-const giamSat = require("./giam_sat");   // [GĐ1] canh bot đứng hình / im lặng / lỗi dày
+
+// ===== CHỈ MỘT BOT CHẠY MỖI LẦN =============================================
+// Hai tiến trình cùng sống = khách nhận TIN ĐÔI. Đo thật 26/08/2026 (ca Hà
+// Giang): khởi động lại giữa lúc một lượt đang chạy dở -> khách nhận hai câu
+// xin số điện thoại cách nhau 6 giây. Sổ chống trùng KHÔNG bắt được vì AI soạn
+// lại mỗi lần một chữ khác. Xem khoá đầy đủ trong khoa_tien_trinh.js.
+//
+// Đặt ở NGAY DÒNG SAU env_boot: phải chặn TRƯỚC khi nạp vision (12 giây, ngốn
+// RAM) và trước mọi lời gọi Pancake.
+const _khoa = require("./loi/tien_ich/khoa_tien_trinh");
+{
+  const _kq = _khoa.giu({ ep: process.argv.includes("--ep-khoa"), ten: "bot_worker_api_v3" });
+  if (!_kq.ok) { console.log(_khoa.loiChan(_kq.chu)); process.exit(1); }
+  // Nhả khoá ở mọi đường thoát BÌNH THƯỜNG. Bị giết cứng (taskkill /F) thì không
+  // chạy được gì — nhưng khoá đó tự thành khoá cũ, lần sau conSong() dọn giúp.
+  process.on("exit", () => _khoa.nha());
+  for (const tin of ["SIGINT", "SIGTERM", "SIGHUP", "SIGBREAK"]) {
+    try { process.on(tin, () => { _khoa.nha(); process.exit(0); }); } catch (_) {}
+  }
+}
+const turnLog = require("./loi/tien_ich/turn_log");   // log có cấu trúc mỗi lượt (nền cho mục 9.4 + 9.5)
+const dieuTiet = require("./loi/tien_ich/dieu_tiet");   // [GĐ1] chạy song song theo hội thoại + giữ nhịp gọi Pancake
+const nguonHoiThoai = require("./loi/bo_nho/nguon_hoi_thoai");   // [GĐ1 · mục 3.5] ký hiệu nguồn: quảng cáo / bình luận / nhắn thẳng
+const giamSat = require("./loi/tien_ich/giam_sat");   // [GĐ1] canh bot đứng hình / im lặng / lỗi dày
 dieuTiet.bocFetch();                       // mọi lời gọi pages.fm tự xếp hàng theo page (chống 429)
 const MAX_MOI_NHIP = Number(process.env.MAX_MOI_NHIP || 30);   // trần số hội thoại xử trong MỘT nhịp poll
 // [CHẠY THỬ] Danh sách trắng hội thoại. Trống = chạy bình thường.
@@ -13,11 +33,112 @@ if (CHI_XU_LY_IDS.size) {
   console.log(`[chạy thử] CHI_XU_LY_IDS: bot CHỈ xử lý ${CHI_XU_LY_IDS.size} hội thoại, bỏ qua tất cả phần còn lại.`);
 }
 
+// ===== BO_QUA_THE_GIU — CHỈ DÙNG KHI CHẠY THỬ SONG SONG VỚI MỘT BOT KHÁC =====
+// Hoàn cảnh (26/08/2026): page PHOM đã có một bản bot khác chạy sẵn ở máy khác.
+// Hai bot cùng đọc một hội thoại thì bot nào cũng trả lời -> khách nhận tin đúp.
+// Cách tách: gắn THẺ GIỮ lên hội thoại thử. Bot kia thấy thẻ giữ -> dừng hẳn
+// (đúng luật "cần người thật thì bot không làm gì tiếp"). Còn bot chạy thử ở
+// đây được phép bỏ qua thẻ đó -> chỉ MỘT bot trả lời khách.
+//
+// HAI KHOÁ AN TOÀN, phải thoả CẢ HAI mới bỏ qua được:
+//   1. BO_QUA_THE_GIU bật, VÀ
+//   2. CHI_XU_LY_IDS có giá trị (tức đang chạy thử, bot chỉ đụng vài hội thoại khai sẵn)
+// Khoá thứ hai là quan trọng nhất: bản THẬT không bao giờ khai CHI_XU_LY_IDS,
+// nên dù ai đó lỡ để BO_QUA_THE_GIU=on trong .env thật thì cờ này vẫn TẮT.
+// Không có khoá đó, một dòng .env gõ nhầm là bot nhảy vào mọi hội thoại nhân
+// viên đang giữ — đúng thứ thẻ giữ sinh ra để ngăn.
+// ===== CHI_XU_LY_KHACH — MỞ HÀNG RÀO THEO KHÁCH, KHÔNG PHẢI THEO HỘI THOẠI =====
+// Khách bình luận vào bài nào là sinh một hội thoại MỚI mang id "POSTID_kháchId".
+// Muốn thử luồng bình luận thì phải khai id đó vào CHI_XU_LY_IDS — mà id chỉ tồn
+// tại SAU khi khách bình luận. Đo thực tế 26/08/2026: mỗi bài mới là một vòng
+// "bình luận -> tra id -> sửa .env -> khởi động lại (3 phút)", trong khi bot bản
+// thật đáp trong 30 giây. Không bao giờ đo được luồng bình luận bằng cách đó.
+//
+// Nay khai MÃ KHÁCH (psid). Vòng quét thấy hội thoại nào của đúng khách đó thì tự
+// thêm id vào danh sách trắng — kể cả bình luận bài mới, không cần khởi động lại.
+//
+// KHOÁ AN TOÀN: chỉ có tác dụng khi CHI_XU_LY_IDS ĐÃ có giá trị. Bản thật không
+// khai CHI_XU_LY_IDS nên cờ này vô hiệu; và không bao giờ có chuyện hàng rào đang
+// TẮT (rào rỗng = chạy thật) tự nhiên BẬT lên giữa chừng khi gặp khách khớp.
+const CHI_XU_LY_KHACH = new Set(
+  String(process.env.CHI_XU_LY_KHACH || "").split(",").map(s => s.trim()).filter(Boolean)
+);
+function _moKhoaTheoKhach(ds) {
+  if (!CHI_XU_LY_IDS.size || !CHI_XU_LY_KHACH.size || !Array.isArray(ds)) return;
+  for (const c of ds) {
+    const id = String((c && c.id) || "");
+    if (!id || CHI_XU_LY_IDS.has(id)) continue;
+    const kid = String((c && c.from && c.from.id) || (c && c.customer_id) || "");
+    if (kid && CHI_XU_LY_KHACH.has(kid)) {
+      CHI_XU_LY_IDS.add(id);
+      console.log(`[chạy thử] CHI_XU_LY_KHACH: nhận thêm hội thoại ${id} (${c.type || "?"}) của khách ${kid} -> tổng ${CHI_XU_LY_IDS.size}.`);
+    }
+  }
+}
+
+const BO_QUA_THE_GIU = CHI_XU_LY_IDS.size > 0
+  && !["", "off", "0", "false", "no", "tat", "khong"].includes(
+       String(process.env.BO_QUA_THE_GIU || "").trim().toLowerCase());
+if (BO_QUA_THE_GIU) {
+  console.log(`[chạy thử] BO_QUA_THE_GIU: bot VẪN xử lý hội thoại đang có thẻ giữ ` +
+              `(chỉ với ${CHI_XU_LY_IDS.size} hội thoại trong CHI_XU_LY_IDS).`);
+}
+
 console.log("[BUILD] patched-2026-07-01: inspect-đuôi-linh-hoạt + regex ktra/đk + nhãn INSPECT_REQUEST/TRYON_REQUEST + price PRICE_OBJECTION 2 câu");
 
-const { getConversations, readConversation, getMessages, normalizeMessages, fetchConversationTags } = require("./pancake_reader");
-const { extractTagIds: _extractTagIds } = require("./conversation_tags");   // đọc thẻ ROBUST (tags/tag_ids/conversation_tags/tag_histories)
-const fbAds = require("./fb_ads");   // đọc creative ad qua Marketing API (vision/caption/mã từ tên)
+// ===== NGUỒN HỘI THOẠI: Pancake hay mfs =====================================
+// Hai module xuất ĐÚNG cùng bộ tên hàm và cùng hình dạng dữ liệu, nên lõi bot
+// bên dưới không cần biết đang chạy trên nguồn nào. Đổi nguồn = đổi một dòng
+// trong .env, không phải sửa mã:
+//     NGUON_TIN=pancake   (mặc định, giữ nguyên hành vi cũ)
+//     NGUON_TIN=mfs       (đọc/gửi/gắn thẻ qua hệ thống mfs)
+const NGUON_TIN = String(process.env.NGUON_TIN || "pancake").toLowerCase();
+const _dungMfs = NGUON_TIN === "mfs";
+// [DỌN 27/08/2026] Bốn mô-đun này chuyển vào loi/. Đây là require ĐỘNG (tên nằm
+// trong biến) nên mọi công cụ dò đường dẫn tự động đều KHÔNG thấy — phải sửa tay.
+const _MO_DUN_READER = _dungMfs ? "./loi/pancake/mfs_reader" : "./loi/pancake/pancake_reader";
+const _MO_DUN_SENDER = _dungMfs ? "./loi/pancake/mfs_sender" : "./loi/pancake/pancake_sender";
+console.log(`[NGUỒN] hội thoại đi qua: ${_dungMfs ? "mfs" : "Pancake"}`);
+
+const { getConversations, readConversation: _readConversationGoc, getMessages, normalizeMessages, fetchConversationTags } = require(_MO_DUN_READER);
+
+// ===== MỐC BỎ QUA TIN CŨ ====================================================
+// Messenger không cho xoá tin nhắn (API Meta lẫn Pancake đều không có đường
+// xoá), nên "reset hội thoại về trắng" phải làm bằng cách CHE: tin cũ hơn mốc
+// coi như không tồn tại. Xem moc_bo_qua.js.
+//
+// BỌC readConversation ngay tại đây thay vì lọc ở từng nơi gọi. Có BA nơi gọi
+// (sweepImageResends, chốt follow-up, vòng xử chính) và bài học ngày 25/08 còn
+// nóng: rào isUrgentSpecificDate ở MỘT trong NĂM nơi gọi, nhánh còn lại vẫn gắn
+// thẻ 185 y như cũ. Một cửa thì không sót được.
+//
+// Tên gốc đã đổi thành _readConversationGoc -> mọi `readConversation(` trong
+// tệp này bắt buộc đi qua bộ lọc. Có test khoá lại chuyện đó.
+// [DỌN 27/08/2026] PHẢI ghi rõ "./loi/". Bỏ "loi/" thì require KHÔNG lỗi — Node
+// thử .js không thấy rồi lấy luôn moc_bo_qua.JSON (tệp dữ liệu cùng tên ở gốc).
+// _mocBoQua thành một object dữ liệu, _mocBoQua.moc() là undefined, và cả lượt
+// xử lý chết lặng ngay trong readConversation: không câu trả lời, không thẻ,
+// không một dòng lỗi nào. Mất một giờ mới truy ra.
+const _mocBoQua = require("./loi/bo_nho/moc_bo_qua");
+async function readConversation(conversationId, convMeta) {
+  const data = await _readConversationGoc(conversationId, convMeta);
+  const moc = _mocBoQua.moc(conversationId);
+  if (!moc || !data || !Array.isArray(data.messages) || !data.messages.length) return data;
+  const truoc = data.messages.length;
+  // Tin KHÔNG có dấu thời gian thì GIỮ. Chiều hỏng an toàn là "bot thấy nhiều
+  // hơn" (chạy như trước khi có mốc), không phải "bot mù mất một tin khách".
+  data.messages = data.messages.filter(m => {
+    const t = parseTime(m && m.insertedAt);
+    return !t || t >= moc;
+  });
+  const bo = truoc - data.messages.length;
+  if (bo && logThrottle("mocboqua_" + conversationId, 60000)) {
+    console.log(`[${BOT_NAME}] Mốc bỏ qua ${new Date(moc).toISOString()} -> giấu ${bo}/${truoc} tin cũ khỏi bot. Conv: ${conversationId}`);
+  }
+  return data;
+}
+const { extractTagIds: _extractTagIds } = require("./loi/pancake/conversation_tags");   // đọc thẻ ROBUST (tags/tag_ids/conversation_tags/tag_histories)
+const fbAds = require("./loi/tien_ich/fb_ads");   // đọc creative ad qua Marketing API (vision/caption/mã từ tên)
 const _watchReadAt = new Map();   // throttle đọc tin cho [THEO DÕI] (60s/id)
 
 // ===== [WEBHOOK] kéo conv_id tin mới từ server nhận webhook (Pancake đẩy real-time) =====
@@ -38,10 +159,66 @@ async function pullWebhookIds() {
     return Array.isArray(j.ids) ? j.ids.map(String).filter(Boolean) : [];
   } catch (e) { return []; }
 }
-const { getAgentRuleMap } = require("./knowledge_loader");
-const { sendInboxMessage: _sendInboxMessage, replyComment: _replyComment, sendPrivateReply: _sendPrivateReply, sendInboxImages: _sendInboxImages, sendInboxContentIds: _sendInboxContentIds, sendInboxImageUrl: _sendInboxImageUrl, sendInboxImageUrls: _sendInboxImageUrls, sendInboxMessageWithImages: _sendInboxMessageWithImages, tagChoXuLyVaUnread, tagXuLyAnh, tagXuLyAnhVaUnread, untagXuLyAnh, tagDonUuTienVaUnread, tagGuiDonGap, tagAiChot: _tagAiChotGoc, addConversationNote, delay } = require("./pancake_sender");
+const { getAgentRuleMap } = require("./loi/ai/knowledge_loader");
+// ===== HÀNG RÀO CHI_XU_LY_IDS — ĐẶT NGAY CỬA RA =============================
+// Page này đang sống: 240 hội thoại, khách nhắn liên tục, nhân viên trả lời tay.
+// CHI_XU_LY_IDS là hàng rào duy nhất giữ bot khỏi 239 khách còn lại.
+//
+// TRƯỚC 26/08/2026 hàng rào chỉ có ở HAI chỗ, cả hai đều trong vòng phân phối:
+// gạn danh sách hội thoại (dòng ~13555) và gạn id webhook (~13587). Nghĩa là an
+// toàn nhờ SUY LUẬN BẮC CẦU: "mọi thứ gửi tin đều được nạp từ vòng đã gạn".
+// Suy luận đó đúng ở bản hiện tại, nhưng nó dựa vào việc không ai thêm một
+// nguồn gửi mới — mà bot có sẵn HAI vòng quét chạy ngoài vòng phân phối
+// (sweepImageResends, quét follow-up) và 276 điểm gọi hàm gửi.
+//
+// Đây đúng loại lỗi đã cắn ngày 25/08: rào isUrgentSpecificDate ở MỘT trong NĂM
+// nơi gọi, bốn nhánh còn lại chạy y như cũ. Ở đây giá của một lần sót không phải
+// một cái thẻ sai — mà là bot nhắn vào mặt khách thật.
+//
+// Nên rào lại đặt Ở CỬA RA: mọi hàm gửi tin / gắn thẻ / ghi chú đều đi qua bộ
+// bọc dưới đây. Muốn lách phải require thẳng ./pancake_sender — có test chặn.
+const _SENDER = require(_MO_DUN_SENDER);
 
-const hangDoiDon = require("./hang_doi_don");
+function _ngoaiDanhSachTrang(target) {
+  if (!CHI_XU_LY_IDS.size) return false;           // không khai -> chạy thật, không rào
+  return !CHI_XU_LY_IDS.has(String(target || ""));
+}
+const _daCanhBaoChan = new Set();
+function _bocRaCuaRa(ten, fn) {
+  if (typeof fn !== "function") return fn;
+  return async function (target, ...con) {
+    if (_ngoaiDanhSachTrang(target)) {
+      // In MỘT lần cho mỗi (hàm, hội thoại): chặn đúng thì log này không được
+      // phình, nhưng phải có — im lặng thì không ai biết rào vừa cứu một bàn.
+      const k = ten + "|" + String(target);
+      if (!_daCanhBaoChan.has(k)) {
+        _daCanhBaoChan.add(k);
+        console.log(`  [RÀO CHẠY THỬ] CHẶN ${ten} tới ${target} — KHÔNG nằm trong CHI_XU_LY_IDS.`);
+      }
+      return { success: true, skipped: "NGOAI_DANH_SACH_TRANG" };
+    }
+    return fn.apply(_SENDER, [target, ...con]);
+  };
+}
+const _sendInboxMessage            = _bocRaCuaRa("sendInboxMessage", _SENDER.sendInboxMessage);
+const _replyComment                = _bocRaCuaRa("replyComment", _SENDER.replyComment);
+const _sendPrivateReply            = _bocRaCuaRa("sendPrivateReply", _SENDER.sendPrivateReply);
+const _sendInboxImages             = _bocRaCuaRa("sendInboxImages", _SENDER.sendInboxImages);
+const _sendInboxContentIds         = _bocRaCuaRa("sendInboxContentIds", _SENDER.sendInboxContentIds);
+const _sendInboxImageUrl           = _bocRaCuaRa("sendInboxImageUrl", _SENDER.sendInboxImageUrl);
+const _sendInboxImageUrls          = _bocRaCuaRa("sendInboxImageUrls", _SENDER.sendInboxImageUrls);
+const _sendInboxMessageWithImages  = _bocRaCuaRa("sendInboxMessageWithImages", _SENDER.sendInboxMessageWithImages);
+const tagChoXuLyVaUnread           = _bocRaCuaRa("tagChoXuLyVaUnread", _SENDER.tagChoXuLyVaUnread);
+const tagXuLyAnh                   = _bocRaCuaRa("tagXuLyAnh", _SENDER.tagXuLyAnh);
+const tagXuLyAnhVaUnread           = _bocRaCuaRa("tagXuLyAnhVaUnread", _SENDER.tagXuLyAnhVaUnread);
+const untagXuLyAnh                 = _bocRaCuaRa("untagXuLyAnh", _SENDER.untagXuLyAnh);
+const tagDonUuTienVaUnread         = _bocRaCuaRa("tagDonUuTienVaUnread", _SENDER.tagDonUuTienVaUnread);
+const tagGuiDonGap                 = _bocRaCuaRa("tagGuiDonGap", _SENDER.tagGuiDonGap);
+const _tagAiChotGoc                = _bocRaCuaRa("tagAiChot", _SENDER.tagAiChot);
+const addConversationNote          = _bocRaCuaRa("addConversationNote", _SENDER.addConversationNote);
+const delay = _SENDER.delay;   // KHÔNG bọc: không nhận conversationId, chỉ là chờ.
+
+const hangDoiDon = require("./loi/don/hang_doi_don");
 
 // ---------------------------------------------------------------------------
 // "Hội thoại này chốt rồi" — báo cho order_worker.
@@ -53,7 +230,7 @@ const hangDoiDon = require("./hang_doi_don");
 // ---------------------------------------------------------------------------
 async function tagAiChot(conversationId) {
   try {
-    const pageId = require("./page_registry").pageIdFromConv(conversationId)
+    const pageId = require("./loi/pancake/page_registry").pageIdFromConv(conversationId)
       || String(conversationId).split("_")[0];
     hangDoiDon.them(conversationId, { pageId });
   } catch (e) {
@@ -80,12 +257,17 @@ function rememberSentId(res) {
 // Bớt "Dạ" đầu câu cho đỡ robot: đang nói chuyện liên tục nên cách câu mới mở "Dạ",
 // còn lại vào thẳng nội dung (vẫn lịch sự). Áp tự động cho mọi tin gửi đi.
 const _daCounter = new Map();
+// [TÁCH GIỌNG 27/08/2026] Luật này trước đây viết cứng -> mọi shop nói cùng một
+// kiểu, shop thứ hai muốn khác phải sửa mã. Nay đọc từ ngăn "giong" của kho.
+// Mặc định "xen_ke" = ĐÚNG hành vi cũ, nên shop chưa khai gì thì không đổi gì.
 function maybeDropDa(target, text) {
   const s = String(text || "");
   if (!/^Dạ\s/i.test(s)) return s;
+  const kieu = String(KB.giong("mo_dau_da", "xen_ke")).toLowerCase();
+  if (kieu === "luon") return s;           // shop trang trọng: câu nào cũng "Dạ"
   const n = (_daCounter.get(target) || 0) + 1;
   _daCounter.set(target, n);
-  if (n % 2 === 0) {                       // ~ một nửa số câu bỏ "Dạ"
+  if (kieu === "khong" || n % 2 === 0) {   // bỏ hẳn, hoặc ~ một nửa số câu bỏ "Dạ"
     const rest = s.replace(/^Dạ\s+/i, "");
     return rest ? rest.charAt(0).toUpperCase() + rest.slice(1) : s;
   }
@@ -161,22 +343,39 @@ function _luot() {
 // ===== ICON LINH HOẠT: xoay vòng nhiều icon ấm (không phải lúc nào cũng), và để THƯA cho đỡ nhàm =====
 // Chỉ thêm icon nếu câu GỐC vốn có icon (giữ đúng ý câu nào cần / không cần). Đếm theo từng hội thoại.
 const _heartCtr = new Map();
-const _WARM_EMOJIS = ["", "", "", "", "", "", ""];
+// Bộ icon ấm MẶC ĐỊNH.
+// [SỬA 27/08/2026] Mảng cũ là BẢY CHUỖI RỖNG — emoji đã bay mất trong một lần lưu
+// tệp sai bảng mã, nên "icon linh hoạt" chết âm thầm không biết từ bao giờ: không
+// thêm icon nào, mà mỗi tin lại bị đính thêm một DẤU CÁCH thừa ở cuối. Bộ lọc bỏ
+// icon cũng hỏng theo — /[]+/ là lớp ký tự RỖNG, không bao giờ khớp gì.
+// Bộ dưới đây lấy đúng theo bộ mà hadEmoji vẫn đang dò, tức ý định ban đầu.
+const _WARM_EMOJIS = ["💕", "🥰", "😘", "💖", "❤️", "😍", "🌸", "✨"];
+// Bỏ icon ấm theo DANH SÁCH, không quét dải Unicode: quét dải sẽ ăn nhầm 📍 của
+// địa chỉ showroom và mọi icon có nghĩa khác trong câu.
+function _boIconAm(text, bo) {
+  let s = String(text);
+  for (const e of [...new Set([..._WARM_EMOJIS, ...(bo || [])])]) {
+    if (e) s = s.split(e).join("");
+  }
+  return s.replace(/\s{2,}/g, " ").replace(/\s+([.,!?])/g, "$1").trim();
+}
+// [TÁCH GIỌNG 27/08/2026] Mức icon và bộ icon nay do ngăn "giong" của shop quyết.
+//   muc: "nhieu" = tin nào cũng thả | "it" = ~2/3 tin (hành vi gốc) | "khong" = tắt hẳn
+// Vẫn giữ luật gốc: câu mẫu KHÔNG có icon thì bot KHÔNG tự thêm.
 function throttleHearts(target, text) {
   const n = (_heartCtr.get(target) || 0) + 1;
   _heartCtr.set(target, n);
   if (!text) return text;
+  const cf = KB.giong("emoji", {}) || {};
+  const muc = String(cf.muc || "it").toLowerCase();
+  const bo = (Array.isArray(cf.bo) ? cf.bo.filter(Boolean) : []);
+  const dung = bo.length ? bo : _WARM_EMOJIS;
   const hadEmoji = /[💕🥰😘💖❤️😍🌸✨]/.test(text);
-  // Bỏ MỌI icon ấm trong câu (kể cả//...) rồi cân nhắc thêm lại 1 cái XOAY VÒNG ở cuối.
-  const stripped = String(text)
-    .replace(/\s*[]+/g, "")
-    .replace(/\s{2,}/g, " ")
-    .replace(/\s+([.,!?])/g, "$1")
-    .trim();
+  const stripped = _boIconAm(text, bo);
+  if (muc === "khong") return stripped;   // shop tắt hẳn icon
   if (!hadEmoji) return stripped;          // câu gốc không có icon -> KHÔNG tự thêm
-  if (n % 3 === 0) return stripped;        // ~1/3 tin để trống cho đỡ dày icon
-  const pick = _WARM_EMOJIS[n % _WARM_EMOJIS.length];   // xoay vòng -> mỗi lần một icon khác
-  return `${stripped} ${pick}`;
+  if (muc !== "nhieu" && n % 3 === 0) return stripped;   // ~1/3 tin để trống cho đỡ dày icon
+  return `${stripped} ${dung[n % dung.length]}`;
 }
 // Nhận diện câu "báo chờ / em kiểm tra rồi báo" = nhường người thật. THEO YÊU CẦU SHOP: KHÔNG gửi câu này cho khách
 // (chỉ gắn thẻ AI-CHỜ XL ở nơi khác là đủ), tránh lặp "chờ đợi" gây nhàm. Câu xin lỗi/khẳng định khác KHÔNG dính.
@@ -225,11 +424,37 @@ function _dupBookSave() {
   } catch (_) {}
 }
 async function sendInboxMessage(target, text) {
+  // [LƯỚI KỊCH BẢN] Kho tra hụt -> KB.cau() gắn MỐC HỤT vào câu. THÀ KHÔNG NHẮN
+  // còn hơn nhắn câu cụt. Cũng chặn luôn câu rỗng — trước đây câu rỗng đi thẳng
+  // xuống API mà không ai biết mình vừa mất một lượt trả lời của khách.
+  const _vetKB = KB.vetTruocKhiGui(text);
+  if (!_vetKB.ok) {
+    try { console.log(`  [gửi tin] CHẶN (${_vetKB.ma}) khoá hụt: ${_vetKB.khoa.join(", ") || "-"} -> KHÔNG nhắn khách.`); } catch (_) {}
+    return { success: true, skipped: _vetKB.ma };
+  }
   // BỎ câu báo-chờ (AI không trả lời được) -> chỉ gắn thẻ, không nhắn khách. Thẻ AI-CHỜ XL gắn ở handler riêng nên không ảnh hưởng.
   if (isWaitHandoffMsg(text)) {
     try { console.log("  [gửi tin] BỎ câu báo-chờ (nhường người thật) -> KHÔNG nhắn khách:", String(text).slice(0, 55)); } catch (_) {}
     return { success: true, skipped: "WAIT_HANDOFF" };
   }
+  // [MỞ MÀN — BƯỚC 4] Cổng mở màn đã gửi giá + ảnh và CỐ Ý chưa gắn câu đuôi, vì
+  // đuôi phải đứng SAU câu trả lời chính. Câu text đầu tiên đi ra sau cổng chính
+  // là câu trả lời đó -> gắn đuôi vào đây, đúng MỘT lần trong lượt.
+  // Bỏ qua nếu câu trả lời đã tự làm việc của đuôi (đã hỏi size / xin sđt+địa
+  // chỉ / mời lên đơn) — hai câu hành động trong một lượt là spam.
+  try {
+    const _mm = _luot().duoiMoMan;
+    if (_mm && String(text || "").trim()) {
+      _luot().duoiMoMan = null;
+      if (!/size|sđt|số điện thoại|địa chỉ|lên đơn|cân nặng/i.test(String(text))) {
+        const _d = String(sizeTailForProduct(_mm.mem, _mm.product) || "").trim();
+        if (_d) {
+          text = String(text).replace(/\s+$/, "") + " " + _d;
+          console.log(`  [MỞ MÀN] gắn câu đuôi vào câu trả lời: "${_d.slice(0, 60)}"`);
+        }
+      }
+    }
+  } catch (_) {}
   // ===== [SALE GỌN - trình bày 3 dòng] Chèn xuống dòng sau câu chương trình để tách đuôi hỏi size:
   //   Dòng 1: "Dạ {tên} có giá X, đang giảm còn Y chị nha 🥰"
   //   Dòng 2: "{câu chương trình} ạ."
@@ -252,8 +477,27 @@ async function sendInboxMessage(target, text) {
     _dupList = (_dupList || []).filter(e => e && (Date.now() - e.at) < 10 * 60 * 1000);
     const _dupHit = _dupNorm.length >= 10 && _dupList.find(e => e.norm === _dupNorm && (Date.now() - e.at) < 8 * 60 * 1000);
     if (_dupHit) {
-      console.log(`  [gửi tin] ⛔ TRÙNG câu đã gửi ${Math.round((Date.now() - _dupHit.at) / 1000)}s trước (sổ 5 ngăn) -> BỎ, không nhắn lặp: "${String(text).slice(0, 50)}"`);
-      return { success: true, skipped: "DUPLICATE" };
+      // NGOẠI LỆ: KHÁCH ĐÃ NHẮN LẠI sau lần gửi đó -> trả lời lại là ĐÚNG, không phải lặp.
+      // Sổ này sinh ra để chặn bot TỰ nhắc lại một câu trong cùng mạch (ca Móm Yêu:
+      // "size M vừa xinh" bắn 2 lần). Nó KHÔNG được chặn câu trả lời cho một câu hỏi MỚI
+      // của khách — dù câu trả lời đúng tình cờ giống hệt lần trước.
+      //
+      // Đo trên page thật 24/08/2026: khách hỏi "đặt 2c này miễn ship cả 2 đúng k ạ",
+      // bot soạn đúng câu miễn ship nhưng bị sổ chặn vì đã gửi câu đó 318 giây trước
+      // -> KHÁCH KHÔNG NHẬN ĐƯỢC GÌ, và mỗi vòng poll lại chặn tiếp (318s, 328s...).
+      //
+      // Trong CÙNG một lượt thì lastCustAt luôn CŨ hơn lần gửi đầu -> vẫn chặn đúng như cũ.
+      let _khachDaNhanLai = false;
+      try {
+        const _lc = _luot().turnCtx && _luot().turnCtx.lastCustAt;
+        _khachDaNhanLai = !!_lc && _lc > _dupHit.at;
+      } catch (_) {}
+      if (!_khachDaNhanLai) {
+        console.log(`  [gửi tin] ⛔ TRÙNG câu đã gửi ${Math.round((Date.now() - _dupHit.at) / 1000)}s trước (sổ 5 ngăn) -> BỎ, không nhắn lặp: "${String(text).slice(0, 50)}"`);
+        return { success: true, skipped: "DUPLICATE" };
+      }
+      console.log(`  [gửi tin] câu trùng câu ${Math.round((Date.now() - _dupHit.at) / 1000)}s trước NHƯNG khách đã nhắn lại sau đó -> VẪN GỬI (trả lời câu hỏi mới).`);
+      _dupList = _dupList.filter(e => e !== _dupHit);   // bỏ ngăn cũ, ghi lại mốc mới bên dưới
     }
     _dupList.push({ norm: _dupNorm, at: Date.now() });
     while (_dupList.length > 5) _dupList.shift();
@@ -313,8 +557,61 @@ async function sendInboxMessage(target, text) {
   if (_luot().turnCtx && _luot().turnCtx.convId === target && _asksContactInReply(text)) {
     const _m = _luot().turnCtx.mem, _p = _luot().turnCtx.productInfo;
     if (_m && !_m.customerSize && orderNeedsSize(_m, _p)) {
-      text = "Dạ chị thường mặc size nào để em tư vấn cho mình nha ạ";
+      text = cauHoiSize();
       try { console.log("  [thứ tự] CHƯA có size -> KHÔNG xin SĐT/địa chỉ, hỏi size trước."); } catch (_) {}
+    }
+  }
+  // ===== TÁCH TIN DỒN DẬP =====================================================
+  // Yêu cầu shop 25/08/2026. Bot từng gửi nguyên khối:
+  //   "Dạ Set Zoise giá 1.650.000đ ạ. Dạ em lên đơn size M cho mình nha.
+  //    Chị xác nhận giúp em vẫn giao về …, sđt … đúng không ạ?"
+  // Ba việc trong một tin, khách đọc thấy bị dồn. Tách thành:
+  //   tin 1 — BÁO GIÁ
+  //   tin 2 — SIZE (chỉ khi đã biết size từ trước)
+  //   tin 3 — XÁC NHẬN địa chỉ + sđt
+  //
+  // Tách ở CỬA GỬI chứ không sửa từng chỗ ghép: câu này được dựng ở nhiều nhánh
+  // khác nhau (mở màn, báo giá lại, đuôi mở màn…), vá từng nơi vừa sót vừa dễ lệch.
+  // Tắt bằng TACH_TIN=off nếu shop thấy nhiều tin lại phiền hơn.
+  {
+    const _tachBat = KB.caiDatBat("TACH_TIN", true);
+    const _raw = String(text || "").trim();
+    // CHỈ tách khi có CÂU GIÁ + ít nhất một câu hành động nữa. Không đụng câu thường.
+    // KHÔNG dùng \b với chữ có dấu: trong regex JS, "á" không phải ký tự từ nên
+    // /\bgiá\b/ KHÔNG BAO GIỜ khớp — bản đầu của chốt này vì thế chạy rỗng, không tách
+    // được tin nào mà cũng chẳng báo lỗi. Và không dùng [^.] vì giá tiếng Việt có dấu
+    // chấm ngăn nghìn ("1.650.000đ").
+    const _coGia = /giá[^!?]{0,40}?(đ|vnđ)(?![a-zà-ỹ])/i.test(_raw);
+    const _coHanhDong = /(size|sđt|số điện thoại|địa chỉ|lên đơn|xác nhận)/i.test(_raw);
+    if (_tachBat && _coGia && _coHanhDong && _raw.length > 90) {
+      // CHE dấu chấm NGĂN NGHÌN trước khi cắt câu. Không che thì "1.650.000đ" bị coi là
+      // ba câu -> ghép lại thành "giá 1. 650. 000đ" -> BÁO SAI GIÁ CHO KHÁCH.
+      const _CHE = "";
+      const _che = _raw.replace(/(\d)[.](\d)/g, "$1" + _CHE + "$2");
+      const _boChe = (x) => String(x).split(_CHE).join(".");
+      // Cắt theo CÂU (dấu chấm / hỏi), giữ nguyên dấu.
+      const _cau = (_che.match(/[^.?!]+[.?!]+|\S[^.?!]*$/g) || []).map(_boChe);
+      if (_cau.length >= 2) {
+        const _phan = { gia: [], size: [], lienHe: [] };
+        for (const c of _cau) {
+          const t = c.trim();
+          if (!t) continue;
+          if (/(sđt|số điện thoại|địa chỉ|giao về|xác nhận)/i.test(t)) _phan.lienHe.push(t);
+          else if (/(size|cân nặng|chiều cao)/i.test(t)) _phan.size.push(t);
+          else _phan.gia.push(t);
+        }
+        const _tin = [_phan.gia.join(" "), _phan.size.join(" "), _phan.lienHe.join(" ")]
+          .map(x => x.trim()).filter(Boolean);
+        if (_tin.length >= 2) {
+          try { console.log(`  [tách tin] 1 tin dồn -> ${_tin.length} tin: ${_tin.map(x => '"' + x.slice(0, 34) + '…"').join(" | ")}`); } catch (_) {}
+          let _cuoi = null;
+          for (let i = 0; i < _tin.length; i++) {
+            if (i > 0) { try { await delay(900); } catch (_) {} }   // nhịp gõ tự nhiên, không dồn
+            _cuoi = await sendInboxMessage(target, _tin[i]);        // đi lại đúng đường cũ: chống trùng, sổ id, follow-up
+          }
+          return _cuoi;
+        }
+      }
     }
   }
   const cleaned = throttleHearts(target, maybeDropDa(target, tidyParticles(stripRepeatedSizeWords(stripStockClearance(stripParenNotes(text))))));
@@ -536,17 +833,30 @@ async function sendImages3(target, items, leadText) {
   return { ok: n > 0, n };
 }
 async function sendPrivateReply(target, text, commentId, postId) {
+  const _v = KB.vetTruocKhiGui(text);          // [LƯỚI KỊCH BẢN] xem sendInboxMessage
+  if (!_v.ok) {
+    try { console.log(`  [rep riêng] CHẶN (${_v.ma}) khoá hụt: ${_v.khoa.join(", ") || "-"} -> KHÔNG nhắn khách.`); } catch (_) {}
+    return { success: true, skipped: _v.ma };
+  }
   const r = await _sendPrivateReply(target, text, commentId, postId);
   rememberSentId(r);
   return r;
 }
 async function replyComment(target, text, commentId) {
+  const _v = KB.vetTruocKhiGui(text);          // [LƯỚI KỊCH BẢN] xem sendInboxMessage
+  if (!_v.ok) {
+    try { console.log(`  [rep cmt] CHẶN (${_v.ma}) khoá hụt: ${_v.khoa.join(", ") || "-"} -> KHÔNG trả bình luận.`); } catch (_) {}
+    return { success: true, skipped: _v.ma };
+  }
   const r = await _replyComment(target, text, commentId);
   rememberSentId(r);
   return r;
 }
-const { reasoning, HUMAN_CHECK_REPLY } = require("./reasoning_engine");
-const { vetAdvisoryReply } = require("./reply_guard");
+const { reasoning, HUMAN_CHECK_REPLY } = require("./loi/ai/reasoning_engine");
+const { vetAdvisoryReply } = require("./loi/ai/reply_guard");
+// KHO KỊCH BẢN — mọi lời bot nói tra ở đây bằng KHOÁ. Kho tự lo bốn tầng:
+// tab AI AGENT (Sheet) -> kich_ban/<shopId>.json -> kich_ban/mac_dinh.json.
+const KB = require("./loi/cau_noi/kho_kich_ban");
 // ===== [CHỐT NHÃN 2026-07-11] "AI đã chấm nhãn thuộc nhóm có handler riêng thì regex KHÁC NHÓM không được
 // nổ súng" — trị tận gốc lớp lỗi regex-chuỗi-con cướp lượt của nhãn đúng ("cửa HÀNG Ở ĐÂU" dính regex kho
 // dù AI đã chấm STORE_ADDRESS). Nhánh regex-trần trước khi bắn phải qua chốt này:
@@ -572,10 +882,10 @@ function _nhanCamRegex(mem, tenNhanh, allowKinds) {
     return mode === "chan";
   } catch (_) { return false; }
 }
-const _va = require("./vn_address");   // map tỉnh/thành 2025 -> suy tỉnh từ quận/huyện + token ambiguous
+const _va = require("./loi/tien_ich/vn_address");   // map tỉnh/thành 2025 -> suy tỉnh từ quận/huyện + token ambiguous
 // [SALE GỌN] page của lượt đang xử -> nay nằm trong _luot().curPageId (xem đầu file).
 // ===== [AI-QUYẾT 2026-07-07] tầng AI quyết định (referent + địa chỉ/chốt đơn) =====
-const aiQuyet = require("./ai_quyet");
+const aiQuyet = require("./loi/ai/ai_quyet");
 function aiQuyetCfg() {
   // đọc lại mỗi lượt -> sửa công tắc KHÔNG cần restart. Thiếu file/hỏng -> tắt hết (an toàn).
   try {
@@ -597,20 +907,20 @@ function _aqLooksAddr(s) {
     || (typeof _va.hasAreaToken === "function" && _va.hasAreaToken(f))
     || /((số|so)\s*(nhà|nha)?\s*\d)|((thôn|thon|xóm|xom|ấp|ap|đội|doi|khu|tổ|to|lô|lo|kiệt|kiet)\s)|((xã|xa|phường|phuong|thị\s*trấn|thi\s*tran|quận|quan|huyện|huyen)\s)|((đường|duong|phố|pho|ngõ|ngo|ngách|ngach|hẻm|hem)\s)/i.test(" " + t + " "));
 }
-const { classifyIntent } = require("./ai_intent");
-const { getOrdersByPhone, posConfigured } = require("./pos_client");
-const { resolveImage, similarByCode } = require("./vision_resolver");
-const recommend = require("./recommend");
-const { ensure: ensureCatalog } = require("./catalog_cache");
-const { detectIntent } = require("./intent_detector");
-const { routeBatch, fold: routerFold } = require("./intent_router");
-const { findInText, getByCode: catalogGetByCode, fuzzyFindModel, hasModelNameToken } = require("./catalog_cache");
-const { extractColor, colorMatches, foldVi, splitColors } = require("./color_utils");
-const { getImageUrls, getImageDownloadUrls, contentIdsByColor, imageItemsByColor, getCodeColors, representativeColor, contentIdByImageId, urlByImageId, imageItemsBySide, hasBackImage, itemsByCode, colorFromName } = require("./product_images");
-const productVideos = require("./product_videos");   // tra content_id VIDEO theo mã (video_index.json)
-const celeb = require("./celeb_images");
-const { getConversationState, updateConversationState } = require("./state_manager");
-const { loadProcessed, addProcessed, saveProcessed } = require("./processed_store");
+const { classifyIntent } = require("./loi/ai/ai_intent");
+const { getOrdersByPhone, posConfigured } = require("./loi/don/pos_client");
+const { resolveImage, similarByCode } = require("./loi/san_pham/vision_resolver");
+const recommend = require("./loi/san_pham/recommend");
+const { ensure: ensureCatalog } = require("./loi/san_pham/catalog_cache");
+const { detectIntent } = require("./loi/ai/intent_detector");
+const { routeBatch, fold: routerFold } = require("./loi/ai/intent_router");
+const { findInText, getByCode: catalogGetByCode, fuzzyFindModel, hasModelNameToken } = require("./loi/san_pham/catalog_cache");
+const { extractColor, colorMatches, foldVi, splitColors, mauDuyNhat } = require("./loi/san_pham/color_utils");
+const { getImageUrls, getImageDownloadUrls, contentIdsByColor, imageItemsByColor, getCodeColors, representativeColor, contentIdByImageId, urlByImageId, imageItemsBySide, hasBackImage, itemsByCode, colorFromName } = require("./loi/san_pham/product_images");
+const productVideos = require("./loi/san_pham/product_videos");   // tra content_id VIDEO theo mã (video_index.json)
+const celeb = require("./loi/san_pham/celeb_images");
+const { getConversationState, updateConversationState } = require("./loi/bo_nho/state_manager");
+const { loadProcessed, addProcessed, saveProcessed } = require("./loi/bo_nho/processed_store");
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
@@ -671,7 +981,7 @@ function materialAdviceSentence(matStr) {
 }
 
 const PAGE_ID = process.env.PANCAKE_PAGE_ID;
-const pageRegistry = require("./page_registry");
+const pageRegistry = require("./loi/pancake/page_registry");
 
 // Bật/tắt việc bot ĐĂNG TRẢ LỜI COMMENT CÔNG KHAI.
 // false = bot chỉ nhắn riêng (DM) mẫu/giá/size/ảnh, KHÔNG đụng comment công khai.
@@ -700,22 +1010,33 @@ function isCheckLaterReply(text) {
 }
 
 // ===== TÊN BOT AI (để dễ phân biệt với người thật trong log) =====
-const BOT_NAME = "Bảo Trâm";
+// Đọc từ danh_tinh_bot.js — MỘT nguồn duy nhất, dùng chung với prompt của
+// reasoning_engine. Trước đây tên được khai riêng ở đây và trong prompt, nên
+// đổi tên cho shop mới là phải nhớ sửa đủ hai chỗ.
+const BOT_NAME = require("./loi/ai/danh_tinh_bot").TEN_BOT;
+// Tên bot hiện trong Pancake (admin_name) — khai ở danh_tinh_bot.js, đổi bằng .env
+const { laNhanBot } = require("./loi/ai/danh_tinh_bot");
 
 // ===== KỊCH BẢN CHUYỂN KHOẢN (CK) =====
-const BANK_INFO = {
-  bank: "Techcombank",
-  stk: "19034747389015",
-  chu_tk: "NGUYEN VAN HUNG",
-};
+// SỐ TÀI KHOẢN: số liệu riêng của shop, khai ở kich_ban/<shopId>.json.
+// KHÔNG có phom code dự phòng — cố ý. Mọi số liệu khác thiếu thì bot nói hơi sai;
+// riêng số tài khoản thiếu mà mượn của shop khác thì TIỀN KHÁCH CHẠY SANG TÚI
+// NGƯỜI KHÁC. Thà không trả lời rồi nhường người thật.
+function bankInfo() { return KB.soLieu("ngan_hang"); }
 // Lời cung cấp thông tin CK khi KHÁCH MUỐN chuyển khoản (chưa biết STK).
+// Trả null khi chưa khai số tài khoản -> nơi gọi PHẢI nhường người thật.
 function buildBankInfoReply() {
+  const nh = bankInfo();
+  if (!nh || !nh.stk || !nh.ten) {
+    console.log(`[${BOT_NAME}] ⚠ chưa khai số liệu "ngan_hang" trong kich_ban/${KB.SHOP_ID}.json -> KHÔNG gửi STK.`);
+    return null;
+  }
   return (
     `Dạ chị chuyển khoản theo thông tin sau ạ:\n` +
-    `${BANK_INFO.bank} STK: ${BANK_INFO.stk}\n` +
-    `Chủ tk: ${BANK_INFO.chu_tk}\n` +
+    `${nh.ten} STK: ${nh.stk}\n` +
+    `Chủ tk: ${nh.chu_tk || ""}\n` +
     `Nội dung: Tên FB - SĐT chị nhé.\n` +
-    `Chị chuyển xong gửi hình em kiểm tra và lên đơn cho mình ạ`
+    KB.cau("bank_info__chuyen_xong_gui_hinh_em")
   );
 }
 
@@ -742,10 +1063,13 @@ function wantsBankInfo(text) {
 }
 
 // ===== ĐỊA CHỈ SHOP / SHOWROOM (§16) =====
-const SHOWROOMS = [
+// Địa chỉ cơ sở: số liệu riêng của shop -> kich_ban/<shopId>.json. Phom code giữ
+// nguyên bản MYS.P làm lưới đỡ (địa chỉ sai thì khách đi nhầm chỗ, khó chịu chứ
+// không mất tiền như số tài khoản, nên ở đây chấp nhận có phom).
+const SHOWROOMS = KB.soLieu("showroom", [
   "📍 105 Bà Triệu, Hai Bà Trưng, Hà Nội",
   "📍 131-133 Nguyễn Trãi, P. Bến Thành, Q1, TP.HCM",
-];
+]);
 // Trả lời theo ĐỊA DANH khách hỏi/chọn. HN/HCM -> chi tiết cơ sở; Bắc Giang -> văn phòng;
 // Vinh/Nghệ An/Phú Thọ -> đã đóng. KHÔNG nhận ra địa danh nào -> null (để luồng khác xử).
 function showroomReplyFor(text) {
@@ -761,7 +1085,7 @@ function showroomReplyFor(text) {
   if (/phu tho/.test(t)) _closed.push("Phú Thọ");
   if (_closed.length) {
     return "Dạ hiện tại bên em có showroom tại:\n" + SHOWROOMS.join("\n") +
-      "\nCòn cơ sở " + _closed.join("/") + " bên em không còn hoạt động nữa ạ.";
+      "\nCòn cơ sở " + _closed.join("/") + KB.cau("showroom_reply_for__ben_em_khong_con_hoat");
   }
   // HN
   if (/ba trieu|hai ba trung|\bha noi\b|\bhn\b|thu do/.test(t)) {
@@ -801,9 +1125,18 @@ function showroomVisitReply(text, mem) {
   }
   const sizeKnown = mem && mem.customerSize && mem.customerSize !== "FREESIZE";
   if (sizeKnown) {
-    return `Dạ vâng, showroom ${name} ở ${addr} chị nha ❤️. Size ${sizeLabel(mem.customerSize)} của mình thì em giữ sẵn tại showroom luôn nha, vì mẫu ở đó cũng nhanh hết hàng lắm ạ. Chị tính ghé khoảng hôm nào để em sắp xếp nhân viên giữ hàng cho mình nha?`;
+    return KB.cau("showroom_visit__showroom_o_chi_nha_size", { name, addr, customerSize: sizeLabel(mem.customerSize) });
   }
-  return `Dạ vâng, showroom ${name} của bên em ở ${addr} chị nha. Chị cho em xin size mình hay mặc, em giữ sẵn tại showroom vì các mẫu ở đó cũng nhanh hết hàng lắm ạ. Chị tính ghé khoảng hôm nào để em sắp xếp nhân viên giữ hàng cho mình nha?`;
+  return KB.cau("showroom_visit__showroom_cua_ben_em_o", { name, addr });
+}
+// Câu hỏi size — câu bot nói nhiều nhất, trước đây viết cứng lặp lại ở nhiều chỗ.
+// Gom về MỘT hàm rồi rút về Sheet: sửa một dòng trong tab AI AGENT là đổi được
+// tất cả, không phải đi tìm từng chỗ trong 12.000 dòng rồi sót một chỗ.
+// `cuoi` — dấu câu do NƠI GỌI quyết định. Cùng một lời, ba chỗ trong mã kết
+// khác nhau ("", "?", "."). Nếu bắt kho giữ ba bản chỉ vì ba dấu chấm thì lại
+// quay về đúng bệnh cũ; để dấu ở chỗ gọi thì LỜI chỉ có một bản duy nhất.
+function cauHoiSize(cuoi) {
+  return KB.cau("hoi_size") + (cuoi || "");
 }
 function asksShipOrigin(text) {
   const t = String(text || "").toLowerCase();
@@ -812,7 +1145,7 @@ function asksShipOrigin(text) {
 function buildShipOriginReply() {
   // [SỬA 2026-07-07] Khách hỏi HÀNG GỬI TỪ ĐÂU (ngữ cảnh ship online) -> trả lời đúng trọng tâm,
   // BỎ vế "Chị ghé cơ sở nào tiện..." (lạc quẻ - khách không hỏi chuyện ghé showroom).
-  return "Dạ hàng bên em được gửi từ kho Bắc Giang ạ. Đơn của mình được giao tận nơi, chị được kiểm hàng trước khi thanh toán nha";
+  return KB.cau("hang_gui_tu_dau");
 }
 // Khách hỏi ĐỊA CHỈ CỦA SHOP / có cửa hàng ở đâu / có ở tỉnh X không (KHÔNG phải địa chỉ giao hàng của khách).
 function asksShopAddress(text) {
@@ -820,8 +1153,11 @@ function asksShopAddress(text) {
   return /(địa chỉ.*(shop|cửa hàng|bên em|showroom|store|cơ sở)|(shop|cửa hàng|showroom|store|cơ sở).*(ở đâu|chỗ nào|địa chỉ|nào)|bên em (ở đâu|có (ở|địa chỉ|cửa hàng|showroom|store|chi nhánh|cơ sở))|có (cửa hàng|shop|showroom|chi nhánh|cơ sở).*(ở|tại|nào)|chi nhánh|có ở (hà nội|hn|hcm|sài gòn|tphcm|bắc giang|bg)|đến (shop|cửa hàng|store|cơ sở).*(xem|thử)?|xem (trực tiếp|tại shop|tại cửa hàng)|(shop|bên em|cửa hàng|showroom|store|cơ sở)\s+(ở|tại|o)\s+(sg|sài gòn|sai gon|hn|hà nội|ha noi|hcm|tphcm|tp ?hcm|đà nẵng|da nang|đn|hp|hải phòng|đâu|dau|nào|tỉnh|miền|chỗ))/i.test(t);
 }
 function buildShopAddressReply() {
-  return "Bên em có 2 showroom chị nha:\n" + SHOWROOMS.join("\n") +
-    "\nChị tiện qua cơ sở nào em nhắn nhân viên chuẩn bị sẵn mẫu cho mình thử nha ❤️. Còn nếu chị bận chưa qua được thì cứ chốt online, bên em ship tận nơi, cho kiểm hàng trước khi thanh toán luôn ạ.";
+  // Danh sách showroom là DỮ LIỆU -> code dựng. Câu dẫn đầu và câu mời cuối là
+  // LỜI -> rút về Sheet, người kinh doanh sửa được mà không đụng địa chỉ.
+  return KB.cau("dia_chi_shop_mo") + "\n" +
+    SHOWROOMS.join("\n") + "\n" +
+    KB.cau("dia_chi_shop_moi");
 }
 
 // Khách hỏi GIẢM GIÁ / sale / bớt / mua nhiều có giảm không.
@@ -835,9 +1171,9 @@ function buildDiscountReply(productInfo, mem) {
   // Khách xin GIẢM THÊM (mua nhiều, bớt nữa) -> lịch sự từ chối, đổi sang ưu đãi khác (freeship/gói kỹ), XOAY câu.
   if (mem._asksMoreDiscount) {
     const more = [
-      "Dạ mua nhiều thì bên em vẫn freeship cho mình ạ, còn giá đang là mức ưu đãi tốt nhất rồi nên em không giảm thêm được nữa, mong chị thông cảm",
-      "Dạ giá này đã là ưu đãi sâu rồi chị ạ, em không giảm thêm được; bù lại chị mua 2 mẫu em ưu tiên gói kỹ và freeship cho mình nha",
-      "Dạ em xin phép giữ giá ưu đãi này giúp chị ạ, mức này là tốt rồi. Mua nhiều em hỗ trợ freeship cho mình nhe",
+      KB.cau("discount__mua_nhieu_thi_ben_em"),
+      KB.cau("discount__gia_nay_da_la_uu"),
+      KB.cau("discount__xin_phep_giu_gia_uu"),
     ];
     mem.discIdx = ((mem.discIdx || 0) + 1) % more.length;
     return more[mem.discIdx];
@@ -846,23 +1182,23 @@ function buildDiscountReply(productInfo, mem) {
     // ĐUÔI ĐỘNG theo thông tin đã có: CHƯA size -> hỏi size (KHÔNG mời "chốt/lên đơn" khi chưa đủ size);
     //  đủ size nhưng thiếu sđt/địa chỉ -> xin contact; đủ hết -> mời lên đơn.
     const _needSize = !effectiveSize(mem, productInfo) && orderNeedsSize(mem, productInfo);
-    const _tail = _needSize ? "Chị mặc size bao nhiêu để em check hàng cho mình ạ?" : orderCtaOrAskContact(mem);
+    const _tail = _needSize ? KB.cau("discount__mac_size_bao_nhieu_de") : orderCtaOrAskContact(mem);
     // Giá rõ: "giá gốc X giảm còn Y" (đúng dữ liệu sheet) — không nói cứng %/CTA chốt khi chưa đủ size.
     const _g = parseMoney(productInfo.price), _s = parseMoney(productInfo.salePrice);
     const _fmt = n => Number(n).toLocaleString("vi-VN");
     const _saleTxt = (_g && _s && _s < _g) ? `giá gốc ${_fmt(_g)}đ giảm còn ${_fmt(_s)}đ` : (productInfo.priceText || "");
     const _sp = _saleTxt ? `, ${_saleTxt}` : "";
     const yes = [
-      `Dạ ${nameTxt}hiện đang được ưu đãi${_sp} ạ, đang giảm rất sâu chị nha 🥰 ${_tail}`,
-      `Dạ ${nameTxt}đang ưu đãi sâu đó chị${_sp} ạ, giá này hời lắm rồi ạ. ${_tail}`,
-      `Dạ ${nameTxt}đang giảm khá sâu${_sp} chị nha, mức này tốt lắm rồi ạ. ${_tail}`,
+      KB.cau("discount__hien_dang_duoc_uu_dai", { nameTxt, sp: _sp, tail: _tail }),
+      KB.cau("discount__dang_uu_dai_sau_do", { nameTxt, sp: _sp, tail: _tail }),
+      KB.cau("discount__dang_giam_kha_sau_chi", { nameTxt, sp: _sp, tail: _tail }),
     ];
     mem.discIdx = ((mem.discIdx || 0) + 1) % yes.length;
     return yes[mem.discIdx];
   }
   const _nmSale = nameTxt || "mẫu này ";
   const _needSizeNo = !effectiveSize(mem, productInfo) && orderNeedsSize(mem, productInfo);
-  const _tailNo = _needSizeNo ? "Chị mặc size bao nhiêu để em check hàng cho mình ạ?" : orderCtaOrAskContact(mem);
+  const _tailNo = _needSizeNo ? KB.cau("discount__mac_size_bao_nhieu_de_2") : orderCtaOrAskContact(mem);
   // ===== [CHƯƠNG TRÌNH KM 2026-07-11] Đang có chương trình (khuyen_mai.json, còn hạn) mà mẫu đang xem
   // KHÔNG nằm diện giảm (cột KM=0) -> KHÔNG được nói "shop hiếm khi giảm giá" (đang chạy sale mà nói thế
   // là tự đá đổ chương trình). Trả lời TRUNG THỰC: có chương trình X, riêng mẫu này giá niêm yết.
@@ -881,9 +1217,9 @@ function buildDiscountReply(productInfo, mem) {
     return _prog.cau_gioi_thieu;
   }
   const no = [
-    `Dạ bên em hiếm khi giảm giá lắm chị ạ, nên chờ sale thì gần như không có, mà ${_nmSale}là hàng thiết kế số lượng ít, để lâu dễ hết size mình thích. ${_tailNo}`,
-    `Dạ shop ít khi sale lắm chị ạ, chờ giảm thì gần như không có ạ, mà ${_nmSale}là hàng thiết kế số lượng có hạn, để lâu dễ hết size mình ưng lắm. ${_tailNo}`,
-    `Dạ giá đang là niêm yết rồi chị nha, bên em hiếm khi giảm giá, mà ${_nmSale}thiết kế làm số lượng ít nên nhanh hết size mình thích ạ. ${_tailNo}`,
+    KB.cau("discount__ben_em_hiem_khi_giam", { nmSale: _nmSale, tailNo: _tailNo }),
+    KB.cau("discount__shop_it_khi_sale_lam", { nmSale: _nmSale, tailNo: _tailNo }),
+    KB.cau("discount__gia_dang_la_niem_yet", { nmSale: _nmSale, tailNo: _tailNo }),
   ];
   mem.discIdx = ((mem.discIdx || 0) + 1) % no.length;
   return no[mem.discIdx];
@@ -906,7 +1242,7 @@ function saleProgram(pageId) {
     if (p.het_han && Date.now() > new Date(p.het_han).getTime()) return null;   // hết hạn -> tự tắt
     let hanTxt = "";
     try { const d = new Date(p.het_han); hanTxt = `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}`; } catch (_) {}
-    return { ten: p.ten, mo_ta: p.mo_ta || "ưu đãi lớn", hanTxt: hanTxt || "khi kết thúc chương trình",
+    return { ten: p.ten, mo_ta: p.mo_ta || "ưu đãi lớn", hanTxt: hanTxt || KB.cau("sale_program__khi_ket_thuc_chuong_trinh"),
       cau_gioi_thieu: p.cau_gioi_thieu || "", cau_online: p.cau_online || "", ap_dung_toan_bo: p.ap_dung_toan_bo === true,
       che_do_sale_gon: p.che_do_sale_gon === true, cau_kem_bao_gia: p.cau_kem_bao_gia || "", cau_tai_cua_hang: p.cau_tai_cua_hang || "" };
   } catch (_) { return null; }
@@ -1255,6 +1591,26 @@ function asksBeachWear(text) {
   if (/xanh\s*biển/.test(t) && !/(đi|ra|mặc|tắm|du lịch|nghỉ mát)\s*biển|biển\s*(xem|mặc|chơi|sao)/.test(t)) return false;
   return /(đi|ra)\s*biển|mặc\s*(đi\s*)?biển|tắm\s*biển|du\s*lịch\s*biển|(đồ|váy|đầm|set|áo|quần|bộ)\s*(đi\s*)?biển|biển\s*(xem sao|mặc|chơi)|đi\s*nghỉ\s*mát|nghỉ\s*mát\s*biển/i.test(t);
 }
+// DỊP khách nhắc tới, trả về đúng cụm để nhắc lại trong câu trả lời ("" = không thấy dịp nào).
+// [25/08/2026] Sinh ra từ ca thật: khách hỏi "mẫu này mặc đi tiệc ở cty được k shop", bot trả
+// lời một câu báo-chờ chung chung, KHÔNG hề nhắc tới chuyện đi tiệc. Shop nhận xét đúng:
+// "thiếu mục trả lời câu hỏi chính của khách".
+// Nhắc lại đúng dịp khách nói là cách rẻ nhất để khách thấy mình được nghe.
+// Xếp CỤ THỂ TRƯỚC: "tiệc công ty" phải thắng "công ty", "đám cưới" thắng "đám".
+const _DIP_KHACH = [
+  [/tiệc\s*(ở\s*)?(cty|công\s*ty)|đi\s*tiệc\s*(ở\s*)?(cty|công\s*ty)/i, "đi tiệc công ty"],
+  [/(đám|dự)\s*cưới|ăn\s*cưới|đi\s*cưới|tiệc\s*cưới|cưới\s*hỏi/i,       "đi ăn cưới"],
+  [/(đi|dự|có)\s*tiệc|tiệc\s*tùng|dạ\s*tiệc|sinh\s*nhật/i,              "đi tiệc"],
+  [/công\s*sở|đi\s*làm|đi\s*học|văn\s*phòng/i,                          "đi làm"],
+  [/(đi|ra)\s*biển|du\s*lịch|nghỉ\s*mát/i,                              "đi biển"],
+  [/đi\s*chơi|dạo\s*phố|cà\s*phê|hẹn\s*hò|đi\s*date/i,                  "đi chơi"],
+  [/đi\s*chùa|lễ\s*chùa|tết|đi\s*lễ/i,                                  "đi lễ"]
+];
+function dipKhachHoi(text) {
+  const t = String(text || "").toLowerCase();
+  for (const [re, ten] of _DIP_KHACH) if (re.test(t)) return ten;
+  return "";
+}
 // Chủng loại khách muốn cho đồ đi biển (rỗng = mọi loại -> nhặt ngẫu nhiên).
 function _beachCatWanted(text) {
   const t = String(text || "").toLowerCase();
@@ -1446,6 +1802,42 @@ function isDeliverableAddress(addr) {
 // [AI QUYẾT ĐỊNH] Địa chỉ đã ĐỦ GIAO chưa. Nguyên tắc AN TOÀN: AI chỉ được phép NỚI ("đủ rồi, thôi hỏi")
 //   để chặn cảnh regex xin đi xin lại; AI KHÔNG được ép "thiếu" (tránh chặn nhầm đơn). AI im/timeout -> regex đỡ y cũ.
 //   Nếu AI thấy tỉnh/thành thuộc diện SÁP NHẬP (province_confirm) -> CHƯA ready, phải hỏi xác nhận (phương án B).
+// ===== XOÁ ĐỊA CHỈ PHẢI ĐỂ LẠI DẤU =====
+// Xoá địa chỉ đã lưu là việc nguy hiểm: xoá nhầm thì lượt sau bot đi hỏi lại thứ
+// khách vừa đưa, hoặc lên đơn thiếu nơi giao. Có CHÍN chỗ trong tệp này xoá nó, và
+// khi đi tìm "ai xoá" thì log không nói một chữ. Đo 27/08/2026: khách đổi sang 188
+// Khương Thượng, lượt sau bot lại xin địa chỉ — mất cả buổi không truy ra chỗ xoá.
+// Từ nay mọi lần xoá đều in ra lý do.
+// ===== ĐỊA CHỈ MỚI CHỈ ĐƯỢC ĐÈ KHI NÓ THẬT SỰ LÀ ĐỊA CHỈ =====
+// Yêu cầu của shop: dùng địa chỉ MỚI NHẤT khách đưa. Nhưng "mới nhất" phải là địa
+// chỉ đã. Đo 27/08/2026: khách đã đổi sang "188 Khương Thượng, Đống Đa, Hà Nội",
+// lượt sau nhắn "e lấy thêm 1 cái Mironne màu hồng size M nữa nhé" -> câu đó bị bóc
+// thành địa chỉ, ĐÈ MẤT địa chỉ thật. Hậu quả kép: lượt sau bot đi xin lại địa chỉ
+// khách vừa đưa, và câu xác nhận đọc ra "vẫn giao về 1 cái Mironne màu hồng size M".
+//
+// Nay: có địa chỉ hợp lệ trong bộ nhớ mà cái mới KHÔNG giống địa chỉ -> GIỮ cái cũ,
+// ghi log. Thà không cập nhật còn hơn mất địa chỉ thật.
+function datDiaChi(mem, addr, viTri) {
+  if (!mem) return;
+  const moi = String(addr == null ? "" : addr).trim();
+  if (!moi) return;
+  const cu = String(mem.address || "").trim();
+  if (cu && _aqLooksAddr(cu) && !_aqLooksAddr(moi)) {
+    console.log(`[${BOT_NAME}] BỎ QUA "địa chỉ" mới "${moi}" — không giống địa chỉ, GIỮ "${cu}". Nguồn: ${viTri}.`);
+    return;
+  }
+  if (cu && foldVi(cu) !== foldVi(moi)) {
+    console.log(`[${BOT_NAME}] ĐỔI ĐỊA CHỈ: "${cu}" -> "${moi}" (nguồn: ${viTri}). Đơn sau dùng địa chỉ này.`);
+  }
+  mem.address = moi;
+}
+function xoaDiaChi(mem, viTri) {
+  if (!mem) return;
+  const cu = String(mem.address || "");
+  mem.address = null;
+  if (cu) console.log(`[${BOT_NAME}] XOÁ ĐỊA CHỈ đã lưu ("${cu}") — lý do: ${viTri}.`);
+}
+
 function addrReady(mem) {
   // [FIX Mỹ Linh] cờ AI chấm lại mỗi lượt -> chỉ chặn khi CHƯA hỏi xác nhận + địa chỉ CHƯA có tỉnh rõ
   //   (explicitProvince nhận cả tên tỉnh CŨ và tự map sang tỉnh mới) — hết cảnh addrReady=false vĩnh viễn.
@@ -1515,7 +1907,7 @@ function addressGapReply(addr, mem) {
   }
   if (mem && mem._aiAddrComplete === true) return null;   // AI phán đủ -> không hỏi lại
   if (isDeliverableAddress(addr)) return null;
-  if (isGarbageAddress(addr)) { if (mem) mem.address = null; }
+  if (isGarbageAddress(addr)) { xoaDiaChi(mem, "chỗ 1858"); }
   const t = addressTiers(addr);
   // Suy ra 1 tỉnh DUY NHẤT từ phường/quận -> ĐÃ tính là deliverable ở trên (return null), KHÔNG hỏi xác nhận nữa.
   //  Chỉ còn hỏi khi MƠ HỒ: khu vực trùng nhiều tỉnh (ambiguous) -> hỏi thẳng khách ở tỉnh/thành nào.
@@ -1596,7 +1988,31 @@ function cleanAddress(addr) {
       }
     }
   }
-  return a || String(addr || "").trim();
+  // ===== CHỐT CUỐI: kết quả phải CÓ DẤU HIỆU ĐỊA CHỈ THẬT, không thì trả RỖNG =====
+  // Trước đây dòng cuối là `return a || addr` — không bao giờ trả rỗng, nên khi hàm gọt
+  // rác dẫn nhập xong mà chẳng còn gì là địa chỉ, nó vẫn trả về phần thừa.
+  //
+  // Đo trên page thật 25/08/2026 — khách nhắn "thế gửi gấp cho e set này nha":
+  //     cleanAddress -> "ấp cho e set này"
+  //     _mergeIfPartial ghép vào địa chỉ cũ -> "Thanh Xuân, Hà Nội, ấp cho e set này"
+  // Bot đọc nguyên chuỗi đó ra cho khách xác nhận. Đơn thật đi với địa chỉ này là giao hỏng.
+  // ("ấp" nằm trong danh sách từ khoá địa chỉ nên gọt rác giữ lại — đúng cho "ấp 3 Tân Kiên",
+  //  sai cho "gấp cho e".)
+  //
+  // Dấu hiệu địa chỉ thật, cần ÍT NHẤT một:
+  //   · có CHỮ SỐ (số nhà, số ngõ...)
+  //   · có tên PHƯỜNG/XÃ/QUẬN/HUYỆN/TỈNH tra được trong danh mục hành chính
+  const _ra = String(a || "").trim();
+  if (_ra) {
+    const _coSo = /\d/.test(_ra);
+    let _coDiaDanh = false;
+    try { _coDiaDanh = _va.hasAreaToken(_va.fold(_ra)) || !!_va.explicitProvince(_va.fold(_ra)); } catch (_) {}
+    if (!_coSo && !_coDiaDanh) {
+      try { console.log(`[địa chỉ] BỎ "${_ra.slice(0, 45)}" — gọt xong không còn dấu hiệu địa chỉ nào (không số, không địa danh).`); } catch (_) {}
+      return "";
+    }
+  }
+  return _ra;
 }
 // [CÂU CHỐT/LÊN ĐƠN] Địa chỉ ghi CHUẨN RÕ: bung viết tắt tỉnh -> TÊN ĐẦY ĐỦ, đảm bảo có tên tỉnh ở cuối.
 //  (vd "...hồng bàng hp" -> "...hồng bàng, Hải Phòng"; "...hồng bàng" -> "...hồng bàng, Hải Phòng").
@@ -1653,6 +2069,51 @@ function isAffirmation(text) {
 }
 
 // Câu hỏi? (để không chốt nhầm khi khách đang hỏi)
+// ============================================================================
+// isAskKind — NHÃN NÀY CÓ PHẢI "KHÁCH ĐANG HỎI" KHÔNG?
+// ----------------------------------------------------------------------------
+// [FIX Hà Giang 2026-08-26 — page PHOM] Trước đây danh sách này được VIẾT TAY
+// ở HAI chỗ (cổng địa-chỉ ~7810 và cổng chốt-đơn ~9124), và hai bản KHÁC NHAU:
+// bản dưới thiếu cả COLOR_ASK. Cả hai đều thiếu MATERIAL_QA.
+//
+// Hậu quả đo được trên page thật: khách hỏi
+//     "nhìn vải hơi mỏng nhỉ, mặc lên có sợ bị lộ khuyết điểm k shop"
+// -> AI gắn nhãn MATERIAL_QA nhưng phất nhầm cờ is_address
+// -> cả hai rào đều không nhận ra đây là CÂU HỎI
+// -> bot coi như "khách vừa cho địa chỉ để chốt" -> GỬI XÁC NHẬN ĐƠN + gắn thẻ
+//    182, tức suýt lên đơn thật 1.290.000đ cho một câu hỏi về chất vải.
+//
+// Nay MỘT hàm, hai cổng cùng gọi. Và nhận theo KHUÔN TÊN chứ không liệt kê
+// từng nhãn: bộ nhãn trong ai_intent.js còn dài và còn thêm nữa, liệt kê tay
+// thì lần sau lại sót đúng kiểu này.
+const _ASK_KINDS_RIENG = new Set([
+  "THANKS", "URGENT", "GREETING", "WAITING_REPLY", "COMPLAINT",
+  "POST_ORDER_CHITCHAT", "POST_ORDER_REQUEST", "POST_ORDER_CONFIRMED",
+  "RETURN_POLICY", "RISK_RECOURSE", "STORE_ADDRESS", "STORE_STOCK", "RESTOCK_PREORDER",
+  // [THÊM 27/08/2026] SIZE_ADVICE là NHÃN CÂU HỎI ("nặng 55kg lấy size nào", "sợ không
+  // vừa") nhưng không khớp khuôn tên nào ở trên, nên isAskKind trả FALSE — và đó chính là
+  // gốc của sự cố đo trên page thật hôm nay: câu "mua về mà k giống được thế thì sao shop"
+  // bị AI gắn nhãn SIZE_ADVICE, rào ở nhánh chốt đọc ra "không phải câu hỏi", rồi bot gửi
+  // khách nguyên CÂU CHỐT ĐƠN kèm COD 890.000đ — hai lần.
+  // Ba chỗ dùng isAskKind đều là rào "đây là câu hỏi -> ĐỪNG làm chuyện mạnh tay"
+  // (đừng ép thành địa chỉ, đừng chốt đơn, đừng nhả câu mời ghé showroom). Nhãn hỏi mà
+  // đứng ngoài rào thì chỉ có hại.
+  "SIZE_ADVICE",
+  "SIMILAR_MODELS", "BROWSE_CATALOG", "COMPARE_MODELS", "MODEL_REFERENCE",
+  "BUY_SEPARATE", "SET_TYPE", "WASH_CARE", "STYLING_QA", "DEFER_DECISION",
+  "CONSULT_FAMILY", "PREGNANCY_FIT", "FIT_SUITABILITY", "BACK_VIEW",
+  "ASK_SHOPEE", "ASK_TIKTOK", "WHOLESALE", "SAME_SHOP_QA", "MULTI_MODEL",
+]);
+function isAskKind(kind) {
+  const k = String(kind || "").toUpperCase().trim();
+  if (!k) return false;
+  // Khuôn tên: mọi nhãn HỎI đều rơi vào một trong các dạng này.
+  //   *_QA        MATERIAL_QA, POLICY_QA, AUTHENTICITY_QA, DELIVERY_QA, OCCASION_QA…
+  //   *_ASK/ASK_* PRICE_ASK, COLOR_ASK, ASK_COLOR…
+  //   *CHART*     SIZE_CHART        *CONCERN*  QUALITY_CONCERN
+  if (/(_QA$)|(_ASK$)|(^ASK_)|CHART|CONCERN/.test(k)) return true;
+  return _ASK_KINDS_RIENG.has(k);
+}
 function looksLikeQuestion(text) {
   const t = String(text || "").toLowerCase().trim();
   // Đuôi nghi vấn tiếng Việt (kể cả viết không dấu): "...à/ah", "...á", "...hả/ha", "...nhỉ/nhể", "...hở", "...chứ".
@@ -1664,8 +2125,51 @@ function looksLikeQuestion(text) {
   if (/(^|\s)(gì|j)\s*(ạ|vậy|thế|v|nhỉ|nhể|e|em|đó|do)?\s*[?]?\s*$/i.test(t)) return true;
   // hỏi chất liệu/vải dù không có "không/gì" (vd "chất vải", "vải gì", "chất liệu thế nào")
   if (/(chất\s*vải|vải\s*(gì|j|gi|như|the|thế|ra sao|nào|loại)|chất\s*liệu|co\s*giãn|co\s*gian)/i.test(t)) return true;
-  return /\?|(có|co|còn|đang|được)\s.{0,20}(không|ko|hong|hông|chưa|à|ah|hả|rồi à|rồi chưa)|bao nhiêu|mấy (màu|size|kg|cân|cái|mẫu)|thế nào|như nào|ra sao|màu gì|màu nào|size gì|size nào|chất liệu|gì (không|ko|ạ|vậy|thế|nhỉ)|được không|được ko|sao ạ|đâu ạ|ở đâu|khi nào|bao lâu|mặc vừa/i.test(t);
+  return /\?|(có|co|còn|đang|được)\s.{0,32}(không|ko|k(?![\wà-ỹ])|hk|khg|hong|hông|chưa|à|ah|hả|rồi à|rồi chưa)|bao nhiêu|mấy (màu|size|kg|cân|cái|mẫu)|thế nào|như nào|ra sao|màu gì|màu nào|size gì|size nào|chất liệu|gì (không|ko|ạ|vậy|thế|nhỉ)|được không|được ko|sao ạ|đâu ạ|ở đâu|khi nào|bao lâu|mặc vừa/i.test(t);
 }
+
+// ===== LƯỢT NHIỀU Ý: TRẢ TỪNG Ý MỘT TIN =====
+// Ca Hà Giang 27/08/2026. Khách nhắn hai tin liền:
+//   "mua về thử k ưng shop cho đổi trả miễn phí k shop"
+//   "dạo này em tăng lên 57kg rồi shop, có size lớn hơn cho e k ạ"
+// Hai tin bị gộp thành MỘT chuỗi rồi chạy qua dây 212 nhánh khớp-trước-thắng.
+// Nhánh chính-sách-đổi khớp trước, trả lời xong là markProcessed(batch) +
+// return -> câu size không bị hoãn mà MẤT HẲN.
+//
+// Không sửa 212 nhánh. Thay vào đó cắt lượt thành hai ý ngay từ đầu: lượt này
+// chỉ thấy ý 1, ý 2 được chạy thêm một vòng nữa và gửi thành TIN RIÊNG.
+//
+// Rất dè dặt khi cắt — gộp tin là hành vi cố ý (khách gõ "váy này" rồi "bao
+// nhiêu tiền" là MỘT ý). Chỉ cắt khi thoả CẢ BA:
+//   · tin CUỐI tự nó là một câu hỏi,
+//   · hai phần có chủ đề RÕ RÀNG,  · và chủ đề đó KHÁC nhau.
+function _chuDeCuaY(text) {
+  const t = String(text || "").toLowerCase();
+  if (!t.trim()) return "";
+  if (isReturnRefund(t) || asksReturnPolicy(t) || asksExchangeIfNotLike(t)) return "chinh_sach";
+  if (/(size|sz|\d{2}\s*kg|cân nặng|can nang|chiều cao|chieu cao)/i.test(t)) return "size";
+  if (/(bao nhiêu|bao nhieu|giá|gia bao|nhiêu tiền|nhieu tien)/i.test(t)) return "gia";
+  if (/(ship|giao hàng|giao hang|vận chuyển|van chuyen|mấy ngày|may ngay|bao lâu|bao lau)/i.test(t)) return "ship";
+  if (/(chất|chat lieu|chất liệu|vải|co giãn|co gian|lót|lot|đệm|dem)/i.test(t)) return "chat";
+  if (/(màu|mau sac|màu sắc)/i.test(t)) return "mau";
+  if (wantsImages(t)) return "anh";
+  return "";
+}
+// Trả [ý1, ý2] khi đáng cắt; [] khi để nguyên như cũ.
+function tachYTrongLuot(batch) {
+  const tins = (batch || [])
+    .filter(m => m && m.type === "text" && String(m.text || "").trim())
+    .map(m => String(m.text).trim());
+  if (tins.length < 2) return [];              // một tin -> không có gì để cắt
+  const yCuoi = tins[tins.length - 1];
+  const yDau  = tins.slice(0, -1).join(" ");   // 3 tin trở lên: gộp phần đầu, cắt đúng MỘT nhát
+  if (!looksLikeQuestion(yCuoi)) return [];    // "màu hồng nha" là bổ ngữ, không phải ý mới
+  const c1 = _chuDeCuaY(yDau), c2 = _chuDeCuaY(yCuoi);
+  if (!c1 || !c2 || c1 === c2) return [];      // cùng chủ đề / chủ đề mờ -> gộp như cũ
+  return [yDau, yCuoi];
+}
+// convId -> ý còn lại của lượt vừa xử, để vòng gọi chạy thêm một lượt nữa.
+const _Y_CON_LAI = new Map();
 
 // Nối danh sách kiểu tiếng Việt: [a,b,c] -> "a, b và c"
 function joinVi(arr) {
@@ -1684,7 +2188,7 @@ function buildOrderInvite(mem, productInfo) {
 
   // (1) THIẾU SIZE -> hỏi size, KHÔNG chốt, KHÔNG nhắc địa chỉ cũ.
   if (orderNeedsSize(mem, productInfo) && !mem.customerSize) {
-    return "Dạ chị thường mặc size nào để em tư vấn cho mình nha ạ";
+    return cauHoiSize();
   }
 
   // (2) Đã đủ size nhưng còn thiếu liên hệ -> mời + xin nốt.
@@ -1740,11 +2244,48 @@ async function sendOrderCreatingWithImages(conversationId, mem, productInfo) {
   } catch (_) { try { await sendInboxMessage(conversationId, LEAD); } catch (__) {} }
 }
 // Chốt đơn CHUẨN: gửi tin "đang tạo" + ảnh -> rồi gửi câu cảm ơn. Trả text câu cảm ơn (để set lastBotReply).
+// ===== CỬA DUY NHẤT ĐỂ CHỐT ĐƠN =====
+// CHÍN nhánh gọi hàm này. Trước đây mỗi nhánh tự gửi tin chốt rồi tự gắn thẻ 182,
+// nên bước "đọc lại cho khách xác nhận" chỉ bọc được đúng MỘT nhánh (AI-QUYẾT) —
+// tám nhánh còn lại vẫn chốt thẳng. Đo 27/08/2026: khách nhắn "tư vấn e thêm mẫu
+// này", nhánh GĐ4 nhét luôn mẫu vào đơn vừa chốt, COD nhảy 925.000 -> 1.915.000.
+//
+// Nay hàm này KHÔNG chốt nữa: nó dựng bản nháp và ĐỌC LẠI cho khách soát. Chỉ
+// nhánh "khách gật bản đọc lại" (đầu lượt) mới thật sự phát tin chốt + gắn 182.
+// Nơi gọi nhận cờ mem._dangChoXacNhan -> dừng lượt, KHÔNG gắn thẻ, KHÔNG đặt
+// orderClosed. Vá từng nhánh thì còn sót; dồn về một cửa thì không.
 async function sendOrderClose(conversationId, mem, productInfo) {
-  await sendOrderCreatingWithImages(conversationId, mem, productInfo);
-  const reply = buildOrderConfirmation(mem, productInfo);
-  await sendInboxMessage(conversationId, reply);
-  return reply;
+  const _lines = [];
+  if (_orderLinesActive(mem, productInfo)) {
+    const byCode = {};
+    for (const p of (mem.quotedProducts || [])) byCode[_up(p.code)] = p;
+    if (productInfo) byCode[_up(productInfo.code)] = productInfo;
+    for (const ln of mem.orderLines) {
+      const p = byCode[_up(ln.code)] || productInfo;
+      _lines.push({ code: _up(ln.code), label: productLabel(p), color: ln.color, size: ln.size, qty: ln.qty || 1, address: mem.address });
+    }
+  } else {
+    const prods = (mem.quotedProducts && mem.quotedProducts.length) ? mem.quotedProducts : (productInfo ? [productInfo] : []);
+    for (const p of prods) {
+      _lines.push({ code: _up(p.code), label: productLabel(p), color: chosenColorForCode(mem, p) || null,
+                    size: mem.customerSize || null, qty: 1, address: mem.address });
+    }
+  }
+  const _nhom = gomDongTheoNoiGiao(_lines);
+  const _luuLines = mem.orderLines, _luuCode = mem.orderLinesCode;
+  const _tien = _nhom.map(g => {
+    mem.orderLines = g.lines.map(ln => ({ code: ln.code, color: ln.color, size: ln.size, qty: ln.qty }));
+    mem.orderLinesCode = null;
+    const t = computeOrderTotal(mem, productInfo);
+    return (t.known && t.total > 0) ? t.total : 0;
+  });
+  mem.orderLines = _luuLines; mem.orderLinesCode = _luuCode;
+  mem.donChoXacNhan = { nhom: _nhom.map(g => ({ address: g.address, lines: g.lines })), phone: mem.phone, luc: Date.now() };
+  mem._dangChoXacNhan = true;
+  const docLai = buildDocLaiDon(_nhom, mem, _tien);
+  await sendInboxMessage(conversationId, docLai);
+  console.log(`[${BOT_NAME}] ĐỌC LẠI ĐƠN chờ khách xác nhận (${_lines.length} món / ${_nhom.length} nơi giao) -> CHƯA lên đơn, CHƯA gắn 182.`);
+  return docLai;
 }
 // Lời chúc cuối câu chốt theo THỜI ĐIỂM (giờ VN, UTC+7). Thang ưu tiên:
 //   1) sau 20h (mọi ngày) -> ngủ ngon
@@ -1766,7 +2307,109 @@ function orderGreeting(mem) {
   if (mem) mem._lastOrderGreeting = timed;
   return timed;
 }
-function buildOrderConfirmation(mem, productInfo) {
+// ===== ĐƠN NHIỀU NƠI GIAO + XÁC NHẬN TRƯỚC KHI LÊN ĐƠN =====================
+// Ca Hà Giang 27/08/2026: "e lấy 1c trắng ship về địa chỉ cũ, và 1c đen ship về
+// địa chỉ 67 Nguyễn Xiển, Thanh Xuân, Hà nội nhé". Bot lên MỘT đơn:
+//   - Sản phẩm: Set Ginevra - kem và Set Ginevra - đen - M
+//   - Địa chỉ: 67 Nguyễn Xiển, Thanh Xuân, Hà Nội
+// Ba cái sai cùng lúc: gộp hai nơi giao thành một, nuốt mất "địa chỉ cũ", và
+// tự đổi màu "trắng" (mẫu Ginevra chỉ có KEM/HỒNG/ĐEN) thành "kem".
+//
+// Nay: dựng bản nháp -> ĐỌC LẠI CHO KHÁCH XÁC NHẬN -> khách ừ mới lên đơn, và
+// mỗi nơi giao thành MỘT đơn riêng.
+
+// Màu khách xin có phải màu THẬT của mẫu không. Mẫu không khai màu -> không chặn.
+function mauCoThatCuaMau(code, mau) {
+  const m = String(mau || "").trim();
+  if (!m) return false;
+  try {
+    const cols = getCodeColors(code) || [];
+    if (!cols.length) return true;
+    return cols.some(c => colorMatches(c, m) || colorMatches(m, c));
+  } catch (_) { return true; }
+}
+
+// Địa chỉ giao của MỘT món. AI ghi "CU" khi khách nói "địa chỉ cũ / như mọi khi"
+// — cố ý không cho AI viết lại địa chỉ cũ, vì nó bịa là giao sai nhà.
+function diaChiCuaMon(it, mem, diaChiChung) {
+  const raw = String((it && it.dia_chi) || "").trim();
+  if (/^cu$/i.test(raw)) return String(mem.address || "").trim();
+  return raw || String(diaChiChung || "").trim();
+}
+
+// ===== ĐỌC THẲNG CÂU KHÁCH ĐỂ BIẾT MÓN NÀO VỀ ĐÂU =====
+// Đo 27/08/2026: bảo AI điền địa chỉ cho từng món (san_pham[i].dia_chi) thì nó
+// KHÔNG làm — vẫn dồn cả hai nơi vào một chuỗi dia_chi_chuan:
+//   địa_chỉ_chuẩn="188 Khương Thượng, Đống Đa, Hà Nội; 67 Nguyễn Xiển, ..."
+//   -> gom nhóm ra ĐÚNG MỘT nơi giao -> vẫn một đơn, đúng lỗi đang sửa.
+// Nên chỗ này KHÔNG chờ AI: cắt thẳng câu khách bằng mã, xác định được thì đè.
+//
+// Cách cắt: mỗi mệnh đề có dạng "<mô tả món> ship/giao/gửi về <địa chỉ>". Địa chỉ
+// tự nó đầy dấu phẩy nên KHÔNG cắt theo dấu phẩy được; phải cắt tại liên từ
+// "và/còn" mà PHÍA SAU còn một động từ giao nữa (dùng lookahead).
+const _RE_GIAO_VE = "(?:ship|giao|gui|gửi)\\s*(?:về|ve|tới|toi|đến|den)\\s*(?:địa\\s*chỉ|dia\\s*chi)?\\s*";
+const _RE_LIEN_TU = "(?:[,;]?\\s*(?:còn|con|và|va)\\s+)";
+const _RE_MENH_DE = new RegExp(
+  "([^,;]{0,60}?)" + _RE_GIAO_VE + "([\\s\\S]*?)(?=" + _RE_LIEN_TU + "[^,;]{0,60}?" + _RE_GIAO_VE + "|$)", "gi");
+const _RE_DIA_CHI_CU = /^(cũ|cu|chỗ\s*cũ|cho\s*cu|đấy|day|đó|do|như\s*(mọi\s*khi|lần\s*trước|cũ))(?![\wà-ỹ])/i;
+
+// Trả [{color, size, address}] khi câu nêu TỪ HAI nơi giao trở lên; [] nếu không.
+function tachNoiGiaoTheoMon(text, mem) {
+  const ra = [];
+  for (const m of String(text || "").matchAll(_RE_MENH_DE)) {
+    const mon = String(m[1] || "").replace(/^[\s,;]*(?:còn|con|và|va)\s+/i, "").trim();
+    let dc = String(m[2] || "").replace(/[\s,;.]+$/, "").replace(/\s*(nhé|nhe|nha|ạ|a)$/i, "").trim();
+    if (!dc) continue;
+    // "ship về địa chỉ cũ" -> động từ đã nuốt chữ "địa chỉ", còn lại đúng chữ "cũ".
+    if (_RE_DIA_CHI_CU.test(dc)) dc = String(mem && mem.address || "").trim();
+    if (!dc) continue;
+    ra.push({ color: extractColor(mon) || null, size: (String(mon).match(/size\s*(xs|s|m|l|xl|xxl)\b/i) || [])[1] || null, address: dc });
+  }
+  if (ra.length < 2) return [];
+  const khac = new Set(ra.map(x => foldVi(x.address)));
+  return khac.size >= 2 ? ra : [];   // hai mệnh đề cùng một nơi -> vẫn là một đơn
+}
+
+// Gom dòng hàng theo NƠI GIAO -> mỗi nhóm về sau thành MỘT đơn.
+function gomDongTheoNoiGiao(lines) {
+  const nhom = [];
+  for (const ln of lines) {
+    const key = foldVi(String(ln.address || ""));
+    let g = nhom.find(x => x.key === key);
+    if (!g) { g = { key, address: ln.address, lines: [] }; nhom.push(g); }
+    g.lines.push(ln);
+  }
+  return nhom;
+}
+
+// Câu ĐỌC LẠI ĐƠN cho khách soát. CỐ Ý không dùng khuôn "- Sản phẩm:" của tin
+// chốt: order_extractor.findAllCods nhận diện tin chốt bằng đúng khuôn đó, câu
+// hỏi xác nhận mà mang khuôn ấy là có ngày lên đơn trước khi khách kịp ừ.
+function buildDocLaiDon(nhom, mem, tienTheoNhom) {
+  const d = [];
+  d.push(KB.cau("doc_lai_don__mo_dau"));
+  nhom.forEach((g, i) => {
+    const mon = g.lines.map(ln => {
+      const ten = ln.label || ln.code;
+      // Màu/size là thứ khách soát kỹ nhất. Thiếu thì nói thẳng là chưa rõ, đừng
+      // im lặng bỏ trống — khách gật một bản đọc lại thiếu màu là gật vào chỗ trống.
+      //
+      // KHÔNG dùng ngoặc đơn: stripParenNotes (:269) cắt sạch mọi cụm (...) khỏi tin
+      // gửi khách vì coi đó là ghi chú nội bộ. Viết màu/size trong ngoặc là khách
+      // nhận được bản đọc lại TRỐNG màu rồi gật bừa.
+      const phu = [ln.color || "chưa rõ màu", ln.size ? sizeLabel(ln.size) : "chưa rõ size"].join(" - ");
+      return `${ten} - ${phu}`;
+    }).join(" + ");
+    const tien = tienTheoNhom[i] ? ` — ${_fmtMoney(tienTheoNhom[i])}đ` : "";
+    d.push(`• ${mon} → giao ${addrForOrder(g.address)}${tien}`);
+  });
+  if (mem.phone) d.push(KB.cau("doc_lai_don__sdt", { sdt: mem.phone }));
+  if (nhom.length > 1) d.push(KB.cau("doc_lai_don__nhieu_noi_giao", { so: nhom.length }));
+  d.push(KB.cau("doc_lai_don__hoi_chot"));
+  return d.join("\n");
+}
+
+function buildOrderConfirmation(mem, productInfo, nhanDon) {
   const tenMauSize = quotedListWithColorSizes(mem, productInfo)
     || (productInfo && productInfo.name ? productLabel(productInfo) : "");
   const _tot = computeOrderTotal(mem, productInfo);
@@ -1782,7 +2425,7 @@ function buildOrderConfirmation(mem, productInfo) {
       codStr += ` (hàng ${_fmtMoney(_tot.sum)}đ + ship ${_fmtMoney(_tot.ship)}đ)`;
     }
   }
-  const lines = ["Cảm ơn chị đã đặt hàng"];
+  const lines = ["Cảm ơn chị đã đặt hàng" + (nhanDon ? " " + nhanDon : "")];
   if (tenMauSize) lines.push(`- Sản phẩm: ${tenMauSize}`);
   if (codStr) lines.push(`- COD: ${codStr}`);
   if (mem.phone) lines.push(`- SĐT: ${mem.phone}`);
@@ -1850,7 +2493,7 @@ function tryCloseFromState(mem, productInfo, latestText) {
   const needColor = colors.length >= 2 && !chosenColorForCode(mem, productInfo);
 
   // --- ĐỊA CHỈ (xoá rác trước khi xét) ---
-  if (mem.address && isGarbageAddress(mem.address)) mem.address = null;
+  if (mem.address && isGarbageAddress(mem.address)) xoaDiaChi(mem, "chỗ 2444");
   const addrOk = addrReady(mem);
 
   // --- ĐỦ -> CHỐT ---
@@ -1952,7 +2595,7 @@ function asksSizeChart(text) {
 async function maybeSendSizeChart(conversationId, custText, product, mem) {
   if (!asksSizeChart(custText)) return false;
   if (SIZE_GUIDE_IMG && (SIZE_GUIDE_IMG.url || SIZE_GUIDE_IMG.contentId)) {
-    await sendInboxMessage(conversationId, "Dạ em gửi chị bảng size để mình tham khảo nha ạ");
+    await sendInboxMessage(conversationId, KB.cau("bang_size_dan"));
     const sres = await sendImages3(conversationId, [{ url: SIZE_GUIDE_IMG.url, contentId: SIZE_GUIDE_IMG.contentId }]);
     const sentImg = !!(sres && sres.ok);
     console.log(`[${BOT_NAME}] Gửi kèm ẢNH bảng size (khách xin) -> sentImg=${sentImg}.`);
@@ -1963,7 +2606,7 @@ async function maybeSendSizeChart(conversationId, custText, product, mem) {
       if (isFree) action = freesizeLine(mem, product);
       else if (mem.noFitForCode === (product && product.code)) action = "Dạ với số đo của mình thì mẫu này chưa có size phù hợp, chị tham khảo thêm bảng size và mẫu khác giúp em nha ạ";
       else if (mem.customerSize && (a.size === 0 || a.has(mem.customerSize))) action = `Dạ ${orderActionLine(mem, mem.customerSize)}`;
-      else action = "Dạ chị thường mặc size nào để em tư vấn cho mình nha ạ";
+      else action = cauHoiSize();
       await sendInboxMessage(conversationId, action);
     } else {
       try { await tagXuLyAnhVaUnread(conversationId); } catch (_) {}
@@ -1980,11 +2623,14 @@ async function maybeSendSizeChart(conversationId, custText, product, mem) {
 const SIZE_WEIGHT = { S: "40-48kg", M: "49-55kg", L: "56-60kg", FREESIZE: "42-57kg" };
 
 // ===== BẢNG SỐ ĐO 3 VÒNG (MYS.P SIZE GUIDE) - tư vấn size theo số đo khách cung cấp =====
-const SIZE_CHART_3V = {
+// Bảng size: số liệu riêng của shop -> kich_ban/<shopId>.json. Shop khác bán dáng
+// khác, số đo khác; dùng nhầm bảng thì bot tư vấn sai TỪNG khách một mà không có
+// dấu hiệu gì báo lỗi — kiểu hỏng âm thầm đắt nhất khi nhân bản bot sang shop mới.
+const SIZE_CHART_3V = KB.soLieu("bang_size_3_vong", {
   S: { nguc: [82, 84], eo: [64, 66], mong: [88, 90] },
   M: { nguc: [86, 88], eo: [68, 70], mong: [92, 94] },
   L: { nguc: [90, 92], eo: [72, 74], mong: [96, 98] },
-};
+});
 // 1 số đo -> size NHỎ NHẤT đủ chứa (mép trên >= số đo) trong danh sách size cho trước; vượt hết -> null.
 function _sizeFitOne(v, dim, sizes) {
   for (const sz of sizes) {
@@ -2141,8 +2787,15 @@ function asksWhySizeDiffer(text) {
 //   - Đang hoàn (177): khách muốn HOÀN/HỦY đơn (hậu-đơn, người thật xử).
 // THẺ AI-XL ảnh (184) KHÔNG chặn: nó chỉ báo "thiếu 1 ảnh để người thật bổ sung",
 // còn lại AI VẪN nói chuyện bình thường với khách.
-const HOLD_TAG_IDS = [183, 185, 166, 177];
-const HOLD_TAG_NAME_RE = /chờ\s*xl|đơn\s*ưu\s*tiên|hàng\s*đổi|đang\s*hoàn/i;
+// [CHỐT SHOP 25/08/2026] "Trường hợp không tự xử lý được, cần người thật vào xử lý thì bot
+// KHÔNG làm gì tiếp; chỉ khi nhân viên vào TRẢ LỜI và GỠ thẻ thì bot mới được trả lời tiếp."
+// -> 184 (ảnh không nhận diện được) vào danh sách chặn cùng 183/185/166/177. Một luật duy nhất
+//    cho mọi ca cần người thật, không chia nhỏ nữa.
+const HOLD_TAG_IDS = [183, 184, 185, 166, 177];
+// "chờ người thật" là tên thẻ giữ bên mfs (thẻ hệ thống, seed sẵn). Tên bên
+// Pancake là "AI-CHỜ XL". Cùng một vai trò, hai tên -> phải nhận cả hai, nếu
+// không thì ở chế độ mfs bot không thấy thẻ giữ và xử lại vô hạn mỗi vòng poll.
+const HOLD_TAG_NAME_RE = /chờ\s*xl|chờ\s*người\s*thật|đơn\s*ưu\s*tiên|hàng\s*đổi|đang\s*hoàn/i;
 // ĐA TRANG: id thẻ trong Pancake KHÁC nhau theo TỪNG page. HOLD_TAG_IDS ở trên chỉ là id của MỘT page,
 // nên trang khác (vd MYSP) có "Hàng đổi"/"CHỜ XL"... mang id KHÁC -> khớp-theo-id trượt; mà payload list
 // nhiều khi KHÔNG kèm tên tag -> khớp-theo-tên cũng trượt -> BOT LỌT VÀO dù đã có thẻ giữ.
@@ -2305,7 +2958,7 @@ function formatPrice(v) {
 
 // Khách có đang YÊU CẦU xem ảnh không?
 function wantsImages(text) {
-  return /xem ảnh|xem ánh|gửi ảnh|gửi ánh|cho.*xem|gửi.*xem|xem mẫu|ảnh thật|ánh thật|ảnh thực tế|ánh thực tế|xem màu|hình ảnh|cho.*hình|gửi.*hình|xem thêm|xem đi|xem cái|cho.*ảnh|cho.*ánh/i.test(String(text || ""));
+  return /xem ảnh|xem ánh|gửi ảnh|gửi ánh|cho.*xem|gửi.*xem|xem mẫu|ảnh thật|ánh thật|ảnh thực tế|ánh thực tế|xem màu|hình ảnh|cho.*hình|gửi.*hình|xem thêm|xem đi|xem cái|cho.*ảnh|cho.*ánh|ảnh khách|ánh khách|ảnh người|ánh người|khách mặc|người mặc|(xin|gửi|gui|cho|có|còn)\s+(\S+\s+){0,2}(ảnh|ánh|hình|tấm)/i.test(String(text || ""));
 }
 
 // Khách đang HỎI tư vấn size? (có kg/chiều cao, hoặc "size gì/nào")
@@ -2364,20 +3017,34 @@ function enforceSize(reply, size, product) {
 //   S: 40–48 | M: 49–57 | L: 56–61 | Freesize: 42–57
 // VÙNG CHỒNG (56–57kg thuộc cả M lẫn L) -> ƯU TIÊN size LỚN (L); L hết mới về M.
 // >61kg = quá tầm shop (không có size).
+// Số liệu riêng của shop -> kich_ban/<shopId>.json. Phom code dưới đây LÀ ĐÚNG
+// từng con số của bản viết cứng cũ, nên shop chưa khai thì hành vi không đổi.
+const _BANG_CN = KB.soLieu("bang_can_nang_size", {
+  khoang: [
+    { size: "L", tu: 56, den: 61 },
+    { size: "M", tu: 49, den: 57 },
+    { size: "S", tu: 40, den: 48 },
+  ],
+  nguong_co_ban: [
+    { size: "S", den: 48 },
+    { size: "M", den: 55 },
+    { size: "L", den: 61 },
+  ],
+  size_qua_tam: "L",
+});
 function weightToBaseSize(kg) {
-  if (kg <= 48) return "S";
-  if (kg <= 55) return "M";   // 49–55 -> M
-  if (kg <= 61) return "L";   // 56–61 -> L (56–57 ưu tiên L)
-  return "L";                 // >61: để resolveSizeByWeight xử "OVER"
+  // Mục ĐẦU TIÊN có "den" >= kg. Cố ý KHÔNG xét cận dưới: khách 38kg vẫn ra S,
+  // đúng như bản cũ (`if (kg <= 48) return "S"`).
+  for (const m of _BANG_CN.nguong_co_ban || []) if (kg <= m.den) return m.size;
+  return _BANG_CN.size_qua_tam;   // >mọi ngưỡng: để resolveSizeByWeight xử "OVER"
 }
 // Trả DANH SÁCH size hợp cân, sắp theo ƯU TIÊN (lớn->nhỏ) để chọn size lớn nhất CÒN hàng.
 // vd 56kg -> ["L","M"] (ưu tiên L, L hết thì M); 53kg -> ["M"]; 46kg -> ["S"].
+// Thứ tự ưu tiên = thứ tự khai trong "khoang", không sắp lại.
 function weightAllowedSizes(kg) {
-  const out = [];
-  if (kg >= 56 && kg <= 61) out.push("L");
-  if (kg >= 49 && kg <= 57) out.push("M");
-  if (kg >= 40 && kg <= 48) out.push("S");
-  return out;   // [] nếu <40 hoặc >61 (quá tầm)
+  return (_BANG_CN.khoang || [])
+    .filter(m => kg >= m.tu && kg <= m.den)
+    .map(m => m.size);   // [] nếu <40 hoặc >61 (quá tầm)
 }
 function parseAvailableSizes(str) {
   const up = String(str || "").toUpperCase();
@@ -2463,6 +3130,9 @@ function markPriced(mem, code) {
   mem.pricedAt = mem.pricedAt || {};
   mem.pricedAt[k] = Date.now();
 }
+// Vừa báo giá trong ngần này PHÚT thì im là đúng (chống đúp trong một mạch).
+// Lâu hơn mà khách hỏi lại giá thì phải trả lời — xem nhánh "Hỏi giá lại mẫu".
+const _VUA_BAO_GIA_PHUT = Number(process.env.VUA_BAO_GIA_PHUT || 5);
 function quotedRecently(mem, code, hours = 24) {
   const k = String(code || "").toUpperCase();
   if (!k || !mem || !mem.pricedAt) return false;
@@ -3129,10 +3799,10 @@ function updateMemoryFromText(mem, text = "") {
     const _looksLooseAddr = _startsHouseNum && _wc >= 3 && !_badAddr;
     if (phoneFound && restAfterPhone.replace(/[^\p{L}]/gu, "").length >= 3 && restLooksAddr) {
       // Khách gửi SĐT KÈM địa chỉ -> phần còn lại (bỏ số đt) chính là địa chỉ.
-      mem.address = _mergeIfPartial(mem.address, cleanAddress(restAfterPhone)); mem._addrJustGiven = true; mem._reaskedAddr = false;
+      datDiaChi(mem, _mergeIfPartial(mem.address, cleanAddress(restAfterPhone)), "sđt kèm địa chỉ"); mem._addrJustGiven = true; mem._reaskedAddr = false;
     } else if ((hasStreetKw || (prov && hasHouseNum) || (cityAbbr && hasHouseNum) || _looksLooseAddr) && t.length >= 6) {
       // Địa chỉ gửi riêng (không kèm SĐT) nhưng có dấu hiệu rõ (số nhà + tỉnh/viết tắt, từ khoá đường/phường, hoặc dạng "lỏng" số nhà + tên đường).
-      mem.address = _mergeIfPartial(mem.address, cleanAddress(t.trim())); mem._addrJustGiven = true; mem._reaskedAddr = false;
+      datDiaChi(mem, _mergeIfPartial(mem.address, cleanAddress(t.trim())), "địa chỉ gửi riêng"); mem._addrJustGiven = true; mem._reaskedAddr = false;
     }
   }
 }
@@ -3247,7 +3917,7 @@ function isHumanInboxMsg(m) {
   if (m.messageId && botSentIds.has(String(m.messageId))) return false;  // chính bot gửi
   const a = (m.adminName || "").trim();
   if (!a) return false;                            // admin RỖNG = tin tự động/hệ thống (vd "Xin chào, cảm ơn..."), KHÔNG phải người thật
-  if (a === "Public API" || a === "Botcake") return false;              // bot / Botcake
+  if (laNhanBot(a)) return false;                  // tin do BOT gửi (Public API / Botcake / tên đã đổi)
   return true;                                     // CÓ TÊN nhân viên = người thật
 }
 function humanTookOverInbox(messages) {
@@ -3262,7 +3932,7 @@ function humanTookOverComment(messages) {
     if (m.messageId && botSentIds.has(String(m.messageId))) return false;   // chính bot gửi
     const a = (m.adminName || "").trim();
     if (!a) return false;                                                   // rỗng = hệ thống/không rõ -> KHÔNG coi là người thật
-    if (a === "Public API" || a === "Botcake") return false;               // bot / Botcake
+    if (laNhanBot(a)) return false;                                         // tin do BOT gửi (xem danh_tinh_bot.js)
     return true;                                                            // CÓ tên NV = người thật đã trả lời comment
   });
 }
@@ -3299,8 +3969,19 @@ function hasProcessed(messages) {
   return messages.some(m => processedMessageIds.has(m.messageId) || processingMessageIds.has(m.messageId));
 }
 function markProcessing(messages) { for (const m of messages) processingMessageIds.add(m.messageId); }
+// Tin đã xử lý TRONG CHÍNH LẦN CHẠY NÀY (RAM, mất khi restart — cố ý).
+// Khác processedMessageIds (ghi xuống đĩa, sống qua restart): sổ này chỉ để biết
+// "vòng poll trước của CHÍNH tiến trình này đã xử cụm tin đó rồi".
+const _daXuLyLuotChay = new Set();
 function markProcessed(messages) {
-  for (const m of messages) { addProcessed(processedMessageIds, m.messageId); processingMessageIds.delete(m.messageId); }
+  for (const m of messages) {
+    addProcessed(processedMessageIds, m.messageId);
+    processingMessageIds.delete(m.messageId);
+    if (m && m.messageId) {
+      _daXuLyLuotChay.add(m.messageId);
+      if (_daXuLyLuotChay.size > 5000) { const k = _daXuLyLuotChay.values().next().value; _daXuLyLuotChay.delete(k); }
+    }
+  }
 }
 function clearProcessing(messages) { for (const m of messages) processingMessageIds.delete(m.messageId); }
 
@@ -3371,13 +4052,27 @@ async function getProductsFromImages(batch) {
   const products = [];
   const colorByCode = {};
   const matchedImgByCode = {};
+  // [25/08/2026] GOM MÃ "NHẬN RA RỒI NHƯNG THIẾU DÒNG SHEET".
+  // NOT_FOUND_IN_SHEET không phải là đọc-không-ra ảnh: vision ĐÃ ra mã, chỉ là mã đó không
+  // có dòng trong Sheet nên không có giá để báo. Trước đây thông tin này bị vứt ngay tại đây,
+  // nên nhánh phía dưới chỉ thấy "không nhận ra mẫu nào" -> im lặng.
+  // Đo 25/08: 265/738 mã có ảnh mà không có dòng Sheet = 2.510/15.221 ảnh (16,5%) rơi kiểu này.
+  const thieuDongSheet = [];
   for (const img of imgs) {
     const r = await resolveImageRetry(img.imageUrl, 3);
     // LOG ĐIỂM TIN CẬY: để soi ảnh CÓ trong hệ thống (điểm cao) vs ảnh CHƯA có (điểm thấp/gap nhỏ) -> chỉnh ngưỡng.
     const _top = (r && r.top || []).slice(0, 3).map(t => `${t.code}:${t.score}`).join(" ");
     console.log("VISION:", JSON.stringify(r?.ok
       ? { ok: true, code: r.code, color: r.color || "", score: r.score, gap: r.gap }
-      : { ok: false, reason: r?.reason || r?.vision?.reason, score: r?.score, gap: r?.gap }) + (_top ? ` | top: ${_top}` : ""));
+      // [25/08/2026] IN CẢ MÃ KHI HỎNG. NOT_FOUND_IN_SHEET nghĩa là vision ĐÃ nhận ra mã
+      // (ở đây 0.9937) nhưng mã đó không có dòng trong Sheet. Không in mã ra thì nhìn log
+      // không biết được là ảnh lạ hay là mã thiếu dòng -> phải đoán. Đã đoán sai một lần.
+      : { ok: false, reason: r?.reason || r?.vision?.reason, code: r?.code || r?.vision?.code || "",
+          score: r?.score, gap: r?.gap }) + (_top ? ` | top: ${_top}` : ""));
+    if (!r?.ok && /NOT_FOUND_IN_SHEET/i.test(String(r?.reason || r?.vision?.reason || ""))) {
+      const _m = String(r?.code || r?.vision?.code || "").toUpperCase();
+      if (_m && !thieuDongSheet.some(x => x.code === _m)) thieuDongSheet.push({ code: _m, score: r?.score });
+    }
     if (r?.ok && r?.product) {
       products.push(r.product);
       const C = String(r.product.code || "").toUpperCase();
@@ -3387,6 +4082,7 @@ async function getProductsFromImages(batch) {
   }
   Object.defineProperty(products, "_colorByCode", { value: colorByCode, enumerable: false });
   Object.defineProperty(products, "_matchedImgByCode", { value: matchedImgByCode, enumerable: false });
+  Object.defineProperty(products, "_thieuDongSheet", { value: thieuDongSheet, enumerable: false });
   return products;
 }
 
@@ -3655,7 +4351,23 @@ function isUrgentSpecificDate(text) {
   const hasNeed = /(cần|can|lấy|lay|nhận|nhan|mặc|mac|đi|dùng|dung|kịp|kip|giao|ship|hàng|hang|tiệc|tiec|việc|viec|đám|dam)/i.test(t);
   if (hasDate && hasNeed) return true;
   // 3) Dịp có deadline (tiệc, cưới, sự kiện...)
-  if (/(có tiệc|co tiec|đám cưới|dam cuoi|đám hỏi|dự tiệc|du tiec|đi tiệc|sự kiện|su kien|có việc gấp|đi đám|di dam)/i.test(t)) return true;
+  // [SỬA 25/08/2026] NHƯNG "hỏi mẫu có hợp dịp không" KHÔNG phải là có deadline.
+  //   "chị có tiệc thứ 5, kịp không em"      -> CÓ deadline  (mục 1/2 bắt: gấp, thứ 5)
+  //   "mẫu này mặc đi tiệc ở cty được k shop" -> HỎI HỢP DỊP -> phải TƯ VẤN
+  // Đo trên page thật: câu thứ hai bị gắn 185 ĐƠN ƯU TIÊN rồi im, dù AI-READ đọc đúng là
+  // OCCASION_QA. Tài liệu tách bạch hẳn hai nhãn OCCASION_QA và URGENT.
+  //
+  // Rào đặt Ở ĐÂY chứ không ở nơi gọi: hàm này có 5 nơi gọi, ban đầu tôi chỉ rào MỘT nơi
+  // (nhánh DISPATCH) và nhánh isPriorityOrder vẫn gắn 185 y như cũ — giả lập bắt được.
+  //
+  // Nhận diện câu HỎI: có trỏ vào một mẫu ("mẫu này/váy này/set này") VÀ có đuôi nghi vấn
+  // ("được không / có hợp không / ổn không"). Câu có thêm mốc ngày vẫn bị mục 1/2 bắt trước
+  // khi tới đây, nên "mẫu này mặc đi tiệc THỨ 5 được không" vẫn tính là gấp — đúng.
+  const _troVaoMau = /(mẫu|mau|váy|vay|đầm|dam|set|áo|ao|quần|quan|bộ|bo|cái|cai|em nó)\s*(này|nay|đó|do|kia)/i.test(t);
+  const _duoiNghiVan = /(được không|duoc khong|được ko|duoc ko|được k(?![\p{L}])|duoc k(?![\p{L}])|có hợp|co hop|hợp không|hop khong|hợp ko|ổn không|on khong|ổn ko|có nên|co nen|thế nào|the nao|ra sao|sao ạ|được chứ|duoc chu|ok không|ok ko)/iu.test(t);
+  const _hoiHopDip = _troVaoMau && _duoiNghiVan;
+  if (!_hoiHopDip
+      && /(có tiệc|co tiec|đám cưới|dam cuoi|đám hỏi|dự tiệc|du tiec|đi tiệc|sự kiện|su kien|có việc gấp|đi đám|di dam)/i.test(t)) return true;
   return false;
 }
 function deliveryTimeReply(mem) {
@@ -3763,24 +4475,37 @@ function doubtsAdvisedQuality(text) {
   return /(không|ko|kg|chẳng|chả)\s*(đẹp|xinh|ổn|ưng|như ý)?\s*(như|giống)\s*(tư vấn|tu van|em nói|e nói|chị nói|c nói|quảng cáo|qc|lời|miêu tả|mô tả)/.test(t)
     || /(tư vấn|quảng cáo|nói)\s*(quá|ảo|điêu|chém|xạo|lố|một đằng)/.test(t);
 }
-const _LOOKS_REASSURE = [
-  "Dạ chị yên tâm nha, hàng thiết kế nên ngoài đời nhìn cũng đẹp lắm ạ",
-  "Dạ ngoài đời mẫu này lên dáng đẹp lắm, chị yên tâm nha",
-];
+// Khách hỏi HẬU QUẢ nếu hàng về không như kỳ vọng: "mua về mà k giống được thế thì sao".
+// Lưới đỡ cho nhãn RISK_RECOURSE — AI đã gắn nhầm câu này thành SIZE_ADVICE một lần.
+// Khuôn: một GIẢ ĐỊNH XẤU (không giống / không đẹp / không ưng / không như quảng cáo)
+// đi kèm cụm HỎI HẬU QUẢ (thì sao / thì thế nào / thì tính sao).
+// CỐ Ý không bắt "không vừa/chật/rộng" — cái đó là lo SIZE, đã có nhánh riêng.
+function asksRiskRecourse(text) {
+  const t = String(text || "").toLowerCase();
+  // Ranh giới từ dùng (?<![\p{L}\p{N}]) chứ KHÔNG dùng \b: \b của JS là ranh giới
+  // ASCII nên "k" trong "khách" cũng được coi là hết từ (đã cắn một lần ở soi_cau_ai.js).
+  const D = "(?<![\\p{L}\\p{N}])";
+  const giaDinhXau = new RegExp(
+    D + "(không|khong|ko|kg|k|chẳng|chả|nhỡ|lỡ|nếu|neu)\\s*(mà\\s*)?" +
+    "((giống|giong|như|nhu|đẹp|dep|xinh|ưng|ung|thích|thich|hài lòng|vừa ý|ổn)(?![\\p{L}\\p{N}])" +
+    "|(giống|giong|như|nhu)\\s*(hình|ảnh|hinh|anh|quảng cáo|qc|mẫu|mau))", "u");
+  const hoiHauQua = new RegExp(
+    D + "(thì|thi)\\s*(sao|thế nào|the nao|tính sao|tinh sao|làm sao|lam sao|như nào|nhu nao|ntn)" +
+    "(?![\\p{L}\\p{N}])", "u");
+  return giaDinhXau.test(t) && hoiHauQua.test(t);
+}
 function buildLooksReassure(mem) {
-  mem.looksIdx = ((mem.looksIdx || 0) + 1) % _LOOKS_REASSURE.length;
-  return _LOOKS_REASSURE[mem.looksIdx];
+  // [BƯỚC 1 · 25/08/2026] Câu lấy từ KHO KỊCH BẢN (shop sửa được, Sheet đè được);
+  // mảng trên chỉ còn là phom code đỡ khi kho hụt. Xoay vòng giữ nguyên như cũ.
+  const arr = KB.cacCau("tran_an_ngoai_doi");
+  return _rotLine(mem, "looksIdx", arr);
 }
 function buildReassureReply(mem) {
   // CHỈ trấn an chất lượng (hàng thiết kế). TUYỆT ĐỐI KHÔNG nhắc hoàn/hủy ở đây
   // (chỉ nói chính sách hoàn/hủy khi khách HỎI -> asksReturnPolicy).
-  const arr = [
-    "Dạ hàng thiết kế nên chị yên tâm chất lượng nha ạ",
-    "Dạ đồ thiết kế nên form và chất đều rất đẹp, chị yên tâm nha ạ",
-    "Dạ mẫu này hàng thiết kế, chất lượng kỹ lắm chị yên tâm ạ",
-  ];
-  mem.reassureIdx = ((mem.reassureIdx || 0) + 1) % arr.length;
-  return arr[mem.reassureIdx];
+  // [BƯỚC 1 · 25/08/2026] Câu lấy từ KHO KỊCH BẢN; mảng dưới là phom code đỡ khi kho hụt.
+  const arr = KB.cacCau("tran_an_chat_luong");
+  return _rotLine(mem, "reassureIdx", arr);
 }
 // ===== THUYẾT PHỤC BẰNG ẢNH NGHỆ SĨ (cột V "Nghệ sĩ" của Sheet) =====
 // Gửi 1 câu thuyết phục + ảnh nghệ sĩ diện mẫu (tối đa 8 ảnh). Dùng cho: khách LĂN TĂN/từ chối,
@@ -4096,15 +4821,42 @@ function asksExchangeReceived(text) {
 }
 // Hướng dẫn GỬI HÀNG ĐỔI -> TÁCH 2 TIN cho tự nhiên (tin 1: địa chỉ + dặn dò; tin 2: lời trấn an).
 function buildExchangeGuide() {
+  // Nơi khách gửi hàng đổi về: số liệu riêng của shop -> kich_ban/<shopId>.json.
+  const dc = KB.soLieu("dia_chi_doi_hang", {
+    nguoi_nhan: "Công ty TNHH Mys.P",
+    sdt: "0566826777",
+    dia_chi: "Số 01 - Đường Huỳnh Thúc Kháng - Phường Dĩnh Kế - TP Bắc Giang - Tỉnh Bắc Ninh",
+    so_ngay_doi: 15,
+  });
   const part1 = [
     "Chị vui lòng gửi hàng về địa chỉ shop theo hướng dẫn sau ạ:",
-    "- Người nhận: Công ty TNHH Mys.P - SĐT: 0566826777",
-    "- Địa chỉ: Số 01 - Đường Huỳnh Thúc Kháng - Phường Dĩnh Kế - TP Bắc Giang - Tỉnh Bắc Ninh",
-    "Shop hỗ trợ đổi hàng trong 15 ngày, chị nhớ ghi đầy đủ tên và SĐT đã dùng để đặt hàng nha.",
+    `- Người nhận: ${dc.nguoi_nhan} - SĐT: ${dc.sdt}`,
+    `- Địa chỉ: ${dc.dia_chi}`,
+    `Shop hỗ trợ đổi hàng trong ${dc.so_ngay_doi} ngày, chị nhớ ghi đầy đủ tên và SĐT đã dùng để đặt hàng nha.`,
     "Sau khi gửi chị cho shop xin lại hình ảnh bill gửi hàng để tiện theo dõi ạ."
   ].join("\n");
   const part2 = "Chị gửi lại sản phẩm nhe, nhận hàng xong bên chăm sóc khách hàng sẽ liên hệ để gửi mẫu đổi cho mình ạ";
   return [part1, part2];
+}
+// ===== KHÁCH HỎI PHÍ ĐỔI/TRẢ — THỨ KỊCH BẢN KHÔNG KHAI =====
+// kich_ban/luat.txt:163 chỉ khai "đổi trong 15 ngày, chưa qua sử dụng, còn tem
+// mác"; :164 khai "không hoàn hàng trừ lỗi shop". KHÔNG dòng nào nói AI CHỊU PHÍ
+// gửi hàng về. Dòng freeship (:162) là phí ship GIAO ĐƠN trên 500k, không liên quan.
+// Bot đoán khoản này = hứa sai TIỀN với khách. Nên: trả phần CÓ dữ liệu, phần phí
+// nói thẳng là nhờ nhân viên xác nhận, rồi gắn thẻ cho người thật vào chốt.
+function hoiPhiDoiTra(text) {
+  const t = String(text || "").toLowerCase();
+  if (!/(đổi|doi|trả|tra|hoàn|hoan)/.test(t)) return false;
+  return /(miễn phí|mien phi|free|mất phí|mat phi|tốn phí|ton phi|mất tiền|mat tien|tốn tiền|ton tien|phí|ai chịu|ai chiu|có phải trả|co phai tra)/.test(t);
+}
+// Câu nằm trong kho -> shop sửa lời được, không phải mở mã. Khai được phí đổi thì
+// sửa thẳng khoá doi_tra__phi_nho_nhan_vien trong kich_ban/mac_dinh.json.
+function cauPhiDoiTra() { return KB.cau("doi_tra__phi_nho_nhan_vien"); }
+// Gọi SAU khi đã gửi câu trả lời phần có dữ liệu.
+async function nhuongNVChotPhiDoiTra(conversationId, mem) {
+  try { await tagChoXuLyVaUnread(conversationId); } catch (_) {}
+  mem.botHandoffAt = Date.now();
+  console.log(`[${BOT_NAME}] Khách hỏi PHÍ đổi/trả — kịch bản KHÔNG khai -> đã trả phần có dữ liệu, gắn thẻ để NV chốt phần phí.`);
 }
 function buildReturnPolicyReply() {
   return "Dạ sản phẩm đã mua shop không hỗ trợ hoàn/hủy, nhưng nếu nhận hàng không vừa shop hỗ trợ đổi size hoặc đổi mẫu cho mình nha ạ";
@@ -4176,11 +4928,25 @@ function worriesGarmentShort(text) {
 }
 // Khách HỎI CÓ 1 SIZE CỤ THỂ không ("có size XL không", "co xl ko", "còn size L ko") -> trả ĐÚNG bảng size mẫu.
 // Trả về size hỏi (in HOA) hoặc null. Tránh bắt 'm' trong "màu", 'l' trong "lấy" (yêu cầu ranh giới + có "có/còn").
+// Khách xin size KHÁC so với size đang bàn: "có size lớn hơn không", "size to hơn",
+// "rộng hơn tí", "bé hơn"... KHÔNG nêu tên size cụ thể nên asksWhichSpecificSize
+// không bắt được (và trước đây bắt nhầm "size lớn" thành size L).
+function hoiSizeKhac(text) {
+  const t = String(text || "").toLowerCase();
+  if (!/(size|sz|số|so)/.test(t) && !/(rộng|rong|chật|chat|to|bé|be|nhỏ|nho)\s*hơn/.test(t)) return null;
+  if (/(lớn|lon|to|rộng|rong|bự|bu|nhỉnh|nhinh)\s*(hơn|hon|h[ơo]n)/.test(t)) return "lon";
+  if (/(nhỏ|nho|bé|be|chật|chat|ôm|om)\s*(hơn|hon)/.test(t)) return "nho";
+  return null;
+}
 function asksWhichSpecificSize(text) {
   const t = String(text || "").toLowerCase().replace(/[?]/g, " ");
   if (!/(^|\s)(có|co|còn|con|cần|can)(\s|$)/.test(t)) return null;
   if (/size\s*(nào|gì|j)(\s|$)/.test(t)) return null;   // "có size nào" = hỏi LIỆT KÊ, không phải 1 size cụ thể
-  const m = t.match(/\b(?:size|sz)\s*(xs|xl|xxl|xxxl|freesize|s|m|l)\b/i)     // "size l", "size xl"
+  // [27/08/2026] "size lớn hơn" TỪNG bị đọc thành size L: \b sau chữ "l" khớp được
+  // vì "ớ" là ký tự ngoài ASCII. Bot ra đúng đáp án nhưng bằng một tai nạn — và
+  // "size to hơn" / "size rộng hơn" thì trượt sạch. Nay chặn bằng lookahead chữ
+  // tiếng Việt, giống lối đã dùng ở looksLikeQuestion.
+  const m = t.match(/\b(?:size|sz)\s*(xs|xl|xxl|xxxl|freesize|s|m|l)(?![\wà-ỹ])/i)     // "size l", "size xl"
          || t.match(/(?:^|\s)(xl|xxl|xxxl|freesize)(?=\s|$)/i)                // xl/xxl... đứng riêng (an toàn)
          || t.match(/(?:^|\s)(s|m|l)\s*(?:ko|không|khong|k|hông|hong)\b/i);   // "m ko", "l ko" (s/m/l đơn chỉ khi theo sau là "ko/không")
   if (!m) return null;
@@ -4190,6 +4956,18 @@ function asksWhichSpecificSize(text) {
 }
 // Khách ĐỒNG Ý / ƯNG ("ok", "oki e", "đồng ý", "chốt nha", "lấy nhé", "ừ", "vâng"...).
 // CHỈ tính khi câu NGẮN + KHÔNG kèm câu hỏi (loại "ok nhưng có ngắn ko") + KHÔNG kèm size/sđt (để handler khác lo).
+// Khách gật với BẢN ĐỌC LẠI ĐƠN. Rộng hơn saysAgree một chút vì câu gật ở đây
+// hay kèm chữ "đúng/chuẩn" ("đúng rồi em", "chuẩn rồi nhé", "ừ lên đơn đi").
+// Câu KHÁC (sửa màu, đổi địa chỉ...) -> không tính là gật, bản nháp bị bỏ và
+// hệ thống đọc lại từ đầu.
+function xacNhanBanNhapDon(text) {
+  const t = String(text || "").toLowerCase().trim();
+  if (!t || t.length > 40) return false;
+  if (/[?]|không|ko\b|\bk\b|chưa|sai|nhầm|đổi|sửa/.test(t)) return false;
+  if (/(đúng|dung roi|chuẩn|chuan)\s*(rồi|roi|r\b|ạ|a\b|nhé|nhe|em|v)?/.test(t)) return true;
+  if (/(lên đơn|len don|chốt luôn|chot luon|chốt đi|chot di|lên luôn)/.test(t)) return true;
+  return saysAgree(t);
+}
 function saysAgree(text) {
   const t = String(text || "").toLowerCase().trim();
   if (!t || t.length > 28) return false;
@@ -4293,7 +5071,54 @@ function saysOrderAlreadyPlaced(text) {
 }
 function isPolicyQuestion(text) {
   const t = String(text || "").toLowerCase();
-  return /(có được|co duoc|được .*(không|ko|hong)|duoc .*(khong|ko)|đổi được|có cho|co cho|có nhận|chính sách|chinh sach|quy định|quy dinh|có hỗ trợ|co ho tro|không ưng|ko ưng|hông ưng|không thích|ko thích|nếu .*(ưng|thích|lỗi))/i.test(t);
+  // ===== ĐÃ CẦM HÀNG TRÊN TAY THÌ KHÔNG CÒN LÀ HỎI CHÍNH SÁCH =====
+  // Hàm này tồn tại để gỡ câu hỏi TRƯỚC KHI MUA ra khỏi cổng hậu mãi. Khách đã
+  // nhận hàng rồi mới nói "không ưng, cho trả lại" là hậu mãi thật -> phải để
+  // người thật lo, dù câu có đủ chữ "không ưng".
+  // NGOẠI LỆ câu GIẢ ĐỊNH: "nếu nhận hàng không ưng thì có đổi được không" là
+  // câu hỏi trước khi mua rất hay gặp — chặn nó là bịt lại đúng thứ đang mở.
+  // (Bản sao của _RE_RECEIVED, cố ý chép tại chỗ: hàm này bị
+  //  test/dinh_tuyen_hau_mai.test.js trích nguyên văn ra chạy riêng, tham chiếu
+  //  ra ngoài là hỏng harness đó. Sửa một bên thì sửa cả hai.)
+  const _daNhanHang = /(nhận được|nhan duoc|đã nhận|da nhan|nhận hàng|nhan hang|nhận đc|nhan dc|hàng về|hang ve|hàng đến|hang den|hàng tới|hang toi|mới nhận|moi nhan|vừa nhận|vua nhan|ship về rồi|ship ve roi|đã ship về|da ship ve|nhận rồi|nhan roi|hàng nhận|hang nhan)/i;
+  const _giaDinh = /\b(nếu|neu|nhỡ|lỡ|giả sử|gia su)\b/i;
+  if (_daNhanHang.test(t) && !_giaDinh.test(t)) return false;
+
+  if (/(có được|co duoc|được .*(không|ko|hong)|duoc .*(khong|ko)|đổi được|có cho|co cho|có nhận|chính sách|chinh sach|quy định|quy dinh|có hỗ trợ|co ho tro|không ưng|ko ưng|hông ưng|không thích|ko thích|nếu .*(ưng|thích|lỗi))/i.test(t)) return true;
+  // HỎI THỜI HẠN đổi/trả = hỏi CHÍNH SÁCH, khách thường CHƯA mua.
+  // Đo được (24/08/2026): "shop cho đổi trả trong bao lâu ạ" trượt hết mấy vế trên
+  // (không có "có...không", không có "chính sách") -> isReturnRefund bắt chữ "đổi trả"
+  // -> postSaleContext trả true -> cổng HẬU MÃI ở đầu vòng xử lý gắn thẻ 183 rồi im,
+  // trong khi buildReturnPolicyReply() có sẵn câu trả lời mà không bao giờ chạy tới.
+  // CHỈ nhận vế HỎI-THỜI-HẠN, KHÔNG nhận "thế nào/ra sao": "hàng bị lỗi, đổi trả thế
+  // nào giờ" là hậu mãi thật, phải để người thật lo.
+  if (/(bao lâu|bao lau|bao nhiêu ngày|bao nhieu ngay|mấy ngày|may ngay|mấy hôm|may hom|trong vòng|trong vong|thời hạn|thoi han|hạn đổi|han doi)/i.test(t)
+      && /(đổi|doi|trả|tra|hoàn|hoan)/i.test(t)) return true;
+
+  // [CA HÀ GIANG 27/08/2026] BA LỐI LỌT NỮA CỦA CÙNG CÁI CỔNG.
+  //   khách: "mua về thử k ưng shop cho đổi trả miễn phí k shop"
+  //   -> isReturnRefund bắt chữ "đổi trả" = true
+  //   -> isPolicyQuestion = false, vì danh sách trên có "không ưng|ko ưng|hông
+  //      ưng" mà THIẾU đúng "k ưng". Gõ tắt một chữ cái là rơi khỏi lưới.
+  //   -> cổng HẬU MÃI gắn thẻ 183 rồi thoát, bot im.
+  // Hậu quả đo được KHÔNG dừng ở câu đó: chữ "đổi trả" nằm lại trong cửa sổ 5 tin
+  // mà postSaleContext quét, nên MỌI tin sau cũng bị nuốt — khách hỏi tiếp "dạo
+  // này em tăng lên 57kg rồi shop, có size..." vẫn không được trả lời. Log ghi 132
+  // lượt nhường người thật liên tiếp: hội thoại chết hẳn, không phải mất một câu.
+  // (Cả ba vế dưới đã được rào bởi chốt ĐÃ-NHẬN-HÀNG ở đầu hàm.)
+  //
+  // (a) VIẾT TẮT của "không ưng / không thích". Buộc đứng LIỀN trước ưng/thích, để
+  //     chữ "k" (hay dùng thay "không") không bắt bừa cả câu.
+  if (/\b(k|kh|kg|ko|hok|hong|hông|khong|không)\s*(ưng|ung|thích|thich|thik)\b/i.test(t)) return true;
+  // (b) GIẢ ĐỊNH CHƯA MUA: "mua về ... đổi/trả/thử" = đang cân nhắc, chưa mua.
+  if (/(mua|đặt|dat|order)\s*(về|ve)\b/i.test(t)
+      && /(đổi|doi|trả|tra|hoàn|hoan|thử|thu)/i.test(t)) return true;
+  // (c) "shop (có) cho / hỗ trợ ... đổi/trả" = hỏi shop CÓ chính sách đó không.
+  //     Buộc "cho/hỗ trợ" đứng NGAY SAU tên shop, nếu không thì "shop hoàn tiền cho
+  //     chị đi" (đòi hoàn thật) cũng lọt vào đây.
+  if (/(shop|bên em|ben em|bên mình|ben minh)\s*(có\s*)?(cho|hỗ trợ|ho tro)\b/i.test(t)
+      && /(đổi|doi|trả|tra|hoàn|hoan)/i.test(t)) return true;
+  return false;
 }
 // ===== HẬU MÃI: khách ĐÃ NHẬN HÀNG rồi KÊU KHÔNG VỪA (rộng/chật/lệch/gửi sai) =====
 // Đây KHÔNG có từ khoá hoàn/đổi/trả nên các detector cũ bỏ sót -> bot tưởng khách hỏi size để MUA
@@ -4303,21 +5128,47 @@ function isPolicyQuestion(text) {
 //   (B) than KHÔNG VỪA / GỬI SAI.
 // -> hậu mãi thật, NHƯỜNG NGƯỜI THẬT. (Yêu cầu CẢ 2 để KHÔNG bắt nhầm câu hỏi size PRE-SALE
 //    kiểu "áo này mặc có rộng không".)
-const _RE_RECEIVED = /(nhận được|nhan duoc|đã nhận|da nhan|nhận hàng|nhan hang|nhận đc|nhan dc|hàng về|hang ve|hàng đến|hang den|hàng tới|hang toi|mới nhận|moi nhan|vừa nhận|vua nhan|ship về rồi|ship ve roi|đã ship về|da ship ve)/i;
+const _RE_RECEIVED = /(nhận được|nhan duoc|đã nhận|da nhan|nhận hàng|nhan hang|nhận đc|nhan dc|hàng về|hang ve|hàng đến|hang den|hàng tới|hang toi|mới nhận|moi nhan|vừa nhận|vua nhan|ship về rồi|ship ve roi|đã ship về|da ship ve|nhận rồi|nhan roi|hàng nhận|hang nhan)/i;
 const _RE_FITBAD = /(rộng|rong\b|chật|chat\b|không vừa|khong vua|ko vừa|k vừa|kg vừa|không mặc vừa|mặc không vừa|lệch|lech\b|nhỏ quá|nho qua|to quá|to qua|bé quá|be qua|ngắn quá|ngan qua|dài quá|dai qua|rộng quá|rong qua|thùng thình|thung thinh|sai size|sai sz|gửi rộng|gui rong|gửi sai|gui sai|gửi nhầm|gui nham|gửi lộn|gui lon|không giống|khong giong)/i;
+// [VÁ 2 · 25/08/2026] "nhận được" và "gửi nhầm" là chuyện của HÀNG HOÁ, không phải của
+// ẢNH hay TIN NHẮN. Hai mẫu chữ trên bắt trần trụi nên câu nói về ảnh/tin nhắn cũng dính:
+//   · "em nhận được ẢNH của chị rồi ạ"                    -> tưởng khách đã nhận HÀNG
+//   · "tin nhắn xin địa chỉ lúc nãy, em GỬI NHẦM ạ"       -> tưởng shop gửi nhầm HÀNG
+// Luật: câu nào đang nói về ảnh/tin nhắn/thông tin mà KHÔNG nhắc tới hàng hoá thì không
+// được tính là bằng chứng hậu mãi.
+const _RE_VE_HANG = /(hàng|hang\b|đơn|don\b|váy|vay\b|đầm|dam\b|áo|quần|set\b|bộ đồ|sản phẩm|san pham|size)/i;
+const _RE_VE_TIN  = /(ảnh|hình|tin nhắn|tin nhan|inbox|thông tin|thong tin|địa chỉ|dia chi|sđt|số điện thoại|so dien thoai|link)/i;
+function _laBangChungHang(t) {
+  return !(_RE_VE_TIN.test(t) && !_RE_VE_HANG.test(t));
+}
+// Câu vừa bị dùng làm bằng chứng -> in kèm lúc gắn thẻ, để lần sau soi ra trong 5 giây
+// thay vì phải dựng lại cả hội thoại như ca Hà Giang.
+let _psBangChung = null;
 function postSaleFitComplaint(messages) {
   const recent = (Array.isArray(messages) ? messages : []).slice(-8);
-  let gotReceived = false, gotFitBad = false;
+  let gotReceived = null, gotFitBad = null;
   for (const m of recent) {
     if (!m) continue;
-    // CHỈ xét tin KHÁCH + NGƯỜI THẬT (bỏ tin bot: bot có thể tự nói "freesize... rộng phần nào" -> tránh tự kích).
-    if (m.messageId && botSentIds.has(String(m.messageId))) continue;
+    // [VÁ 1 · 25/08/2026] Bằng chứng "đã nhận hàng" + "hàng không vừa" CHỈ KHÁCH mới nói được:
+    //   chỉ khách biết mình nhận hàng chưa và mặc có vừa không.
+    // Trước đây hàm xét cả tin phía shop và chỉ loại tin bot bằng botSentIds — mà botSentIds
+    // là Set trong RAM (dòng ~79), bot khởi động lại là quên sạch. Từ đó MỌI câu bot từng nói
+    // biến thành "tin người thật" và quay lại làm bằng chứng buộc tội chính nó.
+    // Ca thật (Hà Giang, 25/08/2026): hai câu của BOT ghép thành một khiếu nại không tồn tại
+    // -> gắn 183 -> nhân viên gỡ thẻ -> vòng sau gắn lại, khách hỏi 2 lần không ai trả lời.
+    if (m.sender !== "customer") continue;
+    if (m.messageId && botSentIds.has(String(m.messageId))) continue;   // lớp đỡ thứ hai (trong cùng phiên chạy)
     const t = String(m.text || "");
     if (!t) continue;
-    if (_RE_RECEIVED.test(t)) gotReceived = true;
-    if (_RE_FITBAD.test(t)) gotFitBad = true;
+    if (!_laBangChungHang(t)) continue;
+    if (!gotReceived && _RE_RECEIVED.test(t)) gotReceived = t;
+    if (!gotFitBad && _RE_FITBAD.test(t)) gotFitBad = t;
   }
-  return gotReceived && gotFitBad;
+  if (gotReceived && gotFitBad) {
+    _psBangChung = { nhanHang: gotReceived.slice(0, 70), khongVua: gotFitBad.slice(0, 70) };
+    return true;
+  }
+  return false;
 }
 // ===== NGỮ CẢNH HẬU MÃI: đơn ĐÃ mua đang GIAO LẠI / HOÀN (người thật đang xử) =====
 // Quét ~10 tin gần nhất CỦA KHÁCH + NGƯỜI THẬT (LOẠI tin BOT), bắt cụm RÕ -> nhường người thật, KHÔNG bán.
@@ -4778,25 +5629,51 @@ async function maybeSendImages(conversationId, code, mem, force, leadText) {
     const visionColor = (mem.colorByCode || {})[C] || null;        // màu khách GỬI ẢNH (đọc tên file ảnh khớp)
     const reqColor = mem.askedImageColor || null;                  // màu khách XIN bằng chữ lượt này
     const sourceColor = (mem.sourceColorByCode || {})[C] || null;  // màu Ở BÀI ADS/COMMENT khách đến từ đó
-    // Ưu tiên TÍN HIỆU CỦA KHÁCH (ảnh khách gửi / khách xin màu) trước; KHÁCH KHÔNG nói gì -> theo MÀU BÀI ĐĂNG.
-    color = visionColor || reqColor || sourceColor;
+    // MÀU BOT VỪA HỨA trong chính câu vừa nhắn lượt này (leadText đi kèm ảnh, hoặc
+    // câu AI gửi ngay trước khi gọi hàm này). Dùng MỘT LẦN rồi xoá.
+    //
+    // [CA HÀ GIANG 27/08/2026] Vì sao lời hứa phải đứng TRƯỚC visionColor:
+    //   10:06  khách gửi ảnh -> vision đọc tên file -> mem.colorByCode[MRKSQ6017]="HỒNG"
+    //   10:11  khách: "đây mà màu xanh à shop"     -> bot: "mẫu này có màu xanh"
+    //   10:12  khách: "gửi e xem"
+    //          REPLY: "em gửi chị xem ảnh màu xanh nhạt của Set Mireva nhe."
+    //          IMG  : gửi 3 ảnh (màu: HỒNG)              <- SAI
+    // mem.colorByCode chỉ có chỗ GHI, không có chỗ XOÁ, mà lại đứng đầu thứ tự ưu
+    // tiên -> một lần khách gửi ảnh hồng là mã đó khoá màu hồng đến hết hội thoại.
+    // Câu chữ do AI soạn, màu ảnh do hàm này chọn, hai đường không ai đối chiếu ai.
+    // Nay: bot đã hứa màu nào thì ảnh phải đúng màu đó.
+    const promiseColor = mauDuyNhat(leadText) || (mem && mem._mauVuaHua) || null;
+    if (mem && mem._mauVuaHua) mem._mauVuaHua = null;   // lời hứa chỉ dùng cho lượt vừa hứa
+    if (promiseColor && visionColor && !colorMatches(visionColor, promiseColor)) {
+      console.log(`IMG ${C}: bộ nhớ còn màu ảnh cũ "${visionColor}" nhưng câu vừa gửi hứa "${promiseColor}" -> theo LỜI HỨA.`);
+    }
+    // Ưu tiên: LỜI HỨA vừa nói > tín hiệu của khách (ảnh khách gửi / khách xin màu) > MÀU BÀI ĐĂNG.
+    color = promiseColor || visionColor || reqColor || sourceColor;
     // [MÃ CHIẾN DỊCH] Mã đang chạy QC 1 màu cố định -> MẶC ĐỊNH gửi đúng màu đó khi khách KHÔNG có
     //  tín hiệu màu (không gửi ảnh màu khác + không xin màu khác bằng chữ). Khách xin màu khác -> tôn trọng.
     //  RIÊNG mã chiến dịch (bảng CAMPAIGN_DEFAULT_COLOR), KHÔNG áp chung mọi mã.
     let _campaignForced = false;
-    if (CAMPAIGN_DEFAULT_COLOR[C] && !visionColor && !reqColor) {
+    if (CAMPAIGN_DEFAULT_COLOR[C] && !visionColor && !reqColor && !promiseColor) {
       color = CAMPAIGN_DEFAULT_COLOR[C];
       _campaignForced = true;   // ép màu chiến dịch -> KHÔNG ghim ảnh khách chụp (giữ THUẦN màu chiến dịch)
       console.log(`IMG ${C}: MÃ CHIẾN DỊCH -> mặc định màu "${color}" (khách chưa xin màu khác).`);
     }
     // STRICT (cấm gửi sai màu) CHỈ khi khách XIN màu bằng chữ. Màu bài đăng -> KHÔNG strict (thiếu thì fallback).
-    let strict = !!reqColor && !visionColor;
+    let strict = !!promiseColor || (!!reqColor && !visionColor);
     if (strict) {
-      let _hasReqColor = false;
-      try { _hasReqColor = (imageItemsByColor(C, reqColor, 1, false) || []).length > 0; } catch (_) {}
-      if (!_hasReqColor) {
-        console.log(`IMG ${C}: khách xin màu "${reqColor}" nhưng mẫu KHÔNG có ảnh màu đó -> gửi ảnh mặc định (đủ 3).`);
-        strict = false;
+      const _mauCanCo = promiseColor || reqColor;
+      let _coAnhDungMau = false;
+      try { _coAnhDungMau = (imageItemsByColor(C, _mauCanCo, 1, false) || []).length > 0; } catch (_) {}
+      if (!_coAnhDungMau) {
+        if (promiseColor) {
+          // KHÔNG nới strict ở đây. Nới là quay lại đúng lỗi đang sửa: câu đã nói
+          // "gửi ảnh màu X" mà album lại ra màu Y. Không có ảnh màu đã hứa thì
+          // thà không gửi tấm nào — chốt chặn bên dưới lo, và log nói rõ vì sao.
+          console.log(`IMG ${C}: bot vừa hứa màu "${promiseColor}" nhưng mẫu KHÔNG có ảnh màu đó -> KHÔNG gửi (thà thiếu còn hơn sai màu).`);
+        } else {
+          console.log(`IMG ${C}: khách xin màu "${reqColor}" nhưng mẫu KHÔNG có ảnh màu đó -> gửi ảnh mặc định (đủ 3).`);
+          strict = false;
+        }
       }
     }
     matchedId = (mem.matchedImgByCode || {})[C] || null;     // tấm ảnh khớp nhất -> chắc chắn đúng mẫu+màu
@@ -4819,7 +5696,7 @@ async function maybeSendImages(conversationId, code, mem, force, leadText) {
       if (mU) fileUrls = [mU, ...fileUrls.filter(x => x !== mU)].slice(0, 3);
     }
     if (strict && !contentIds.length && !fileUrls.length) {
-      console.log(`IMG ${C}: khách xin màu "${reqColor}" nhưng KHÔNG có ảnh gắn màu đó -> KHÔNG gửi (tránh sai màu).`);
+      console.log(`IMG ${C}: ${promiseColor ? `bot vừa hứa màu "${promiseColor}"` : `khách xin màu "${reqColor}"`} nhưng KHÔNG có ảnh gắn màu đó -> KHÔNG gửi (tránh sai màu).`);
       if (leadText) { try { await _sendInboxMessage(conversationId, leadText); } catch (_) {} }
       return false;
     }
@@ -4962,9 +5839,10 @@ async function sendBlocks(conversationId, products, mem, force, priceAsk) {
       await maybeSendImages(conversationId, p.code, mem, !!force);
       continue;
     }
-    // KỊCH BẢN §13 (ĐẢO THỨ TỰ): mỗi mẫu -> gửi ẢNH TRƯỚC rồi mới BÁO GIÁ (LẦN ĐẦU của mẫu đó).
+    // KỊCH BẢN §13: "Sau mỗi lần báo giá sản phẩm, bắt buộc gửi kèm hình ảnh
+    // đúng mẫu vừa báo giá" -> BÁO GIÁ TRƯỚC, ẢNH SAU. Trước đây code làm ngược
+    // (ảnh trước) mà vẫn viện dẫn §13; nay theo đúng chữ trong kịch bản.
     // force = true -> gửi ảnh kể cả mã này đã gửi ảnh trước đó.
-    await maybeSendImages(conversationId, p.code, mem, true);
     if (p.priceText) {
       await sendInboxMessage(conversationId, `Dạ ${label} ${p.priceText} ạ.`);
     } else if (priceIsValid(p.price)) {
@@ -4973,11 +5851,89 @@ async function sendBlocks(conversationId, products, mem, force, priceAsk) {
       await sendInboxMessage(conversationId, `Dạ ${label} em gửi chị xem ạ, giá em báo lại chị ngay nha.`);
       console.log("GIÁ LỖI cho mã", p.code, "=", p.price);
     }
+    await maybeSendImages(conversationId, p.code, mem, true);
     markPriced(mem, k);
     // GIÃN NHỊP giữa các mẫu: gửi nhiều mẫu dồn dập -> Pancake rate-limit -> ALBUM rớt.
     // Nghỉ 1 nhịp trước mẫu kế (không nghỉ sau mẫu cuối).
     if (bi < products.length - 1) { try { await delay(1000); } catch (_) {} }
   }
+}
+
+// ===== MỞ MÀN SẢN PHẨM =====================================================
+// Yêu cầu shop: tin ĐẦU TIÊN của khách về một mẫu thì nhịp trả lời LUÔN là
+//   1) báo giá  →  2) ba ảnh mẫu  →  3) trả lời đúng câu khách hỏi  →  4) câu đuôi
+// Ví dụ: khách gửi ảnh mẫu + hỏi "có màu khác không" thì vẫn báo giá và gửi ảnh
+// trước, rồi mới trả lời chuyện màu, cuối cùng mới hỏi size.
+//
+// Vì sao phải là một CỔNG RIÊNG chạy trước, không sửa trong từng nhánh: mọi
+// handler trong dispatch đều kết thúc bằng `markProcessed(batch); return true`
+// — nhánh nào nhận câu hỏi thì lượt đó hết, nên không có chỗ nào chèn được
+// "giá trước, câu trả lời sau". Cổng này chạy trước tất cả và CỐ Ý KHÔNG return,
+// để nhánh chuyên trách phía dưới vẫn trả lời đúng câu khách hỏi.
+//
+// Bước (4) không nằm ở đây: câu đuôi phải đứng CUỐI, sau câu trả lời chính, nên
+// nó do handler bên dưới gắn (`sizeTailForProduct`). Cổng này chỉ lo giá + ảnh.
+//
+// Công tắc MO_MAN_MODE — bot đang chạy trên page thật, đây là đổi nhịp của MỌI
+// câu trả lời về sản phẩm nên phải tắt được ngay mà không cần sửa mã:
+//   "on"     (mặc định) chạy thật
+//   "shadow" chỉ ghi log câu sẽ gửi, KHÔNG đổi hành vi — dùng để soi vài ngày
+//   "off"    tắt hẳn, về đúng nhịp cũ
+// Khách XIN TƯ VẤN về một mẫu: "tư vấn e mẫu này đi", "mẫu này thế nào shop",
+// "xem giúp em mẫu này với". Đây là lời mời bán hàng, không phải một câu hỏi
+// thuộc tính lẻ -> phải mở màn đủ nhịp §13: giá + ảnh trước, rồi mới tư vấn.
+function xinTuVanMau(text) {
+  const t = String(text || "").toLowerCase();
+  if (/(tư vấn|tu van)/.test(t)) return true;
+  if (/(mẫu|mau|set|váy|vay|áo|ao|em này|cái này|con này)\s*(này|nay)?\s*(thế nào|the nao|như nào|nhu nao|ra sao|sao ạ|sao a)/.test(t)) return true;
+  if (/(xem|check|ngó)\s*(giúp|giup|hộ|ho)\s*(em|e|mình|minh|chị|chi)/.test(t)) return true;
+  return false;
+}
+async function moManSanPham(conversationId, mem, product, soMauLuotNay, epTuVan) {
+  const mode = String(KB.caiDat("MO_MAN_MODE", "on")).toLowerCase();
+  if (mode === "off") return false;
+  if (!product || soMauLuotNay > 1) return false;      // nhiều mẫu -> sendBlocks lo, có nhịp riêng
+  const k = String(product.code || "").toUpperCase();
+  if (!k) return false;
+  // Chốt 24h (luat.txt:135 "Mẫu đã báo giá trong 24 giờ thì không mở màn lại,
+  // tránh lặp giá"). Đúng cho một mạch tư vấn liền, nhưng ca Hà Giang 27/08/2026
+  // cho thấy nó cắn nhầm: hội thoại thử đã đi qua 13 mẫu, khách gửi ảnh mẫu
+  // Ginevra (MRAD5446) kèm "tư vấn e mẫu này đi" -> mã nằm sẵn trong pricedCodes
+  // từ trước -> KHÔNG mở màn -> khách chỉ nhận đúng một câu trấn an size chung
+  // chung, không tên mẫu, không giá, không ảnh.
+  //
+  // Khách XIN TƯ VẤN một mẫu là mở một lượt bán MỚI cho mẫu đó. Vẫn giữ chốt
+  // chống đúp trong cùng một mạch: chỉ mở lại khi lần báo giá gần nhất của đúng
+  // mã này đã quá _VUA_BAO_GIA_PHUT phút.
+  if (quotedRecently(mem, k)) {
+    const _lucBaoGia = (mem.pricedAt && mem.pricedAt[k]) || 0;
+    const _daLau = _lucBaoGia && (Date.now() - _lucBaoGia) > _VUA_BAO_GIA_PHUT * 60 * 1000;
+    if (!(epTuVan && _daLau)) return false;
+    console.log(`[${BOT_NAME}] [MỞ MÀN] ${k}: đã báo giá ${Math.round((Date.now() - _lucBaoGia) / 60000)} phút trước NHƯNG khách xin tư vấn lại mẫu này -> mở màn lại (giá + ảnh).`);
+  }
+  if (recommend.isOutOfStock(product)) return false;   // hết hàng -> nhánh riêng báo hết + gửi mẫu tương tự
+  if (mem.orderClosed) return false;                   // đã chốt đơn -> đang ở luồng hậu mãi
+  const pl = priceLine(product);
+  if (!pl) return false;                               // giá thiếu/lỗi -> KHÔNG bịa, để luồng dưới nhờ người thật
+
+  const cau = `Dạ ${productLabel(product)} ${pl} ạ.`;
+  if (mode === "shadow") {
+    console.log(`[MỞ-MÀN shadow] ${k}: sẽ gửi TRƯỚC "${cau}" + 3 ảnh, rồi mới để nhánh dưới trả lời.`);
+    return false;
+  }
+  await sendInboxMessage(conversationId, cau);                  // 1. GIÁ
+  // Mở màn thì ảnh là BẮT BUỘC (luat.txt:136 "Sau mỗi lần báo giá sản phẩm, bắt
+  // buộc gửi kèm hình ảnh đúng mẫu vừa báo giá"). Cờ này mở cổng _imgShownBefore.
+  mem._imgAllowSend = true;
+  await maybeSendImages(conversationId, k, mem, true);          // 2. BA ẢNH
+  markPriced(mem, k);
+  mem.lastBotReply = cau;
+  // Hẹn bước 4. Đuôi KHÔNG gắn ở đây vì nó phải đứng SAU câu trả lời chính; câu
+  // text kế tiếp đi ra trong lượt này chính là câu trả lời đó, nên gắn vào đấy.
+  // Đặt SAU khi gửi giá + ảnh, kẻo tự gắn đuôi vào chính câu giá của mình.
+  _luot().duoiMoMan = { mem, product };
+  console.log(`[${BOT_NAME}] [MỞ MÀN] ${k}: giá + 3 ảnh TRƯỚC -> nhường nhánh dưới trả lời câu hỏi chính.`);
+  return true;
 }
 
 // Tìm sản phẩm từ BÀI POST của comment: ưu tiên tên trong caption, không ra thì vision ảnh bài.
@@ -5165,6 +6121,28 @@ function sizeTailForProduct(mem, product) {
     if (!mem.phone) _missing.push("số điện thoại");
     if (!_addrOk) _missing.push("địa chỉ");
     if (_missing.length) {
+      // [NGUYÊN TẮC 4 + mục 3.8 của yêu cầu] Khách ĐÃ TỪNG chốt đơn -> sđt và địa chỉ đã nằm
+      // trong lịch sử, và đơn cũ đã đi được bằng chính địa chỉ đó. Đặt thêm mẫu thì phải XÁC
+      // NHẬN lại, TUYỆT ĐỐI không xin lại từ đầu:
+      //   "Đã có size, màu, địa chỉ, số điện thoại trong lịch sử thì tuyệt đối không hỏi lại."
+      //   "Khách đặt thêm mẫu thì chỉ hỏi thông tin của mẫu mới, giữ nguyên địa chỉ và sđt đã có."
+      // Đo trên page thật 24/08/2026: khách chốt đơn xong, gửi ảnh mẫu mới -> bot đáp
+      // "Chị cho em xin địa chỉ để em lên đơn size M" dù đã có "Thanh Xuân, Hà Nội" + sđt.
+      // (addrReady trả false vì địa chỉ thiếu phường — nhưng thiếu tầng KHÁC với chưa có gì.)
+      const _daTungDat = !!(mem.everOrdered || mem.orderClosed);
+      const _diaChiCu = String(mem.address || "").trim();
+      if (_daTungDat && mem.phone && _diaChiCu) {
+        return " " + KB.cau("xac_nhan_lien_he_cu",
+          { size: sizeLabel(mem.customerSize), diaChi: _diaChiCu, sdt: mem.phone },
+          `Dạ em lên đơn ${sizeLabel(mem.customerSize)} cho mình nha. Chị xác nhận giúp em vẫn giao về ${_diaChiCu}, sđt ${mem.phone} đúng không ạ?`);
+      }
+      // CÓ địa chỉ nhưng THIẾU tầng (phường/quận/tỉnh) -> xin ĐÚNG tầng thiếu. addressGapReply
+      // đã lo việc này sẵn; xin lại cả địa chỉ là bắt khách gõ lại thứ họ vừa đưa (mục 3.7:
+      // "chỉ hỏi lại khách khi thật sự không tra ra được").
+      if (!_addrOk && _diaChiCu && mem.phone) {
+        const _gap = addressGapReply(_diaChiCu, mem);
+        if (_gap) return " " + _gap;
+      }
       // CHƯA đủ liên hệ -> XIN sđt+địa chỉ (không mời "em lên đơn cho mình nha" khi chưa có gì để lên đơn).
       return ` Chị cho em xin ${joinVi(_missing)} để em lên đơn ${sizeLabel(mem.customerSize)} cho mình nha ạ`;
     }
@@ -5242,6 +6220,33 @@ function openerOrLead(product, mem) {
 
 // ===== FOLLOW-UP: câu CHỈ TRẢ LỜI (không kèm hành động) -> chờ ~30s, khách im thì gửi 1 CÂU HÀNH ĐỘNG =====
 const FOLLOWUP_DELAY_MS = 15 * 1000;   // mặc định 15s khách im -> gửi 1 câu hành động
+
+// ===== BÁM KHÁCH (mục 4.5 yêu cầu tính năng) — SHOP KHAI, BOT CHỈ CHẠY THEO ==========
+// Yêu cầu: "Shop chọn có dùng tính năng bám khách hay không / tự đặt sau bao lâu thì
+// nhắc lần đầu, bao lâu thì nhắc lần hai / tự đặt số lần nhắc tối đa.
+// Bot chỉ chạy theo đúng những gì shop đã khai, không tự quyết nhắc bao nhiêu lần."
+//
+// Trước 25/08/2026 ba mốc này viết cứng ở hai hàm khác nhau, giá trị chép trùng nhau
+// (hằng số còn tên FIVE_SEC mà giá trị là 10 phút — đọc mã rất dễ hiểu nhầm).
+// Nay gom một chỗ, khai qua .env, shop sửa xong khởi động lại bot là ăn.
+//
+// Còn thiếu so với yêu cầu (để GĐ5): shop tự VIẾT NỘI DUNG từng câu nhắc, và tự khai
+// trường hợp nào thì ngừng — hiện 10 điều kiện dừng vẫn viết cứng.
+// ĐỌC LIVE TỪ KHO KỊCH BẢN, không chốt cứng lúc khởi động: shop sửa
+// kich_ban/<shopId>.json là ăn sau ≤5 phút, không phải khởi động lại bot.
+// Thứ tự: kich_ban/<shopId>.json > mac_dinh.json > .env > mặc định ở đây.
+const BAM_KHACH = {
+  get BAT()     { return KB.caiDatBat("BAM_KHACH", true); },              // off = tắt hẳn
+  get LAN1_MS() { return KB.caiDatSo("BAM_KHACH_LAN1_PHUT", 10) * 60 * 1000; },
+  get LAN2_MS() { return KB.caiDatSo("BAM_KHACH_LAN2_GIO", 2) * 60 * 60 * 1000; },
+  get SO_LAN()  { return Math.max(0, Math.min(5, KB.caiDatSo("BAM_KHACH_SO_LAN", 2))); },  // trần 5
+};
+try {
+  console.log(`[bám khách] ${BAM_KHACH.BAT ? "BẬT" : "TẮT"}`
+    + (BAM_KHACH.BAT ? ` | lần 1 sau ${Math.round(BAM_KHACH.LAN1_MS / 60000)} phút`
+        + ` | lần 2 sau ${Math.round(BAM_KHACH.LAN2_MS / 3600000)} giờ`
+        + ` | tối đa ${BAM_KHACH.SO_LAN} lần` : ""));
+} catch (_) {}
 const pendingFollowups = new Map();   // convId -> { at, action, delay }
 // đang gửi 1 follow-up -> KHÔNG cho hook tự hẹn follow-up MỚI. Nay theo lượt: _luot().sendingFollowup
 
@@ -5564,6 +6569,10 @@ function customerJustAsking(text) {
 function scheduleFollowup(convId, mem, product, reply) {
   // [DIAG] log lý do bỏ follow (gỡ sau khi xong) — để biết vì sao follow 5s không bắn.
   const _diag = (why) => { try { console.log(`[${BOT_NAME}] [follow-skip] ${why} | conv=${convId} | reply="${String(reply||"").slice(0,40)}"`); } catch(_){} };
+  if (!BAM_KHACH.BAT) { _diag("BÁM KHÁCH đang TẮT (BAM_KHACH=off)"); pendingFollowups.delete(String(convId)); return; }
+  if (BAM_KHACH.SO_LAN <= 0) { _diag("BAM_KHACH_SO_LAN=0 -> shop khai không nhắc lần nào"); pendingFollowups.delete(String(convId)); return; }
+  // Shop khai TỐI ĐA bao nhiêu lần thì bot nhắc đúng bấy nhiêu, không tự quyết.
+  if (mem && (mem._soLanDaNhac || 0) >= BAM_KHACH.SO_LAN) { _diag(`đã nhắc đủ ${BAM_KHACH.SO_LAN} lần (shop khai)`); pendingFollowups.delete(String(convId)); return; }
   if (!product) { _diag("KHÔNG có product"); pendingFollowups.delete(String(convId)); return; }
   if (!reply || !reply.trim() || reply.startsWith("[")) { _diag("reply rỗng/[]"); pendingFollowups.delete(String(convId)); return; }
   if (isCheckLaterReply(reply)) { _diag("câu chờ-kiểm-tra"); pendingFollowups.delete(String(convId)); return; }
@@ -5578,11 +6587,9 @@ function scheduleFollowup(convId, mem, product, reply) {
   // STAGE follow-up:
   //  - Mở đầu hội thoại (chưa từng follow đợt này): lần 1 sau 5s (stage 1) -> bắn xong tự hẹn lần 2 sau 2h (stage 2).
   //  - Các đợt sau (khách đã nhắn lại + bot trả + khách lại im): chỉ 1 lần sau 2h (stage 0).
-  const FIVE_SEC = 10 * 60 * 1000;   // [SỬA Thuy Nguyen] follow-up lần đầu: 5s -> 10 phút (tránh giục dồn)
-  const TWO_HOURS = 2 * 60 * 60 * 1000;
-  const _firstTurn = !mem._followedOnce;   // đợt MỞ ĐẦU hội thoại -> được 2 lần (5s + 2h)
+  const _firstTurn = !mem._followedOnce;   // đợt MỞ ĐẦU hội thoại -> được 2 lần (lần 1 + lần 2)
   const stage = _firstTurn ? 1 : 0;
-  const delay = _firstTurn ? FIVE_SEC : TWO_HOURS;
+  const delay = _firstTurn ? BAM_KHACH.LAN1_MS : BAM_KHACH.LAN2_MS;
   // Chọn câu hành động: nếu câu trên ĐÃ có hành động thì truyền reply để tránh trùng lõi (bổ trợ, không lặp).
   const action = pickFollowupAction(mem, product, hasAction ? reply : "");
   if (!action) { _diag("pickFollowupAction trả null (hết câu)"); pendingFollowups.delete(String(convId)); return; }
@@ -5613,7 +6620,7 @@ async function sendGetStartedGallery(cid, mem) {
 
 async function sweepFollowups() {
   const now = Date.now();
-  const TWO_HOURS = 2 * 60 * 60 * 1000;
+  if (!BAM_KHACH.BAT) { pendingFollowups.clear(); return; }   // shop tắt bám khách -> không bắn gì
   // ĐẾM GIỜ FOLLOW từ thời điểm MUỘN HƠN giữa: tin khách cuối (custAt) và lúc bot HẸN (at).
   //  - Khách nhắn realtime: custAt ~ at -> đếm như thường (10 phút kể từ khách ngừng gõ).
   //  - Tin khách CŨ (nhắn TRƯỚC khi bật bot): custAt xa quá khứ -> nếu chỉ lấy custAt thì delay vượt NGAY
@@ -5691,13 +6698,14 @@ async function sweepFollowups() {
       m._followedLines = m._followedLines || [];
       const _core = _actionCore(info.action);
       if (!m._followedLines.includes(_core)) m._followedLines.push(_core);   // chống TRÙNG CÂU các lần sau
+      m._soLanDaNhac = (m._soLanDaNhac || 0) + 1;   // đếm để tôn trọng BAM_KHACH_SO_LAN shop khai
       updateConversationState(cid, m);
       console.log(`[${BOT_NAME}] Follow-up (stage ${info.stage}, hẹn ${Math.round((info.delay || 5000) / 1000)}s) -> ${info.action}`);
       // STAGE 1 (lần 1 @5s của đợt MỞ ĐẦU) -> hẹn tiếp LẦN 2 sau 2h (stage 2), trừ khi khách nhắn lại.
-      if (info.stage === 1 && info.product) {
+      if (info.stage === 1 && info.product && (m._soLanDaNhac || 0) < BAM_KHACH.SO_LAN) {
         const action2 = pickFollowupAction(m, info.product, info.action);
         if (action2 && !m._followedLines.includes(_actionCore(action2))) {
-          pendingFollowups.set(cid, { at: Date.now(), action: action2, delay: TWO_HOURS, stage: 2, product: info.product, custAt: lastCustomerMsgAt.get(cid) || 0 });
+          pendingFollowups.set(cid, { at: Date.now(), action: action2, delay: BAM_KHACH.LAN2_MS, stage: 2, product: info.product, custAt: lastCustomerMsgAt.get(cid) || 0 });
         }
       }
     } catch (e) { console.log("Lỗi follow-up:", e.message); }
@@ -5705,7 +6713,7 @@ async function sweepFollowups() {
   }
 }
 
-async function processOneConversation(conversation) {
+async function processOneConversation(conversation, _epY) {
   const conversationId = conversation.id;
   // [VÀO XỬ] soi conv nào ĐƯỢC đưa vào xử lý + trạng thái lúc vào (để truy độ trễ: nếu khách gửi tin mà
   //  KHÔNG thấy dòng này -> kẹt ở bước LỌC fresh/đọc list; nếu CÓ dòng này mà bot không trả -> kẹt bên trong).
@@ -5737,14 +6745,36 @@ async function processOneConversation(conversation) {
   // ĐA TRANG: nạp bộ id thẻ giữ ĐÚNG theo page trước khi kiểm (id thẻ khác nhau mỗi page).
   const _holdPid = pageRegistry.pageIdFromConv(conversationId) || String(conversationId).split("_")[0];
   try { await ensureHoldTagIdsForPage(_holdPid, pageRegistry.tokenForConv(conversationId)); } catch (_) {}
-  if (convHasHoldTag(conversation, _holdPid)) {
-    mem.aiStandsOut = true; updateConversationState(conversationId, mem);   // đánh dấu để sweepFollowups KHÔNG bắn follow-up
+  // [B · 25/08/2026] PHÂN BIỆT hai loại thẻ giữ. holdTagKind() đã viết sẵn từ lâu với đúng ý
+  // định này nhưng KHÔNG NƠI NÀO GỌI — cổng chặn dùng convHasHoldTag nên coi 183 và 185 như nhau:
+  //   · 183 CHỜ XL      = người thật xử lý HẲN  -> AI đứng ngoài hoàn toàn (yêu cầu mục 3.3)
+  //   · 185 ĐƠN ƯU TIÊN = người thật chỉ LÊN ĐƠN -> AI VẪN trả lời được câu hỏi trong lúc chờ
+  //
+  // Hậu quả khi gộp: khách giục gấp -> gắn thẻ -> nhân viên chưa kịp vào -> khách hỏi tiếp
+  // "tư vấn em mẫu này" -> bot KHÔNG ĐỌC TIN, hội thoại chết tới khi có người gỡ thẻ tay.
+  //
+  // [CHỐT SHOP 25/08/2026] Đã bỏ cách chia nhỏ: nay MỌI thẻ giữ (183/184/185/166/177) đều
+  // khiến bot dừng hẳn. Một luật duy nhất, nhân viên không phải nhớ thẻ nào cho bot nói tiếp.
+  if (convHasHoldTag(conversation, _holdPid) && BO_QUA_THE_GIU) {
+    // Ngoại lệ chạy thử: thẻ giữ ở đây là để ĐUỔI BOT KIA ra, không phải để gọi
+    // người thật. Bot này vẫn phục vụ tiếp. Xem khối khai BO_QUA_THE_GIU ở đầu tệp.
+    if (logThrottle("bqtg_" + conversationId))
+      console.log(`[${BOT_NAME}] BO_QUA_THE_GIU -> có thẻ giữ nhưng VẪN xử lý (hội thoại thử). Conv: ${conversationId}`);
+  } else if (convHasHoldTag(conversation, _holdPid)) {
+    mem.aiStandsOut = true;
+    // MỐC GIỮ: dùng để biết nhân viên đã trả lời SAU khi hội thoại bị giữ hay chưa.
+    // Chỉ ghi LẦN ĐẦU, không dập lại mỗi vòng poll (dập lại thì tin trả lời của nhân
+    // viên luôn thành "trước mốc" -> bot không bao giờ được chạy lại).
+    if (!mem._giuTuLuc) mem._giuTuLuc = Date.now();
+    updateConversationState(conversationId, mem);   // đánh dấu để sweepFollowups KHÔNG bắn follow-up
     cancelFollowup(conversationId);
     if (logThrottle("hold_" + conversationId))
-      console.log(`[${BOT_NAME}] Còn thẻ giữ (CHỜ XL/ĐƠN ƯU TIÊN/Hàng đổi/Đang hoàn) -> người thật xử lý, AI đứng ngoài. Conv: ${conversationId}`);
+      console.log(`[${BOT_NAME}] Còn thẻ giữ (${holdTagKind(conversation) || "giữ"}) -> người thật xử lý, AI đứng ngoài. Conv: ${conversationId}`);
     return false;
   }
-  if (mem.aiStandsOut) { mem.aiStandsOut = false; updateConversationState(conversationId, mem); }   // hết thẻ giữ -> cho phép lại
+  // CỐ Ý KHÔNG xoá aiStandsOut ở đây nữa. Hết thẻ giữ mới là ĐIỀU KIỆN THỨ NHẤT; điều kiện
+  // thứ hai (nhân viên đã trả lời khách) chỉ kiểm được SAU khi đọc tin — xem khối bên dưới.
+  // Xoá sớm ở đây là chốt đó không bao giờ chạy.
   // RESET cờ bàn giao đầu lượt: botHandoffAt được set ở ~15 chỗ mỗi lần nhường người, nhưng trước đây
   // hầu như không reset -> dính mãi -> sweepFollowups/scheduleFollowup luôn bỏ follow-up ở MỌI lượt sau.
   // Đến đây nghĩa là hội thoại KHÔNG còn thẻ giữ (người thật không ôm) -> cờ cũ vô nghĩa, xoá.
@@ -5780,6 +6810,69 @@ async function processOneConversation(conversation) {
 
   const data = await readConversation(conversationId, conversation);
 
+  // ===== GỠ THẺ THÔI CHƯA ĐỦ: PHẢI CÓ NHÂN VIÊN ĐÃ TRẢ LỜI ====================
+  // [CHỐT SHOP 25/08/2026] "…chỉ khi nhân viên vào TRẢ LỜI và GỠ đi những thẻ đó thì
+  // lúc này bot mới được trả lời tiếp."
+  //
+  // Trước đây chỉ cần thẻ biến mất là bot chạy lại ngay vòng poll kế. Gỡ nhầm thẻ, hoặc
+  // gỡ để dọn hàng đợi mà chưa kịp nhắn khách, là bot nhảy vào giữa chừng — đúng thứ
+  // mục 3.3 muốn tránh ("để nhân viên làm việc mà không bị bot chen vào").
+  //
+  // Đến đây nghĩa là thẻ giữ ĐÃ được gỡ (cổng trên đã cho qua). Nếu hội thoại từng bị
+  // giữ mà CHƯA có tin nào của người thật SAU mốc giữ -> tiếp tục đứng ngoài.
+  if (mem.aiStandsOut) {
+    // MỞ KHOÁ CỤM TIN CUỐI để bot trả lời NGAY tin khách đang chờ, không bắt khách
+    // nhắn lại. Phải xoá ở CẢ HAI sổ:
+    //   · processedMessageIds — sổ ĐĨA, sống qua restart
+    //   · _daXuLyLuotChay     — sổ RAM thêm sáng 25/08 để chặn xử lại vòng lặp
+    // Thiếu sổ thứ hai thì gỡ thẻ xong bot vẫn im: cụm tin bị coi là "đã xử lượt này".
+    //
+    // Đặt Ở ĐÂY, không dựa vào cờ botHandoffAt như đường cũ (dòng ~6231): hai nhánh
+    // gắn thẻ 184 CỐ Ý không đặt cờ đó (chỉ nhờ nhìn giúp một tấm ảnh, không phải
+    // nhường cả hội thoại) -> gỡ thẻ 184 xong bot sẽ không bao giờ trả lời lại.
+    const _moKhoaCumCuoi = () => {
+      try {
+        const _b = getLastCustomerMessages(data.messages) || [];
+        let _n = 0;
+        for (const m of _b) {
+          if (!m || !m.messageId) continue;
+          if (processedMessageIds.delete(m.messageId)) _n++;
+          processingMessageIds.delete(m.messageId);
+          _daXuLyLuotChay.delete(m.messageId);
+        }
+        if (_n) saveProcessed(processedMessageIds);
+        if (_b.length) console.log(`[${BOT_NAME}] Gỡ thẻ -> mở khoá ${_b.length} tin khách cuối để trả lời ngay. Conv: ${conversationId}`);
+      } catch (_) {}
+    };
+    // CÔNG TẮC — mặc định TẮT theo yêu cầu shop 25/08/2026: "tạm thời chỉ cần gỡ thẻ là
+    // bot hoạt động trở lại; điều kiện nhân viên trả lời rồi mới gỡ thẻ sẽ siết sau."
+    // Bật lại: SIET_NHAN_VIEN_TRA_LOI=on trong .env (không phải sửa mã).
+    const _siet = KB.caiDatBat("SIET_NHAN_VIEN_TRA_LOI", false);
+    if (!_siet) {
+      mem.aiStandsOut = false; mem._giuTuLuc = 0;
+      updateConversationState(conversationId, mem);
+      _moKhoaCumCuoi();
+      console.log(`[${BOT_NAME}] Thẻ giữ đã gỡ -> bot nhận lại hội thoại. Conv: ${conversationId}`);
+    } else {
+    const _moc = Number(mem._giuTuLuc || 0);
+    const _nguoiThatDaTraLoi = (data.messages || []).some(m => {
+      if (!isHumanInboxMsg(m)) return false;
+      if (!_moc) return true;                       // không có mốc (dữ liệu cũ) -> có tin người thật là đủ
+      const t = new Date(m.insertedAt || m.inserted_at || 0).getTime();
+      return Number.isFinite(t) && t >= _moc;
+    });
+    if (!_nguoiThatDaTraLoi) {
+      if (logThrottle("chuatraloi_" + conversationId))
+        console.log(`[${BOT_NAME}] Thẻ giữ đã gỡ NHƯNG chưa thấy nhân viên trả lời khách -> bot vẫn đứng ngoài (chốt shop). Conv: ${conversationId}`);
+      return false;
+    }
+    mem.aiStandsOut = false; mem._giuTuLuc = 0;
+    updateConversationState(conversationId, mem);
+    _moKhoaCumCuoi();
+    console.log(`[${BOT_NAME}] Nhân viên ĐÃ trả lời + thẻ giữ đã gỡ -> bot nhận lại hội thoại. Conv: ${conversationId}`);
+    }
+  }
+
   // ===== HẬU MÃI: đơn ĐÃ mua đang GIAO LẠI / HOÀN (người thật đang lo) -> NHƯỜNG NGƯỜI THẬT, KHÔNG bán =====
   // Tín hiệu hậu mãi nằm trong tin KHÁCH/NGƯỜI THẬT (giao lại / hoàn / phí ship hoàn...). Bắt SỚM, TRƯỚC cổng ad
   // + trước size/ảnh, để bot KHÔNG báo giá / hỏi size / gửi ảnh đè lên việc người thật đang xử giao-hoàn.
@@ -5794,7 +6887,13 @@ async function processOneConversation(conversation) {
         && (postSaleContext(data.messages) || saysOrderAlreadyPlaced(_psText))) {
       await tagChoXuLyVaUnread(conversationId);
       mem.lastBotReply = HUMAN_CHECK_REPLY; mem.botHandoffAt = Date.now();
-      console.log(`[${BOT_NAME}] HẬU MÃI/ĐƠN ĐÃ CÓ (giao lại/hoàn/"hôm trước lên đơn rồi") -> gắn người thật, AI đứng ngoài. Conv: ${conversationId}`);
+      // In BẰNG CHỨNG kèm theo: cổng này gắn thẻ rồi thoát, nên không có dòng này thì
+      // không ai biết vì sao một câu hỏi bình thường lại bị nhường người thật.
+      const _psVi = _psBangChung
+        ? ` | bằng chứng: nhận-hàng="${_psBangChung.nhanHang}" + không-vừa="${_psBangChung.khongVua}"`
+        : ` | bằng chứng: ${saysOrderAlreadyPlaced(_psText) ? `khách nói đã đặt rồi ("${String(_psText).slice(0, 50)}")` : "ngữ cảnh giao/hoàn trong 5 tin cuối"}`;
+      _psBangChung = null;
+      console.log(`[${BOT_NAME}] HẬU MÃI/ĐƠN ĐÃ CÓ (giao lại/hoàn/"hôm trước lên đơn rồi") -> gắn người thật, AI đứng ngoài. Conv: ${conversationId}${_psVi}`);
       updateConversationState(conversationId, mem); markProcessed(_psBatch);
       return true;
     }
@@ -5866,21 +6965,77 @@ async function processOneConversation(conversation) {
   // Trước đây chỉ hội thoại từ quảng cáo CÓ BÁO GIÁ mới được ghi chú nguồn; khách từ
   // bình luận hoặc ca bot nhường người thật thì nhân viên mở lên không biết khách ở đâu ra.
   try {
-    await nguonHoiThoai.danhDau({
+    // data.fromAd KHÔNG phải bằng chứng khách bấm quảng cáo. pancake_reader bật cờ
+    // đó cho MỌI hội thoại có bài viết (reader dòng 709, chú thích ghi rõ "Hội thoại
+    // COMMENT cũng có post") — cốt để lấy caption bài mà suy ra mẫu, và việc đó thì
+    // đúng. Nhưng đem cờ suy-diễn ấy đi GẮN NHÃN NGUỒN thì mọi khách bình luận đều
+    // thành khách quảng cáo: nhân viên mở lên nhìn sai nguồn, và số đo hiệu quả
+    // quảng cáo bị thổi lên bằng chính lượng khách tự nhiên — hỏng đúng thứ mô-đun
+    // này sinh ra để đo. Đo được 24/08/2026: hội thoại COMMENT nhận ghi chú
+    // "🎯 TỪ QUẢNG CÁO".
+    //
+    // Bằng chứng ad THẬT là conversation.ads / ad_ids do Pancake báo -> data.adCandidates.
+    // Khách bấm ad RỒI bình luận thì vẫn tính quảng cáo (tiền đã bỏ ra) — đó là lý do
+    // adCandidates thắng isCommentOrigin, chứ không phải cờ suy diễn thắng.
+    const _adThat = Array.isArray(data.adCandidates) && data.adCandidates.length > 0;
+    const _laQuangCao = _adThat || (!!data.fromAd && !isCommentOrigin);
+    const _kq = await nguonHoiThoai.danhDau({
       conversationId,
       mem,
       chiTiet: {
-        fromAd: !!data.fromAd,
-        adId: data.adId || null,
+        fromAd: _laQuangCao,
+        adId: _laQuangCao ? (data.adId || null) : null,
         isCommentOrigin,
         postId: data.adPostId || data.postId || null,
         tenAd: data.adTitle || data.postCaption || null
       },
       ghiChuHam: addConversationNote
     });
+    // LƯU NGAY cờ chống-ghi-lại. Trước đây chỉ đặt mem._nguonDaGhi trong RAM rồi
+    // đi tiếp; lượt nào bot không trả lời thì mem không được lưu -> vòng poll sau
+    // ghi chú lại từ đầu. Đo được: một hội thoại bình luận nhận 13 dòng ghi chú
+    // GIỐNG HỆT nhau trong ~40 giây. Ô ghi chú là chỗ nhân viên đọc, không phải log.
+    if (_kq && _kq.daGhi) updateConversationState(conversationId, mem);
   } catch (_) {}
   const windowOpen = data.canInbox === true || hasInboxMessage(data.messages);
   const inboxId = data.inboxConversationId;
+
+  // ===== [FIX Hà Giang 2026-08-26] BỘ NHỚ KHOÁ THEO HỘI THOẠI, KHÔNG THEO KHÁCH =====
+  // Bảng hoi_thoai có PRIMARY KEY (shop_id, conversation_id). Hội thoại BÌNH LUẬN
+  // mang id "POSTID_kháchId", khác hẳn id inbox, nên mem của nó TRỐNG — dù cùng
+  // một khách đã mua nhiều lần bên inbox.
+  //
+  // Đo trên page PHOM 26/08/2026: khách đã có size M, sđt 0385…, địa chỉ đầy đủ
+  // và đã chốt 3 đơn trong hội thoại inbox. Comment vào bài thì bot vẫn nhắn
+  // "Chị cho em xin chiều cao và cân nặng" — vi phạm Nguyên tắc 4 của
+  // docs/YEU_CAU_TINH_NANG.txt ("đã có size/địa chỉ/sđt thì TUYỆT ĐỐI không hỏi lại").
+  //
+  // Bot ĐÃ biết inboxId ngay dòng trên, chỉ là chưa dùng. Nay mượn sang.
+  //
+  // CHỈ mượn ĐIỀU BIẾT VỀ KHÁCH. TUYỆT ĐỐI không mượn mẫu đang khoá / trạng thái
+  // đơn của hội thoại kia: mẫu ở đây phải là mẫu của BÀI khách vừa bình luận,
+  // mượn lock bên inbox sang là báo giá nhầm mẫu.
+  const _MUON_TU_INBOX = ["customerSize", "sizeFromCustomer", "weightKg", "customerWeightKg",
+                          "measure3V", "phone", "address", "everOrdered"];
+  if (isCommentOrigin && inboxId && String(inboxId) !== String(conversationId)) {
+    try {
+      const _memInbox = getConversationState(inboxId);
+      if (_memInbox) {
+        const _daMuon = [];
+        for (const k of _MUON_TU_INBOX) {
+          const cu = mem[k];
+          if ((cu === undefined || cu === null || cu === "") && _memInbox[k] != null && _memInbox[k] !== "") {
+            mem[k] = _memInbox[k];
+            _daMuon.push(k);
+          }
+        }
+        if (_daMuon.length) {
+          updateConversationState(conversationId, mem);
+          console.log(`[${BOT_NAME}] COMMENT: mượn thông tin khách từ hội thoại inbox ${inboxId} -> ${_daMuon.join(", ")}. KHÔNG hỏi lại thứ đã có.`);
+        }
+      }
+    } catch (e) { console.log(`[COMMENT] không mượn được bộ nhớ inbox: ${e.message}`); }
+  }
   // ĐÍCH gửi DM cho tin ĐẦU từ comment:
   //  - ƯU TIÊN kênh private_reply (m_...) -> FB gắn banner "phản hồi bình luận + Link Facebook"
   //    để ADMIN biết tin nhắn xuất phát từ bình luận nào (truy nguồn). Tin này vẫn vào luồng Messenger.
@@ -5953,7 +7108,10 @@ async function processOneConversation(conversation) {
       const _postIdForReply = data.postId
         || ((_convFirst && _convFirst !== String(PAGE_ID) && /^\d{6,}$/.test(_convFirst)) ? _convFirst : null);
       if (commentId) {
-        prResp = await sendPrivateReply(conversationId, opener, commentId, _postIdForReply);
+        // Truyền page THẬT: id conv bình luận là "POSTID_kháchId" nên hàm gửi KHÔNG tự
+        // suy ra page được, và ở cấu hình đa-page nó đoán nhầm sang page trong .env.
+        prResp = await sendPrivateReply(conversationId, opener, commentId, _postIdForReply,
+                                        (conversation && conversation.page_id) || _holdPid);
         ok = prResp && prResp.success !== false;
         console.log("COMMENT private_replies | commentId:", commentId, "| post_id:", _postIdForReply, "| can_reply_privately:", data.canReplyPrivately, "| PHẢN HỒI:", JSON.stringify(prResp));
         if (ok) effTarget = inboxId || conversationId;
@@ -6059,7 +7217,7 @@ async function processOneConversation(conversation) {
           ? `Dạ chị ${ten} check tin nhắn shop vừa gửi nhe ạ, em vừa gửi thông tin chi tiết để tư vấn kỹ hơn cho mình rồi đó ạ`
           : "Dạ chị check tin nhắn shop vừa gửi nhe ạ, em vừa gửi thông tin chi tiết để tư vấn kỹ hơn cho mình rồi đó ạ";
         try {
-          const r = await replyComment(conversationId, hook, commentId);
+          const r = await replyComment(conversationId, hook, commentId, (conversation && conversation.page_id) || _holdPid);
           const rok = r && r.success !== false;
           console.log("COMMENT (CÔNG KHAI điều hướng):", hook, "| OK?:", rok, "| PHẢN HỒI:", JSON.stringify(r));
           if (rok) mem.commentPublicReplied = true;
@@ -6092,6 +7250,17 @@ async function processOneConversation(conversation) {
     || isSheerConcern(_adCustNow) || worriesGarmentShort(_adCustNow)
     || asksSkirtOrSet(_adCustNow) || asksCategory(_adCustNow)   // liền hay rời / áo hay váy hay set -> ĐỂ HANDLER trả lời, không báo giá đè
     || asksOtherColors(_adCustNow) || asksInStock(_adCustNow);
+  // [THÊM 27/08/2026] Khách bấm quảng cáo rồi hỏi NGAY TIN ĐẦU "mua về mà k giống được
+  // thế thì sao shop". Cổng ads báo giá + gửi ảnh + markProcessed rồi KẾT THÚC lượt ->
+  // câu lo lắng không bao giờ tới dispatch, bot coi như chưa nghe thấy.
+  //
+  // ĐÃ THỬ cách chặn cổng ads (cho vào _adDontOpen) — HỎNG, và hỏng theo kiểu tệ hơn:
+  // cổng ads cũng chính là chỗ GIẢI RA MẪU từ adId. Chặn nó thì reader quét 3 lần không
+  // ra mẫu rồi GẮN NGƯỜI THẬT — mất cả giá, cả ảnh, cả câu trả lời.
+  //
+  // Cách đúng đã có sẵn tiền lệ ngay dưới (câu hỏi GIAO/SHIP): CỨ để cổng ads chạy — báo
+  // giá + gửi ảnh, có ích — nhưng ĐỪNG markProcessed, để vòng sau handler trả nốt câu hỏi.
+  const _adRiskQ = asksRiskRecourse(_adCustNow);
   const _adFollowupQ = asksWeightForSize(_adCustNow) || !!parseWeightKg(_adCustNow)        // "50 ký mặc size nào"
     || !!extractStatedSize(_adCustNow) || asksWhichSizeAdvice(_adCustNow) || asksWhatSize(_adCustNow)
     || asksSizeChart(_adCustNow) || asksMaterial(_adCustNow) || asksShopAddress(_adCustNow)
@@ -6620,11 +7789,26 @@ async function processOneConversation(conversation) {
       mem.lastBotReply = opener;
       // KHÔNG bỏ sót ý khác trong tin: khách vừa đến từ ad VỪA xin "cho bảng size" -> gửi kèm bảng size.
       try { await maybeSendSizeChart(conversationId, _adCustNow, product, mem); } catch (_) {}
+      // Cùng nếp trên: khách vừa đến từ ad VỪA lo "mua về mà k giống được thế thì sao"
+      // -> trả nốt QUYỀN LỢI ngay trong lượt này.
+      // KHÔNG dùng cách "bỏ markProcessed rồi để vòng sau trả" — đã thử và ĐO: bot vừa
+      // nhắn giá + ảnh xong nên hội thoại thành "shop nhắn cuối", bộ lọc danh sách loại
+      // nó ra ngay, vòng sau KHÔNG BAO GIỜ tới. Chờ 40 giây vẫn im.
+      if (_adRiskQ) {
+        try {
+          const _rr = _rotLine(mem, "riskIdx", KB.cacCau("lo_khong_giong_anh"));
+          await sendInboxMessage(conversationId, _rr);
+          mem.lastBotReply = _rr;
+          console.log(`[${BOT_NAME}] Opener ad + lo "mua về không giống thì sao" -> trả nốt quyền lợi trong CÙNG lượt.`);
+        } catch (_) {}
+      }
       scheduleFollowup(conversationId, mem, product, opener);   // ad-khách cũng được NHẮC như luồng thường (trước đây thiếu -> ad ko follow)
       console.log(`[${BOT_NAME}] Tin từ QUẢNG CÁO -> báo giá mẫu ${product.code} (${product.name}) | adId=${_adId} | title="${(data.adTitle || data.postCaption || "").slice(0, 40)}".`);
       // CHẶN GỐC LẶP BÁO GIÁ: đánh dấu tin opener ĐÃ XỬ -> vòng quét sau KHÔNG xử lại -> không sinh báo giá lần 2.
       // CẨN THẬN: nếu opener còn hỏi GIAO/SHIP (cái quote CHƯA trả) -> KHÔNG đánh dấu, để handler giao trả nốt lượt sau.
       // (Hỏi thuộc tính/màu/chất/tồn/tra-đơn -> đã bị _adDontOpen chặn không vào đây; bảng size -> maybeSendSizeChart đã gửi.)
+      // _adRiskQ đã được trả lời NGAY TRÊN nên vẫn đánh dấu xử xong như thường —
+      // không đánh dấu thì chỉ tổ mở đường cho báo giá lần hai.
       if (!isDeliveryTimeQuestion(_adCustNow) && !isDeliveryConcern(_adCustNow)) {
         try { markProcessed(getLastCustomerMessages(data.messages)); } catch (_) {}
         console.log(`[${BOT_NAME}] -> đã đánh dấu opener xử xong (chống lặp gốc).`);
@@ -6666,16 +7850,27 @@ async function processOneConversation(conversation) {
   // bỏ sót tin mới chỉ vì nó nằm chung cụm với 1 tin cũ đã xử lý (trước đây dùng .some() -> bỏ cả cụm).
   //  NGOẠI LỆ: conv CHƯA ĐỌC + khách nhắn cuối (_unreadCustomerWaiting) -> khách đang chờ thật, dù messageId
   //  đã nằm trong processedMessageIds (lần chạy trước đã đụng/gắn thẻ) vẫn PHẢI trả -> KHÔNG lọc theo processed.
-  const batchNew = _unreadCustomerWaiting
+  // [ĐO 25/08/2026] Ngoại lệ này TỪNG bỏ kiểm processed cho MỌI conv chưa-đọc-khách-chờ.
+  // Nhánh nào "gắn thẻ rồi im" (giao người thật) cũng gọi markUnread -> conv vẫn chưa-đọc +
+  // khách nhắn cuối -> vòng poll sau lại bỏ kiểm -> XỬ LẠI CÙNG MỘT TIN mãi mãi.
+  // Đo được: một tin bị xử 7 lần, gắn lại thẻ 7 lần, đốt 23 giây gọi AI, khách vẫn không
+  // nhận được gì. Đây là thứ làm bot chậm, không phải bản thân lời gọi AI.
+  //
+  // Ngoại lệ vốn sinh ra cho tin của LẦN CHẠY TRƯỚC (đã nằm trong sổ đĩa nhưng chưa từng
+  // được trả lời). Tin mà CHÍNH tiến trình này vừa xử xong thì không cần xử lại.
+  const _cumDaXuLuotNay = batch.length > 0 && batch.every(m => m && _daXuLyLuotChay.has(m.messageId));
+  const batchNew = (_unreadCustomerWaiting && !_cumDaXuLuotNay)
     ? batch
     : batch.filter(m => !processedMessageIds.has(m.messageId) && !processingMessageIds.has(m.messageId));
-  if (!batchNew.length) {
+  // Lượt ÉP Ý (vòng hai của một lượt nhiều ý): mọi tin đã được đánh dấu xử lý ở
+  // vòng một, nên cổng này chắc chắn chặn. Ý 2 do _epY mang tới, không cần tin mới.
+  if (!_epY && !batchNew.length) {
     if (logThrottle("done_" + conversationId))
       console.log(`[BỎ QUA] ${data.customerName} (${conversationId}): không còn tin MỚI (cả cụm đã xử lý). ids=${batch.map(m=>m.messageId).join(",")}`);
     mem.skipUpd = _curUpd; updateConversationState(conversationId, mem);   // đã xử lý hết -> khỏi đọc lại tới khi có tin mới
     return false;
   }
-  batch = batchNew;
+  if (batchNew.length) batch = batchNew;
 
   // CHỐT CHẶN CHỐNG LẶP (quan trọng): nếu SHOP/Botcake đã trả lời THẬT (text có nội dung / ảnh)
   // SAU tin khách cuối -> coi như đã xử lý rồi, KHÔNG báo giá lại. Xử lý ca: Botcake trả lời lúc
@@ -6693,7 +7888,12 @@ async function processOneConversation(conversation) {
         && !/đã trả lời một quảng cáo/i.test(m.text)) return true;       // text thật (bỏ dòng hệ thống)
     return false;
   });
-  if (_shopReplyAfter) {
+  // Vòng HAI của lượt nhiều ý: tin "shop trả lời sau tin khách" chính là câu vừa
+  // trả cho ý 1 ở vòng một. Bình thường botSentIds loại nó ra, nhưng chỉ vài trăm
+  // mili-giây sau khi gửi thì id có thể chưa kịp về -> cổng này tưởng người thật
+  // đã xử và nuốt luôn ý 2. Vòng ép ý bỏ qua cổng, vì ta biết chắc tin đó là của
+  // chính mình.
+  if (!_epY && _shopReplyAfter) {
     markProcessed(batch);   // đánh dấu đã xử để khỏi kiểm lại mỗi vòng (đỡ tốn request)
     if (logThrottle("shopreplied_" + conversationId))
       console.log(`[BỎ QUA] ${data.customerName} (${conversationId}): shop/Botcake đã trả lời sau tin khách -> KHÔNG báo lại (chống lặp).`);
@@ -6709,11 +7909,23 @@ async function processOneConversation(conversation) {
     return false;  // chưa markProcessing -> vòng sau xử lý lại
   }
 
+  // [RƠI LẶNG] MỐC "lượt này CÓ việc của khách, và bot ĐÃ nhận việc".
+  // Đặt sau TẤT CẢ cổng bỏ qua: thẻ giữ · cụm tin rỗng · cụm đã xử lý · CHỜ DEBOUNCE.
+  // Cổng debounce là cái dễ quên nhất: bot cố ý hoãn để đợi khách gõ xong rồi gộp tin,
+  // câu trả lời rơi vào lượt SAU. Đặt mốc trước nó thì mọi lượt đang đợi đều bị chấm
+  // oan là "bỏ rơi khách" — đo 25/08/2026: 40 báo động cho 46 kịch bản, gần như toàn oan.
+  // Qua được tới đây thì bot thật sự đang xử lý lượt này; im lúc này mới là im đáng ngờ.
+  // Hai trường dưới khai sẵn trong turn_log từ đầu mà chưa nơi nào điền.
+  turnLog.set({
+    khachText: batch.filter(m => m && m.type === "text").map(m => m.text || "").join(" ").trim().slice(0, 500),
+    coAnh: batch.some(m => m && m.type === "image")
+  });
+
   // (Đã bỏ luật "chờ 5 phút / phát hiện người thật sát giờ gửi".)
   // Điều phối người thật vs AI giờ CHỈ dựa vào THẺ (đã kiểm tra convHasHoldTag ở đầu hàm):
   // còn thẻ giữ -> AI đứng ngoài; gỡ thẻ -> AI xử lý ngay.
 
-  if (!_unreadCustomerWaiting && hasProcessed(batch)) return false;
+  if (!_epY && !_unreadCustomerWaiting && hasProcessed(batch)) return false;
   markProcessing(batch);
 
   try {
@@ -6725,8 +7937,69 @@ async function processOneConversation(conversation) {
 
     // NFKC: chữ/số CÁCH ĐIỆU (Unicode toán học in đậm/nghiêng: 𝟬𝟵𝟴𝟵.. , 𝘾𝙝𝙞..) -> ASCII thường,
     // để regex SĐT/địa chỉ bắt được. An toàn cho tiếng Việt (giữ dấu), emoji không đổi.
-    const latestTextRaw = batch.filter(x => x.type === "text").map(x => (x.text || "").normalize("NFKC")).join(" ");
+    // ===== CẮT LƯỢT NHIỀU Ý (xem tachYTrongLuot) =====
+    // Vòng một: chỉ nhìn ý 1, cất ý 2 vào _Y_CON_LAI cho vòng hai.
+    // Vòng hai (_epY): latestText CHÍNH LÀ ý 2, không đọc lại cụm tin.
+    let _textLuot = batch.filter(x => x.type === "text").map(x => (x.text || "").normalize("NFKC")).join(" ");
+    if (_epY) {
+      _textLuot = String(_epY).normalize("NFKC");
+      console.log(`[nhiều ý] vòng 2 — trả nốt ý: "${String(_epY).slice(0, 60)}"`);
+    } else {
+      const _ys = tachYTrongLuot(batch);
+      if (_ys.length === 2) {
+        _textLuot = _ys[0].normalize("NFKC");
+        _Y_CON_LAI.set(String(conversationId), _ys[1]);
+        console.log(`[nhiều ý] lượt có 2 ý khác chủ đề -> trả ý 1 trước, ý 2 gửi TIN RIÊNG: "${_ys[1].slice(0, 60)}"`);
+      } else {
+        _Y_CON_LAI.delete(String(conversationId));
+      }
+    }
+    const latestTextRaw = _textLuot;
     const latestText = normalizeViet(latestTextRaw);   // dò ý trên bản CHUẨN HOÁ (viết tắt/lặp -> chuẩn)
+
+    // ===== KHÁCH GẬT VỚI BẢN ĐỌC LẠI ĐƠN -> GIỜ MỚI LÊN ĐƠN =====================
+    // Đặt ngay đầu lượt, TRƯỚC mọi nhánh khác: khách vừa được đọc lại đơn thì câu
+    // kế tiếp gần như chắc chắn là gật hoặc sửa, đừng để nhánh khác cướp lượt.
+    // Mỗi NƠI GIAO phát MỘT tin chốt riêng, đánh số "(đơn i/N)" — order_extractor
+    // dựa đúng nhãn đó để tách thành N đơn (xem chú thích ở đó).
+    if (mem.donChoXacNhan && Array.isArray(mem.donChoXacNhan.nhom) && mem.donChoXacNhan.nhom.length) {
+      const _dc = mem.donChoXacNhan;
+      if (Date.now() - (_dc.luc || 0) > 6 * 3600 * 1000) {
+        // Bản nháp để quên quá lâu -> bỏ, đừng lên đơn theo thứ khách đã quên.
+        mem.donChoXacNhan = null; updateConversationState(conversationId, mem);
+        console.log(`[${BOT_NAME}] Bản nháp đơn quá 6 tiếng chưa ai xác nhận -> BỎ. Conv: ${conversationId}`);
+      } else if (xacNhanBanNhapDon(latestText)) {
+        const _byCode = {};
+        for (const _p of (mem.quotedProducts || [])) _byCode[_up(_p.code)] = _p;
+        if (mem.currentProduct) _byCode[_up(mem.currentProduct.code)] = mem.currentProduct;
+        const _N = _dc.nhom.length;
+        mem.phone = _dc.phone || mem.phone;
+        mem.orderColorByCode = mem.orderColorByCode || {};
+        for (let _i = 0; _i < _N; _i++) {
+          const _g = _dc.nhom[_i];
+          mem.orderLines = _g.lines.map(ln => ({ code: ln.code, color: ln.color, size: ln.size, qty: ln.qty }));
+          mem.orderLinesCode = null;
+          mem.address = _g.address;
+          for (const ln of _g.lines) if (ln.color) mem.orderColorByCode[ln.code] = ln.color;
+          const _p0 = _byCode[_up(_g.lines[0].code)] || mem.currentProduct;
+          if (_i === 0) await sendOrderCreatingWithImages(conversationId, mem, _p0);
+          const _tin = buildOrderConfirmation(mem, _p0, _N > 1 ? `(đơn ${_i + 1}/${_N})` : "");
+          await sendInboxMessage(conversationId, _tin);
+          mem.lastBotReply = _tin;
+        }
+        await tagAiChot(conversationId);
+        mem.orderClosed = true; mem.orderState = "DA_CHOT"; mem.everOrdered = true;
+        mem.donChoXacNhan = null;
+        cancelFollowup(conversationId);
+        console.log(`[${BOT_NAME}] Khách XÁC NHẬN bản đọc lại -> LÊN ${_N} ĐƠN: ${_dc.nhom.map((g, k) => `#${k + 1} ${g.lines.length} món -> ${g.address}`).join(" | ")}`);
+        updateConversationState(conversationId, mem); markProcessed(batch); return true;
+      } else {
+        // Khách nói chuyện khác (sửa màu / đổi địa chỉ / hỏi thêm) -> bỏ bản nháp,
+        // để luồng thường đọc lại từ đầu rồi dựng bản nháp MỚI.
+        mem.donChoXacNhan = null; updateConversationState(conversationId, mem);
+        console.log(`[${BOT_NAME}] Khách KHÔNG gật bản đọc lại ("${String(latestText).slice(0, 40)}") -> bỏ nháp, đọc lại từ đầu.`);
+      }
+    }
     mem._lastCustText = latestText;   // [CHƯƠNG TRÌNH KM] để buildDiscountReply phân biệt khách hỏi "áp dụng online không"
     if (_luot().turnCtx) _luot().turnCtx.customerText = latestText;   // để scheduleFollowup biết khách vừa HỎI gì
     let askImages = wantsImages(latestText);
@@ -6949,6 +8222,14 @@ async function processOneConversation(conversation) {
           // Luật id-tươi (fix Nhung Cao) cấm adPostId cũ để chống ad-cũ-cướp-mẫu — đúng khi hội thoại ĐANG
           // bám mẫu khác; còn khi MỌI nguồn cạn VÀ hội thoại không bám mẫu nào -> map tay là chính xác nhất
           // còn lại, dùng làm NGUỒN CUỐI trước khi quét lại/nhường người.
+          // [FIX 2026-08-24] `product`/`_how` của CỔNG ADS khai ở dòng 6463-6464, khối đó ĐÓNG ở dòng
+          // 6732 — cách đây 300 dòng. Dùng lại tên đó ở đây là ReferenceError:
+          //   - dòng gán nằm trong try{}catch(_){} -> lỗi bị NUỐT, map nguồn cuối chưa từng cứu được ai;
+          //   - dòng `if (product)` nằm NGOÀI try -> lỗi thoát ra, giết cả processOneConversation.
+          // Và nó chạy VÔ ĐIỀU KIỆN (ngoài khối if ở trên), nên MỌI hội thoại từ quảng cáo mà chưa ra
+          // mẫu đều chết ở đây — không trả lời, không kịp gắn cả thẻ 183. Đã đánh vào khách thật
+          // (ca Thu Trang 19/07). Nay dùng biến CỤC BỘ.
+          let _pCuoi = null;
           if (data.adPostId && !mem.currentProduct && !(mem.quotedProducts || []).length) {
             try {
               const _mL = lookupAdProduct(String(data.adPostId));
@@ -6956,13 +8237,19 @@ async function processOneConversation(conversation) {
                 const _cL = await ensureCatalog();
                 const _pL = _cL.byCode.get(String(_mL).toUpperCase());
                 if (_pL) {
-                  product = _pL; _how = "MAP nguồn cuối (adPostId " + data.adPostId + ")";
+                  _pCuoi = _pL;
                   console.log(`[${BOT_NAME}] Ad ${_adId || "-"} -> MAP NGUỒN CUỐI (adPostId ${data.adPostId}) ra mẫu ${_pL.code} (${_pL.name}) — mọi nguồn tươi đã cạn, hội thoại không bám mẫu khác.`);
                 }
               }
-            } catch (_) {}
+            } catch (e) { console.log(`[${BOT_NAME}] MAP nguồn cuối lỗi: ${e.message}`); }
           }
-          if (product) { /* đã cứu được bằng map nguồn cuối -> đi tiếp luồng báo giá bên dưới */ } else {
+          if (_pCuoi) {
+            // Cứu được -> bàn giao mẫu cho luồng báo giá bên dưới, đúng cách khối OCR ở dưới đang làm
+            // (nó gán thẳng `fromText = hit`). KHÔNG lặp lại nhánh 6618 (gửi ảnh + opener) vì chú thích
+            // gốc nói rõ là "đi tiếp luồng báo giá bên dưới", không phải mở lại lượt chào hàng.
+            mem.currentProduct = _pCuoi;
+            if (!fromText.length) fromText = [_pCuoi];
+          } else {
           // [FIX gắn-183-quá-sớm] ad chưa ra mẫu có thể do ad_ids/creative CHƯA kịp load ở nhịp quét đầu.
           //  Giống hệt gỡ thẻ tay rồi bot chạy lại là ra -> QUÉT LẠI vài nhịp TRƯỚC khi đành gắn người thật.
           if ((mem._adResolveRetry || 0) < 3) {
@@ -7075,6 +8362,7 @@ async function processOneConversation(conversation) {
     mem._aiProvinceConfirm = false;   // AI thấy tỉnh/thành thuộc diện SÁP NHẬP -> hỏi xác nhận (phương án B)
     mem._aiRefersTo = null;           // [ĐA MẪU] mẫu khách nhắc (AI neo) - reset mỗi lượt
     mem._aiIsAddress = false;         // tin lượt này có phải địa chỉ không (để AI ép "thiếu" đúng lúc)
+    mem._aiTinCay = null;             // AI tự chấm độ tin cậy của nhãn (0..1). null = AI không chấm -> không chặn.
     if (String(process.env.AI_READ_FIRST || "on").toLowerCase() === "on"
         && latestText && latestText.trim().length >= 1) {
       try {
@@ -7112,7 +8400,8 @@ async function processOneConversation(conversation) {
           mem._aiProvinceConfirm = _lab.province_confirm === true;
           mem._aiRefersTo = _lab.refers_to || null;   // [ĐA MẪU] mẫu khách nhắc (AI neo) - hiện CHỈ ghi log để theo dõi, CHƯA tự chốt
           mem._aiIsAddress = !!_lab.is_address;        // tin lượt này CÓ nội dung địa chỉ? (để AI được ép "thiếu" đúng lúc)
-          console.log(`[AI-READ] nhãn=${_lab.kind} | size=${_lab.size || "-"} addr=${_lab.is_address} order=${_lab.wants_order} price=${_lab.asks_price} chart=${_lab.asks_size_chart} concern=${_lab.concern || "-"} | phone=${_lab.phone || "-"} addrDu=${_lab.address_complete} provConfirm=${_lab.province_confirm} refers=${_lab.refers_to || "-"}`);
+          mem._aiTinCay = (typeof _lab.do_tin_cay === "number") ? _lab.do_tin_cay : null;   // dưới NGUONG_TIN_CAY -> giao người thật (mạng an toàn phía dưới)
+          console.log(`[AI-READ] nhãn=${_lab.kind} | size=${_lab.size || "-"} addr=${_lab.is_address} order=${_lab.wants_order} price=${_lab.asks_price} chart=${_lab.asks_size_chart} concern=${_lab.concern || "-"} | phone=${_lab.phone || "-"} addrDu=${_lab.address_complete} provConfirm=${_lab.province_confirm} refers=${_lab.refers_to || "-"} tin_cay=${_lab.do_tin_cay == null ? "-" : _lab.do_tin_cay}`);
           // (1) SIZE: AI bắt được size mà extractStatedSize trượt -> điền, hết hỏi lại size.
           // [FIX Thuy Nguyen 2026-07-11] "M62 53 kg" = cao 1m62 nặng 53kg (khách gõ tắt) — AI vớ chữ "M"
           // phán size=M -> hệ thống tin nhầm "khách TỰ KHAI M" (sizeFromCustomer=true) -> về sau nhánh
@@ -7133,8 +8422,7 @@ async function processOneConversation(conversation) {
           //     AI CHỈ phất cờ "đây là địa chỉ"; CHUỖI địa chỉ thật vẫn do code bóc (cleanAddress), KHÔNG để AI bịa.
           // [GUARD] Nếu nhãn chính là CÂU HỎI (hỏi hàng đẹp như hình, hỏi giá, bảng size, lăn tăn, cảm ơn, gấp...)
           // thì TUYỆT ĐỐI không ép thành "đang cho địa chỉ/chốt" — 1 câu hỏi không thể là địa chỉ. Tránh chốt nhầm.
-          const _askKinds = ["AUTHENTICITY_QA", "PRICE_ASK", "SIZE_CHART", "QUALITY_CONCERN", "POLICY_QA", "POST_ORDER_CHITCHAT", "POST_ORDER_REQUEST", "POST_ORDER_CONFIRMED", "THANKS", "URGENT", "COLOR_ASK", "ASK_COLOR"];
-          const _isAskLabel = _askKinds.includes(String(_lab.kind || "").toUpperCase());
+          const _isAskLabel = isAskKind(_lab.kind);
           if ((_lab.is_address || _lab.kind === "ADDRESS") && !_isAskLabel && !mem._addrJustGiven && !asksShopAddress(latestText)
               && !looksLikeQuestion(latestText)) {
             mem._addrJustGiven = true; mem._reaskedAddr = false;
@@ -7148,7 +8436,7 @@ async function processOneConversation(conversation) {
                 const _okAddr = !!(_va.explicitProvince(_fca)
                   || (typeof _va.hasAreaToken === "function" && _va.hasAreaToken(_fca))
                   || /(\d+[a-z]?\s*(\/|-)\s*\d+)|((số|so)\s*(nhà|nha)?\s*\d)|((thôn|thon|xóm|xom|ấp|ap|đội|doi|khu|tổ|to|lô|lo|kiệt|kiet)\s*\d*\s)|((xã|xa|phường|phuong|thị\s*trấn|thi\s*tran|quận|quan|huyện|huyen)\s)|((đường|duong|phố|pho|ngõ|ngo|ngách|ngach|hẻm|hem)\s)/i.test(" " + _caddr + " "));
-                if (_okAddr) { mem.address = _caddr; }
+                if (_okAddr) { datDiaChi(mem, _caddr, "bóc từ tin khách"); }
                 else { console.log(`[AI-READ] -> BỎ lưu địa chỉ: "${String(_caddr).slice(0, 30)}" KHÔNG có tín hiệu địa danh (AI phất nhầm is_address).`); }
               } catch (_) {}
             }
@@ -7223,6 +8511,24 @@ async function processOneConversation(conversation) {
         } catch (e) { console.log(`[AI-QUYẾT] LỖI: ${(e && e.message) || e} -> chạy luật cũ.`); }
       }
     }
+    // _ai("X") = AI gắn nhãn X. Dùng để OR vào điều kiện nhánh sẵn có -> bắt được khi TỪ-KHOÁ TRƯỢT.
+    // Code vẫn DUYỆT trong từng handler (sheet/POS/catalog). AI timeout/OTHER -> _ai luôn false -> chạy thuần từ-khoá.
+    //
+    // [SỬA 26/08/2026 — ca Hà Giang] KHAI BÁO PHẢI ĐỨNG Ở ĐÂY, TRƯỚC _aiQuyetHanhDong().
+    // Trước đó nó nằm SAU lời gọi _aiQuyetHanhDong() (~30 dòng dưới). Hàm đó là function
+    // declaration nên được hoisted và gọi được sớm, NHƯNG thân nó có dùng _ai("URGENT")
+    // (nhánh IM_NHUONG_NGUOI). const nằm dưới => vùng chết tạm thời (TDZ) => gọi là ném
+    // "Cannot access '_ai' before initialization".
+    //
+    // Hậu quả đo được trên page thật: khách hỏi "tầm bao giờ ship về đấy ạ", AI-QUYẾT
+    // quyết ĐÚNG là IM_NHUONG_NGUOI (nhường người thật), nhưng vừa vào nhánh đó là ném
+    // lỗi -> khối try nuốt -> "luật cũ cầm lái" -> rừng luật cũ chạy lại nhánh chốt đơn
+    // và gửi khách MỘT BẢN XÁC NHẬN ĐƠN THỨ HAI + một tấm ảnh, không dính gì câu hỏi.
+    //
+    // Nghĩa là ĐƯỜNG IM_NHUONG_NGUOI CHƯA BAO GIỜ CHẠY ĐƯỢC: mọi lần AI định nhường cho
+    // người thật đều rơi vào catch. Lỗi im lặng hoàn toàn — chỉ lộ ra ở một dòng log.
+    const _ai = (k) => mem._aiIntent === k;
+
     // ===== AI-FIRST DISPATCH (tiếp) =====
     // ===== [CỔNG SALE GỌN 2026-07] che_do_sale_gon bật: bot CHỈ làm 4 việc — báo giá / chất liệu /
     // tư vấn size từ số đo / 2 câu chương trình. MỌI THỨ KHÁC: IM LẶNG TUYỆT ĐỐI + gắn Chờ-XL cho người
@@ -7266,9 +8572,6 @@ async function processOneConversation(conversation) {
         return true;
       }
     } catch (e) { console.log(`[AI-QUYẾT ưu tiên] LỖI: ${(e && e.message) || e} -> luật cũ cầm lái.`); }
-    // _ai("X") = AI gắn nhãn X. Dùng để OR vào điều kiện nhánh sẵn có -> bắt được khi TỪ-KHOÁ TRƯỢT.
-    // Code vẫn DUYỆT trong từng handler (sheet/POS/catalog). AI timeout/OTHER -> _ai luôn false -> chạy thuần từ-khoá.
-    const _ai = (k) => mem._aiIntent === k;
 
     // [AI-QUYẾT giá] AI đã đọc xong ở trên. AI chạy được -> GIÁ do AI quyết (mem._aiAsksPrice);
     // AI rỗng/timeout -> giữ giá trị regex isPriceAsk đã tính ở trên (lưới đỡ). Mọi nhánh phía dưới
@@ -7292,7 +8595,18 @@ async function processOneConversation(conversation) {
         mem.lastBotReply = "[hẹn ghé showroom -> người thật]";
         updateConversationState(conversationId, mem); markProcessed(batch); return true;
       }
-      if (!_aiOr(wantsVisitShowroom(latestText), "STORE_VISIT") && !_ai("STORE_ADDRESS") && !showroomReplyFor(latestText)) {
+      // [FIX Hà Giang 2026-08-26 — page PHOM] KHÁCH HỎI CHUYỆN KHÁC thì đừng nuốt câu hỏi.
+      // Cửa sổ này dài 2 TIẾNG và trước đây chỉ chừa ba lối ra (STORE_VISIT / STORE_ADDRESS /
+      // showroomReplyFor). Mọi tin khác — hỏi màu, hỏi giá, hỏi size — đều rơi vào B3 và bị
+      // trả lời bằng câu mời ghé showroom, rồi `return true` kết thúc lượt nên câu hỏi thật
+      // KHÔNG BAO GIỜ tới được nhánh trả lời. Đo trên page thật:
+      //   15:03:40 khách "bên mình có cửa hàng k nhỉ, e muốn qua thử"  -> bot đưa địa chỉ + hỏi hôm nào ghé
+      //   15:05:19 khách "mẫu đó còn màu khác k shop"                   -> nhãn COLOR_ASK
+      //   15:05:33 bot   "Dạ chị tiện thì ghé thử cho ưng ý nha..."     -> lạc đề hoàn toàn
+      // B3 chỉ dành cho tin KHÔNG phải câu hỏi: "bận rồi", "để hôm khác", "ok"...
+      const _hoiChuyenKhac = isAskKind(mem._aiIntent) || looksLikeQuestion(latestText);
+      if (!_hoiChuyenKhac
+          && !_aiOr(wantsVisitShowroom(latestText), "STORE_VISIT") && !_ai("STORE_ADDRESS") && !showroomReplyFor(latestText)) {
         // B3: CHƯA chốt thời gian (bận/lưỡng lự) -> thuyết phục: ghé thử HOẶC ship tận nơi kiểm hàng.
         mem.showroomVisitAsked = null;
         const reply = "Dạ chị tiện thì ghé thử cho ưng ý nha. Còn nếu mấy hôm này chị bận chưa qua được, em tư vấn và ship tận nơi, cho kiểm hàng trước khi thanh toán luôn — chị khỏi mất công đi lại ạ.";
@@ -7304,7 +8618,7 @@ async function processOneConversation(conversation) {
     // (2) [STORE_VISIT] Khách BÁO/HẸN SẼ GHÉ -> xin size GIỮ HÀNG + hỏi hôm nào ghé. (AI quyết; regex đỡ)
     if (_aiOr(wantsVisitShowroom(latestText), "STORE_VISIT") && !mem.orderClosed && !mem.showroomVisitAsked) {
       mem.pendingShowroomChoice = null;
-      if (mem._addrJustGiven) mem.address = null;
+      if (mem._addrJustGiven) xoaDiaChi(mem, "chỗ 8569");
       const _svReply = showroomVisitReply(latestText, mem);
       mem.showroomVisitAsked = Date.now();
       await sendInboxMessage(conversationId, _svReply);
@@ -7317,7 +8631,7 @@ async function processOneConversation(conversation) {
         const _srReply = showroomReplyFor(latestText);
         if (_srReply) {
           mem.pendingShowroomChoice = null;
-          if (mem._addrJustGiven) mem.address = null;   // tên cơ sở bị bắt nhầm thành địa chỉ giao -> xoá
+          if (mem._addrJustGiven) xoaDiaChi(mem, "tên cơ sở bị bắt nhầm thành địa chỉ giao -> xoá");   // tên cơ sở bị bắt nhầm thành địa chỉ giao -> xoá
           await sendInboxMessage(conversationId, _srReply);
           console.log(`[${BOT_NAME}] Khách CHỌN/HỎI CƠ SỞ (qua shop) -> trả đúng cơ sở, KHÔNG lên đơn giao.`);
           mem.lastBotReply = _srReply; updateConversationState(conversationId, mem); markProcessed(batch); return true;
@@ -7461,6 +8775,32 @@ async function processOneConversation(conversation) {
       }
     }
 
+    // ===== NGƯỠNG TIN CẬY: AI tự chấm do_tin_cay cho chính nhãn nó vừa gắn (ai_intent.js).
+    // Trước đây nhãn đoán bừa vẫn được tin 100% — chỉ lỗi/timeout mới rơi về regex. Nay điểm
+    // DƯỚI NGƯỠNG = AI tự nhận "không chắc" -> GIAO NGƯỜI THẬT (im lặng, gắn AI-CHỜ XL), thà
+    // nhường người còn hơn để một nhãn đoán bừa kéo cả nhánh đi sai.
+    // Ngưỡng: env NGUONG_TIN_CAY (mặc định 0.6 — cùng mốc NGUONG_CHAC của intent_router.js).
+    // GÁC (y như mạng an toàn OTHER ở trên): tin ack/xã giao, có tín hiệu tiền-đơn-địa chỉ-sđt-size
+    // (code xử chắc tay), đã chốt đơn, hoặc người thật đang trong hội thoại -> KHÔNG chặn.
+    // AI không chấm điểm (null, vd bản prompt cũ hoặc AI quên điền) -> giữ nguyên hành vi cũ.
+    {
+      const _nguongTC = Number(process.env.NGUONG_TIN_CAY || 0.6);
+      const _tinCay = mem._aiTinCay;
+      const _tcText = String(latestText || "").trim();
+      const _tcAckLike = !_tcText || isBareAck(_tcText) || isAffirmation(_tcText)
+        || isFriendlyRemark(_tcText) || isPostOrderChitChat(_tcText) || _isBlankPing(_tcText);
+      const _tcOrderSignal = mem._addrJustGiven || mem.phone || mem.customerSize
+        || priceAsk || customerWantsToOrder(latestText, mem.lastIntent)
+        || customerGaveContact(latestText);
+      if (mem._aiOk && typeof _tinCay === "number" && Number.isFinite(_nguongTC) && _tinCay < _nguongTC
+          && !_tcAckLike && !_tcOrderSignal && !mem.orderClosed && !humanInbox) {
+        try { await tagChoXuLyVaUnread(conversationId); } catch (_) {}
+        mem.botHandoffAt = Date.now();
+        console.log(`[DISPATCH] AI nhãn=${mem._aiIntent} nhưng TIN CẬY ${_tinCay} < ngưỡng ${_nguongTC} -> GIAO NGƯỜI THẬT (im, AI-CHỜ XL). Câu: "${_tcText.slice(0, 40)}"`);
+        updateConversationState(conversationId, mem); markProcessed(batch); return true;
+      }
+    }
+
     // AI hay nhầm "giá"/"lấy giá" -> DISCOUNT. Chỉ cho nhãn DISCOUNT kích nhánh giảm giá khi câu THỰC SỰ
     // có từ giảm/sale/bớt... -> tránh nuốt câu HỎI GIÁ (vd "Let giá s ak") thành câu "ít khi giảm giá".
     const _aiDiscount = _ai("DISCOUNT") && /giảm|bớt|sale|\bkm\b|khuyến m[ãa]i|ưu đãi|deal|fix giá|rẻ hơn|mềm giá|giá tốt/i.test(String(latestText || "").toLowerCase());
@@ -7482,8 +8822,18 @@ async function processOneConversation(conversation) {
 
     // (C2) KHẨN / DEADLINE: AI=URGENT, hoặc code bắt MỐC NGÀY cụ thể (mai/T4/trước thứ 5/đi tiệc) khi KHÔNG phải
     //      đang hỏi giá / chốt / cho contact -> ĐƠN ƯU TIÊN, người thật. (AI chỉ phân nhánh; câu trả do code.)
+    // [25/08/2026] HỎI HỢP DỊP ≠ CÓ DEADLINE. isUrgentSpecificDate mục (3) bắt mọi câu có
+    // "đi tiệc / đám cưới / sự kiện" là gấp. Nhưng "mẫu này mặc ĐI TIỆC ở cty được k shop"
+    // là HỎI MẪU CÓ HỢP KHÔNG — tài liệu có hẳn nhãn OCCASION_QA cho việc này, tách bạch
+    // với URGENT.
+    // Đo trên page thật: AI-READ đọc ĐÚNG là OCCASION_QA, nhưng nhánh này chạy theo regex
+    // riêng nên vẫn gắn 185 ĐƠN ƯU TIÊN rồi im -> khách hỏi tư vấn mà bị đẩy vào hàng đợi
+    // đơn gấp, và không nhận được câu trả lời nào.
+    // -> AI đã phán là câu HỎI HỢP DỊP/HỢP DÁNG thì regex mốc-ngày KHÔNG được đè.
+    //    (Nhãn URGENT thật của AI vẫn đi qua bình thường.)
+    const _hoiHopDip = _ai("OCCASION_QA") || _ai("FIT_SUITABILITY") || _ai("PREGNANCY_FIT");
     if (_ai("URGENT")
-        || (isUrgentSpecificDate(latestText) && !priceAsk
+        || (isUrgentSpecificDate(latestText) && !_hoiHopDip && !priceAsk
             && !customerWantsToOrder(latestText, mem.lastIntent) && !customerGaveContact(latestText))) {
       // [NGUYÊN TẮC] Giao NGƯỜI THẬT (gắn thẻ ĐƠN ƯU TIÊN) -> CHỈ GẮN THẺ + IM LẶNG, KHÔNG nói gì với khách.
       try { await tagDonUuTienVaUnread(conversationId); } catch (_) {}
@@ -7496,6 +8846,7 @@ async function processOneConversation(conversation) {
     {
       const _reqC = extractColor(latestText);
       mem.askedImageColor = _reqC || null;
+      mem._mauVuaHua = null;   // lời hứa của lượt TRƯỚC không được vắt sang lượt này
       // Cờ khách XIN ĐỦ MÀU lượt này -> maybeSendImages mới được bung đủ màu. Mặc định false (gửi màu bìa).
       mem._wantAllColors = wantsAllColorsImages(latestText) || wantsAllColorsLoose(latestText);
     }
@@ -7525,14 +8876,84 @@ async function processOneConversation(conversation) {
       console.log(`[${BOT_NAME}] ĐƠN ĐÃ CHỐT + tin mơ hồ + không mẫu mới -> hậu mãi đơn cũ, nhường người thật. Conv: ${conversationId}`);
       mem.lastBotReply = HUMAN_CHECK_REPLY; updateConversationState(conversationId, mem); markProcessed(batch); return true;
     }
+    // ===== ẢNH NHẬN RA RỒI NHƯNG MÃ THIẾU DÒNG SHEET -> NÓI THẬT, KHÔNG IM =====
+    // ĐẶT TRƯỚC nhánh "khách gửi ĐỊA CHỈ bằng ẢNH" ngay bên dưới. Đặt sau thì không bao
+    // giờ chạy tới: nhánh kia chỉ cần "có ảnh + bot vừa hỏi địa chỉ + địa chỉ chưa đủ +
+    // vision trượt" là kết luận đó là ảnh địa chỉ rồi đòi khách nhắn địa chỉ bằng chữ.
+    // Dựng lại trong giả lập 25/08 (kich_ban_thu/anh_thieu_dong_sheet.json): khách gửi ảnh
+    // MRQN553 giữa lúc đang dở địa chỉ -> bot đòi địa chỉ, gắn 183, hội thoại chết.
+    // Ảnh mà vision ĐÃ RA MÃ SẢN PHẨM thì chắc chắn KHÔNG phải ảnh địa chỉ.
+    // [25/08/2026] Ca đo trên page thật: khách gửi ảnh, vision ra MRQN553 với điểm 0.9937
+    // (chắc gần như tuyệt đối), nhưng MRQN553 không có dòng nào trong 589 dòng Sheet nên
+    // findProductByCode trả rỗng -> tấm ảnh bị bỏ -> bot rơi vào nhánh "không nhận ra mẫu
+    // nào" bên dưới -> gắn thẻ rồi IM. Khách không nhận được câu nào.
+    //
+    // Đây KHÔNG phải bot đọc kém. Ảnh có trên Drive, kho CLIP có 19 tấm của mã này. Thiếu là
+    // thiếu DÒNG HÀNG để lấy giá. Quét toàn kho: 265/738 mã thiếu dòng = 2.510/15.221 ảnh
+    // (16,5%). Cứ 6 tấm khách gửi thì 1 tấm rơi kiểu này.
+    //
+    // Gộp chung với "không nhận ra" là sai hai lần: sai với khách (im lặng), và sai với nhân
+    // viên (ghi chú bảo "bot không nhận ra mẫu" trong khi bot biết thừa mã là gì, chỉ cần ai
+    // đó thêm một dòng vào Sheet).
+    //
+    // -> Tách riêng: NÓI THẬT với khách một câu, ghi chú NÊU ĐÍCH DANH MÃ cho nhân viên, gắn
+    //    184 rồi DỪNG. 184 nằm trong HOLD_TAG_IDS (dòng ~2322) nên hội thoại đứng lại cho tới
+    //    khi nhân viên thêm dòng Sheet và gỡ thẻ — đúng chốt của shop: "cần người thật thì bot
+    //    không làm gì tiếp". Khác nhánh "không nhận ra" ở chỗ khách ĐƯỢC NGHE một câu tử tế
+    //    thay vì im bặt, và nhân viên biết chính xác phải thêm mã nào.
+    const _thieuSheet = (fromImages && fromImages._thieuDongSheet) || [];
+    if (thisTurn.length === 0 && imageCount > 0 && _thieuSheet.length) {
+      const _maThieu = _thieuSheet.map(x => x.code).join(", ");
+      // NHẮC LẠI ĐÚNG CÂU KHÁCH HỎI. Bản đầu chỉ nói mỗi "em xác nhận lại thông tin với bên
+      // kho" — toàn chuyện của shop, không đụng gì tới điều khách hỏi. Shop nhận xét đúng là
+      // "thiếu mục trả lời câu hỏi chính của khách".
+      // Ở đây KHÔNG có dòng Sheet nên không có căn cứ nào để phán mẫu có hợp dịp hay không;
+      // bịa ra "hợp lắm ạ" đúng vào thứ shop sợ nhất. Nên: nêu rõ đang đi hỏi VỀ CHÍNH VIỆC ĐÓ.
+      const _dip = dipKhachHoi(latestText);
+      // Câu nằm trong kho kịch bản -> shop khác sửa được, không phải mở mã.
+      const reply = _dip
+        ? KB.cau("anh_thieu_dong_sheet__co_dip", { dip: _dip })
+        : KB.cau("anh_thieu_dong_sheet");
+      // KHÔNG dùng cụm "chờ em kiểm tra ..." / "để em kiểm tra ...": sendInboxMessage coi đó
+      // là câu báo-chờ (isWaitHandoffMsg) và NUỐT -> lại im lặng y như cũ. Có test khoá việc này.
+      await sendInboxMessage(conversationId, reply);
+      await tagXuLyAnhVaUnread(conversationId);
+      try {
+        await addConversationNote(conversationId,
+          `🖼️ Bot NHẬN RA mẫu là ${_maThieu} nhưng mã này KHÔNG có dòng trong Sheet -> không có giá để báo. ` +
+          `Cần thêm dòng cho ${_maThieu} vào Sheet (hoặc báo giá tay). Bot vẫn trả lời các câu hỏi khác.`);
+      } catch (_) {}
+      console.log(`[${BOT_NAME}] Ảnh nhận ra mã ${_maThieu} nhưng THIẾU DÒNG SHEET -> đã nói thật với khách + thẻ AI-XL ảnh (184). Bot DỪNG tới khi nhân viên thêm dòng Sheet và gỡ thẻ.`);
+      mem.lastBotReply = reply;
+      // CỐ Ý không đặt botHandoffAt: chỉ nhờ bổ sung một dòng hàng, không phải nhường cả hội thoại.
+      updateConversationState(conversationId, mem);
+      markProcessed(batch);
+      return true;
+    }
+
     // OCR ảnh hay đọc RÁC (ảnh giày dép/card SP -> "Mã/Giá/màu" thành địa chỉ) -> chốt bậy. Theo yêu cầu shop:
     // ảnh địa chỉ thì NGƯỜI THẬT kiểm tra, bot KHÔNG tự nhận diện điền vào đơn.
     const _recentShop = (data.messages || []).filter(m => m && m.sender === "shop" && m.type === "text")
       .slice(-5).map(m => String(m.text || "")).join(" ");
     const _botAskedAddr = /địa chỉ|dia chi|đ\/c\b/i.test(_recentShop) || /địa chỉ|dia chi|đ\/c\b/i.test(String(mem.lastBotReply || ""));
-    if (imageCount > 0 && _botAskedAddr && !addrReady(mem) && thisTurn.length === 0) {
-      if (mem.address && isGarbageAddress(mem.address)) mem.address = null;   // xoá rác OCR tồn đọng
-      const reply = "Dạ em nhận được ảnh của chị rồi ạ. Để tránh sai sót khi giao, chị nhắn giúp em địa chỉ bằng tin nhắn chữ (số nhà - phường/xã - tỉnh/thành) nha, hoặc chờ em kiểm tra lại giúp mình ạ.";
+    // [FIX 25/08/2026] Nhánh này TỪNG không nhìn khách nói gì — chỉ cần "có ảnh + bot vừa
+    // nhắc địa chỉ + địa chỉ chưa đủ + vision trượt" là kết luận ảnh địa chỉ. Đo trên page
+    // thật: khách gửi ảnh MẪU kèm "tư vấn em mẫu này với" (AI-READ = PRICE_ASK, AI-QUYẾT =
+    // TU_VAN) mà vẫn bị gắn CHỜ XL. Vision trượt (LOW_CONFIDENCE 0.79) là chuyện thường với
+    // ảnh mẫu, không phải bằng chứng đó là ảnh địa chỉ.
+    // -> Khách đang HỎI VỀ SẢN PHẨM trong chính tin này thì ảnh là ảnh MẪU. Không nhận nhầm.
+    const _hoiSanPham = priceAsk || _ai("PRICE_ASK") || _ai("IMAGE_REQ") || _ai("COLOR_ASK")
+      || _ai("SIZE_ADVICE") || _ai("MATERIAL_QA") || _ai("STOCK")
+      // \b KHÔNG dùng được với chữ có dấu (xem chú thích ~dòng 393). Ranh giới ở đây là
+      // "không phải chữ cái" theo Unicode — nếu không, "ao"/"bo"/"mau" khớp cả trong
+      // "bao nhiêu", "bọc", làm rào luôn bật và nhánh ảnh-địa-chỉ chết hẳn.
+      || /(?<![\p{L}])(mẫu|mau|váy|vay|đầm|dam|set|bộ|bo|áo|ao|chân váy)(?![\p{L}])/iu.test(String(latestText || ""))
+      || /(tư vấn|tu van|bao nhiêu|bao nhieu|(?<![\p{L}])bn(?![\p{L}])|giá|gia bao)/iu.test(String(latestText || ""));
+    if (imageCount > 0 && _botAskedAddr && !addrReady(mem) && thisTurn.length === 0 && !_hoiSanPham) {
+      if (mem.address && isGarbageAddress(mem.address)) xoaDiaChi(mem, "xoá rác OCR tồn đọng");   // xoá rác OCR tồn đọng
+      // KHÔNG dùng cụm "chờ em kiểm tra": sendInboxMessage coi đó là câu báo-chờ và NUỐT
+      // (isWaitHandoffMsg) -> khách nhận được con số không, chỉ thấy hội thoại im bặt.
+      const reply = "Dạ em nhận được ảnh của chị rồi ạ. Để tránh sai sót khi giao, chị nhắn giúp em địa chỉ bằng tin nhắn chữ (số nhà - phường/xã - tỉnh/thành) nha ạ.";
       await sendInboxMessage(conversationId, reply);
       await tagChoXuLyVaUnread(conversationId); mem.botHandoffAt = Date.now();
       console.log(`[${BOT_NAME}] Khách gửi ĐỊA CHỈ bằng ẢNH -> KHÔNG tự OCR điền, GẮN NGƯỜI THẬT + xin địa chỉ bằng chữ.`);
@@ -7548,12 +8969,35 @@ async function processOneConversation(conversation) {
 
     // Khách gửi ảnh MỚI nhưng không nhận ra -> báo chờ, không lôi mẫu cũ
     if (thisTurn.length === 0 && imageCount > 0) {
-      // KHÔNG xử lý được (ảnh không nhận ra) -> CHỈ gắn AI-CHỜ XL (183) + IM, để người thật trả lời.
-      // (KHÔNG gắn AI-XL ảnh: thẻ 184 chỉ dành cho ca tin TỪ COMMENT mà bot KHÔNG GỬI ĐƯỢC ảnh.)
-      await tagChoXuLyVaUnread(conversationId);
-      console.log(`Ảnh mới không nhận ra -> gắn thẻ AI-CHỜ XL + chưa đọc (IM, để người thật xử lý)`);
+      // [25/08/2026] ĐỔI 183 -> 184. Yêu cầu tính năng mục 6.1 định nghĩa BA thẻ hệ thống cho
+      // BA việc khác nhau: "Cần người thật xử lý" · "ẢNH KHÔNG NHẬN DIỆN ĐƯỢC" · "Tình huống
+      // nhạy cảm". Ca này đúng là thẻ thứ hai, nhưng mã cũ gắn thẻ thứ nhất.
+      //
+      // Chú thích cũ tự thu hẹp 184 thành "chỉ dành cho ca comment không gửi được ảnh" — hẹp
+      // hơn định nghĩa trong tài liệu, và không có lý do kỹ thuật nào bắt phải thế.
+      //
+      // Hậu quả đo được trên page thật: bot đọc không ra MỘT tấm ảnh -> dán nhãn "cần người
+      // thật xử lý CẢ HỘI THOẠI" (183 là thẻ giữ, chặn ở đầu vòng xử lý) -> khách hỏi câu
+      // khác, kể cả câu bot thừa sức trả lời, cũng không được đọc. Hội thoại chết tới khi có
+      // người gỡ thẻ tay.
+      //
+      // [SỬA 25/08/2026 - chú thích cũ SAI] Câu cũ ở đây viết "184 KHÔNG nằm trong HOLD_TAG_IDS
+      // nên không chặn, bot vẫn phục vụ tiếp". KHÔNG còn đúng: cùng ngày, theo chốt của shop
+      // ("cần người thật thì bot không làm gì tiếp"), 184 ĐÃ được đưa vào HOLD_TAG_IDS
+      // (xem dòng ~2322). Gắn 184 = hội thoại DỪNG cho tới khi nhân viên gỡ thẻ.
+      // Giữ 184 thay vì 183 vẫn đúng — mục 6.1 tài liệu tách riêng thẻ "ảnh không nhận diện
+      // được" — nhưng đừng đọc chú thích cũ mà tưởng bot còn trả lời tiếp được.
+      // Bot tự gỡ 184 khi sau đó nhận ra mẫu (untagXuLyAnh).
+      // Thêm ghi chú vào hội thoại để nhân viên biết cần làm gì, không phải đoán.
+      await tagXuLyAnhVaUnread(conversationId);
+      try {
+        await addConversationNote(conversationId,
+          "🖼️ Bot KHÔNG nhận ra mẫu trong ảnh khách gửi -> nhờ người xem giúp. Bot vẫn trả lời các câu hỏi khác.");
+      } catch (_) {}
+      console.log(`Ảnh mới không nhận ra -> gắn thẻ AI-XL ảnh (184) + chưa đọc. Bot KHÔNG đứng ngoài, vẫn trả lời câu hỏi khác.`);
       mem.lastBotReply = "[unrecognized]";
-      mem.botHandoffAt = Date.now();
+      // CỐ Ý không đặt botHandoffAt: đây không phải nhường-người-cả-hội-thoại, chỉ là nhờ nhìn
+      // giúp một tấm ảnh. Đặt cờ đó sẽ chặn follow-up và mấy nhánh khác một cách oan uổng.
       updateConversationState(conversationId, mem);
       markProcessed(batch);
       return true;
@@ -7579,9 +9023,21 @@ async function processOneConversation(conversation) {
         markPriced(mem, k);
         await maybeSendImages(conversationId, k, mem, true);     // gửi ảnh mẫu ĐÃ nhận ra
         try { await _sendInboxMessage(conversationId, "Còn mẫu kia em kiểm tra lại thông tin rồi báo chị ngay nha."); } catch (_) {}  // raw -> báo cho khách biết, không bị lọc báo-chờ
-        await tagChoXuLyVaUnread(conversationId);                // mã CÒN LẠI chưa nhận ra -> AI-CHỜ XL cho người thật (SAU khi đã báo giá xong)
-        mem.botHandoffAt = Date.now();
-        console.log(`Gửi ${imageCount} ảnh, nhận ra ${fromImages.length} -> BÁO GIÁ XONG mẫu ${k} + AI-CHỜ XL cho ${unresolved} mã chưa nhận ra.`);
+        // [25/08/2026] 183 -> 184, cùng lý do với nhánh "không nhận ra ảnh nào".
+        // Ở đây còn vô lý hơn: bot ĐÃ BÁO GIÁ THÀNH CÔNG một mẫu rồi tự khoá cả hội thoại
+        // lại vì tấm ảnh còn lại. 183 nằm trong HOLD_TAG_IDS -> mọi tin sau khách nhắn bot
+        // không đọc. Đo được: khách gửi 2 ảnh, bot báo giá Zoise xong rồi câm.
+        // [SỬA 25/08/2026 - chú thích cũ SAI] "184 KHÔNG chặn" không còn đúng: 184 đã vào
+        // HOLD_TAG_IDS cùng ngày theo chốt của shop. Ở nhánh này bot ĐÃ báo giá xong mẫu
+        // nhận ra rồi mới gắn thẻ, nên khách vẫn nhận được thông tin — nhưng từ đó hội thoại
+        // DỪNG tới khi nhân viên gỡ thẻ, chứ không phải "bot vẫn phục vụ tiếp".
+        await tagXuLyAnhVaUnread(conversationId);
+        try {
+          await addConversationNote(conversationId,
+            `🖼️ Khách gửi ${imageCount} ảnh, bot nhận ra ${fromImages.length}. Còn ${unresolved} mẫu chưa ra -> nhờ người xem giúp. Bot vẫn trả lời các câu hỏi khác.`);
+        } catch (_) {}
+        // CỐ Ý không đặt botHandoffAt: chỉ nhờ nhìn giúp một tấm ảnh, không phải nhường cả hội thoại.
+        console.log(`Gửi ${imageCount} ảnh, nhận ra ${fromImages.length} -> BÁO GIÁ XONG mẫu ${k} + thẻ AI-XL ảnh (184) cho ${unresolved} mã chưa nhận ra. Bot KHÔNG đứng ngoài.`);
         mem.lastBotReply = _quote; updateConversationState(conversationId, mem); markProcessed(batch); return true;
       }
       // Giá mẫu nhận ra cũng lỗi -> chờ kiểm tra + tag (như cũ).
@@ -7597,9 +9053,23 @@ async function processOneConversation(conversation) {
     // Đơn ĐÃ chốt + đủ sđt/địa chỉ + khách "lấy thêm"/thêm mẫu -> APPEND mẫu mới (KHÔNG ghi đè cụm cũ),
     // xác nhận lại ĐƠN TỔNG về ĐỊA CHỈ CŨ. TUYỆT ĐỐI không đòi lại địa chỉ, không tư vấn lại từ đầu.
     {
-      const _addIntent = /lấy thêm|lên đơn thêm|đặt thêm|thêm mẫu|mẫu này nữa|thêm \d+ mẫu|lấy luôn cả/i.test(latestText)
-        || routeBatch(batch.filter(x => x.type === "text").map(x => x.text || "")).some(r => r.intent === "THEM_MAU_VAO_DON")
-        || _ai("ADD_TO_ORDER");
+      // [27/08/2026 — ca Hà Giang] "tư vấn e THÊM MẪU này" khớp regex "thêm mẫu" nhưng
+      // là XIN TƯ VẤN, không phải lệnh thêm vào đơn. Đo thật: khách gửi ảnh mẫu Mironne
+      // kèm câu đó -> AI-READ ra PRICE_ASK, AI-QUYẾT ra TU_VAN, vậy mà nhánh này vẫn nhét
+      // mẫu vào đơn vừa chốt và gửi lại tin "Cảm ơn chị đã đặt hàng", COD nhảy 925.000 ->
+      // 1.915.000. Khách hỏi giá mà thành mua thêm gần một triệu.
+      //
+      // Nhãn AI nói RÕ ADD_TO_ORDER thì tin. Còn đoán theo CHỮ thì phải nhường khi khách
+      // đang xin tư vấn hoặc AI bảo TU_VAN — trừ khi câu có động từ mua thật sự.
+      const _addRo = _ai("ADD_TO_ORDER");
+      const _addDoan = /lấy thêm|lên đơn thêm|đặt thêm|thêm mẫu|mẫu này nữa|thêm \d+ mẫu|lấy luôn cả/i.test(latestText)
+        || routeBatch(batch.filter(x => x.type === "text").map(x => x.text || "")).some(r => r.intent === "THEM_MAU_VAO_DON");
+      const _dongTuMua = /(lấy|lay|đặt|dat|chốt|chot|lên\s*đơn|len\s*don|order)/i.test(latestText);
+      const _aiNoiTuVan = String((mem._aiQ && mem._aiQ.hanh_dong) || "") === "TU_VAN";
+      const _addIntent = _addRo || (_addDoan && _dongTuMua && !_aiNoiTuVan);
+      if (_addDoan && !_addIntent) {
+        console.log(`[${BOT_NAME}] [GĐ4] Câu có chữ "thêm mẫu" NHƯNG ${_aiNoiTuVan ? "AI nói TU_VAN" : "không có động từ mua"} -> KHÔNG nhét vào đơn cũ, để luồng dưới báo giá mẫu mới.`);
+      }
       // GỬI ẢNH MẪU ≠ ĐỒNG Ý CHỐT. Khách từng chốt 1 đơn, lần sau gửi ảnh mẫu khác có thể chỉ ĐANG XEM/HỎI.
       // -> TUYỆT ĐỐI không tự nhét mẫu vào đơn cũ. Chỉ thêm vào đơn khi khách NÓI RÕ ("lấy thêm/chốt thêm" = _addIntent).
       // Mẫu mới gửi tới -> để luồng dưới BÁO GIÁ (§13/sendBlocks), KHÔNG auto-chốt.
@@ -7617,20 +9087,32 @@ async function processOneConversation(conversation) {
         const _pi = mem.quotedProducts[0];
         const _tot = computeOrderTotal(mem, _pi);
         const _sizeOk = !orderNeedsSize(mem, _pi) || mem.customerSize;
-        if (mem.address && isGarbageAddress(mem.address)) { mem.address = null; }
+        if (mem.address && isGarbageAddress(mem.address)) { xoaDiaChi(mem, "chỗ 9038"); }
         if (_tot.known && _sizeOk && addrReady(mem)) {
           mem.orderClosed = false;
           const reply = await sendOrderClose(conversationId, mem, _pi);   // gửi tin "đang tạo" + ảnh -> câu cảm ơn (ĐƠN TỔNG, sđt/địa chỉ CŨ)
+          // Chưa xác nhận -> sendOrderClose mới chỉ ĐỌC LẠI đơn: dừng lượt tại đây,
+          // KHÔNG gắn 182, KHÔNG đặt orderClosed. Khách gật thì nhánh đầu lượt mới chốt.
+          if (mem._dangChoXacNhan) { mem._dangChoXacNhan = false; mem.lastBotReply = reply; updateConversationState(conversationId, mem); markProcessed(batch); return true; }
           await tagAiChot(conversationId);
           mem.orderClosed = true; mem.orderState = "DA_CHOT"; mem.everOrdered = true;
           console.log(`[${BOT_NAME}] [GĐ4] Thêm ${thisTurn.length} mẫu vào đơn đã chốt -> XÁC NHẬN ĐƠN TỔNG (${mem.quotedProducts.length} mẫu), GIỮ địa chỉ cũ.`);
           mem.lastBotReply = reply; updateConversationState(conversationId, mem); markProcessed(batch); return true;
         }
         // ĐỊA CHỈ cũ KHÔNG hợp lệ (rỗng/rác/thiếu) mà đủ giá+size -> xin LẠI địa chỉ, không chốt bừa.
+        // Địa chỉ đã lưu còn hợp lệ thì dùng luôn — khách vừa đưa xong, hỏi lại là phiền.
+        if (_tot.known && _sizeOk && !addrReady(mem) && _aqLooksAddr(mem.address)) {
+          console.log(`[${BOT_NAME}] [GĐ4] addrReady=false nhưng địa chỉ đã lưu "${mem.address}" vẫn hợp lệ -> dùng lại, không xin nữa.`);
+          mem._aiAddrComplete = true;
+        }
         if (_tot.known && _sizeOk && !addrReady(mem)) {
           const reply = "Dạ chị cho em xin lại địa chỉ nhận hàng (số nhà, đường, phường/xã) để em chốt đơn tổng cho mình nha ạ";
           await sendInboxMessage(conversationId, reply);
-          console.log(`[${BOT_NAME}] [GĐ4] Thêm mẫu nhưng ĐỊA CHỈ cũ KHÔNG hợp lệ -> xin lại địa chỉ.`);
+          // In ĐỦ căn cứ: addrReady có 4 nhánh, không nói rõ nhánh nào chặn thì mỗi lần
+          // bot đi xin lại địa chỉ khách vừa đưa là một buổi mò.
+          console.log(`[${BOT_NAME}] [GĐ4] Thêm mẫu nhưng ĐỊA CHỈ cũ KHÔNG hợp lệ -> xin lại địa chỉ. ` +
+            `address="${mem.address || "(rỗng)"}" | aiAddrComplete=${mem._aiAddrComplete} | aiIsAddress=${mem._aiIsAddress} | ` +
+            `provConfirm=${mem._aiProvinceConfirm}/${mem._provConfirmDone} | aqLooksAddr=${_aqLooksAddr(mem.address)}`);
           mem.lastBotReply = reply; updateConversationState(conversationId, mem); markProcessed(batch); return true;
         }
         // thiếu giá/size mẫu mới -> xin nốt đúng phần thiếu, TUYỆT ĐỐI không đòi địa chỉ
@@ -7766,7 +9248,31 @@ async function processOneConversation(conversation) {
           // mà đai tính cụm Nayeli/Elegance/Silhouette cũ là "đa mẫu" -> chặn oan AI đang ĐÚNG -> luật multi
           // xả 8 câu cho cụm cũ.
           const _rqMulti = ((fromImages || []).length >= 2) || ((fromText || []).length >= 2);
-          if (_rqMulti) {
+
+          // [ĐAI ẢNH LƯỢT NÀY — ca Hà Giang 26/08/2026] AI-QUYẾT KHÔNG NHÌN THẤY ẢNH.
+          // Bản ghi hội thoại đưa cho nó dựng ở dòng ~7098: tin ảnh được rút gọn thành
+          // đúng chữ "[gửi ảnh]", không kèm mã, không kèm tên mẫu. Danh sách ứng viên
+          // thì có "mẫu đang khoá từ TRƯỚC" — nên khi khách gửi ảnh mẫu MỚI kèm câu
+          // trỏ mơ hồ ("set này...", "cái ở dưới..."), AI chỉ còn mẫu cũ để chọn và
+          // chọn nó với độ tin cậy 1,0. Rồi lấy chính con số 1,0 đó đè lên vision.
+          //
+          // Đo trên page thật 26/08:
+          //   khách gửi ảnh + "set này có màu khác không ạ"
+          //   VISION  : MMVX5282 (Grandeur) điểm 0,9797   <- ĐÚNG, khách hỏi mẫu này
+          //   luật cũ : FOCUS image, lock MGKSQ6072 -> MMVX5282, switch=true  <- ĐÚNG
+          //   AI-QUYẾT: referent=MGKSQ6072 (tin cậy 1)    <- đoán mù, không thấy ảnh
+          //   -> ĐÈ focus MMVX5282 -> MGKSQ6072 -> bot trả lời màu của MẪU CŨ.
+          //
+          // Ảnh khách gửi TRONG LƯỢT NÀY là bằng chứng mạnh nhất về "đang nói mẫu nào".
+          // Vision đã ra mã thì AI đoán bằng chữ không được phép lật. Đai này hẹp: chỉ
+          // chặn khi focus hiện tại ĐẾN TỪ ảnh của chính lượt này — mọi ca khác AI vẫn
+          // đè như cũ.
+          const _maAnhLuotNay = (fromImages || []).map(_codeUp).filter(Boolean);
+          const _focusTuAnhLuotNay = !!_oldCode && _oldCode !== "-" && _maAnhLuotNay.includes(_oldCode);
+
+          if (_focusTuAnhLuotNay) {
+            console.log(`[AI-QUYẾT referent] ẢNH LƯỢT NÀY đã ra ${_oldCode} -> AI KHÔNG đè (AI chỉ thấy "[gửi ảnh]", không thấy mẫu).`);
+          } else if (_rqMulti) {
             console.log(`[AI-QUYẾT referent] LƯỢT ĐA MẪU (${(fromImages || []).length} ảnh) -> giữ luật multi, AI không đè.`);
           } else try {
             const _cR = await ensureCatalog();
@@ -7834,12 +9340,19 @@ async function processOneConversation(conversation) {
       worriesGarmentShort(latestText),
     ].filter(Boolean).length;
     const _multiAttrQ = _attrQ >= 2 && !!productInfo
-      && (process.env.AI_REPLY_MODE || "off").toLowerCase() === "on"
+      && String(KB.caiDat("AI_REPLY_MODE", "off")).toLowerCase() === "on"
       && !priceAsk && !isAngryOrSensitive(latestText) && !isSensitiveHandoff(latestText)
       && !saysBotMistake(latestText) && !asksShopComparison(latestText);
     if (_multiAttrQ) console.log(`[${BOT_NAME}] LƯỢT có ${_attrQ} câu hỏi thuộc tính -> để AI gộp trả ĐỦ ý (chặn handler đơn lẻ).`);
     // Ghi nhớ mẫu trong phiên (để vớt đơn): mẫu lượt này + mẫu focus hiện tại.
     rememberSessionProducts(mem, thisTurn.length ? thisTurn : (productInfo ? [productInfo] : []));
+
+    // [MỞ MÀN SẢN PHẨM] Tin đầu tiên về một mẫu -> GIÁ + 3 ẢNH trước mọi thứ khác.
+    // KHÔNG return: nhánh chuyên trách bên dưới vẫn trả lời đúng câu khách hỏi,
+    // và tự gắn câu đuôi ở cuối. Xem chú thích ở hàm moManSanPham.
+    // Khách xin tư vấn -> mở màn được phép chạy lại dù mẫu từng báo giá (xem moManSanPham).
+    const _daMoMan = await moManSanPham(conversationId, mem, productInfo, thisTurn.length,
+                                        xinTuVanMau(latestText));
 
     // ===== KHÁCH PHẢN ÁNH BÁO GIÁ CHƯA ĐỦ MẪU ("còn mẫu còn lại đã đủ đâu", "báo giá chưa đủ mẫu") =====
     // -> KHÔNG đoán mò/đẩy đơn 1 mẫu. Để NGƯỜI THẬT bổ sung giá các mẫu còn lại (AI-CHỜ XL). Ưu tiên cao, chặn trước mọi nhánh chốt/AI.
@@ -7937,7 +9450,7 @@ async function processOneConversation(conversation) {
 
 
     if (saysWillSendNewAddress(latestText) && !looksLikeQuestion(latestText)) {
-      mem.address = null;   // địa chỉ cũ không còn dùng -> xoá để không lên đơn nhầm về địa chỉ cũ
+      xoaDiaChi(mem, "địa chỉ cũ không còn dùng -> xoá để không lên đơn nhầm về đị");   // địa chỉ cũ không còn dùng -> xoá để không lên đơn nhầm về địa chỉ cũ
       const reply = "Dạ vâng có địa chỉ mới chị gửi em sớm để em lên đơn cho mình nha ạ";
       await sendInboxMessage(conversationId, reply);
       console.log(`[${BOT_NAME}] Khách báo sẽ gửi ĐỊA CHỈ MỚI / không ở địa chỉ cũ -> xác nhận chờ, xoá địa chỉ cũ.`);
@@ -7972,7 +9485,48 @@ async function processOneConversation(conversation) {
           // [RÀO CÂU HỎI SẢN PHẨM - ca Thuy Nguyen 2026-07-11] Khách đang HỎI về sản phẩm (màu/chất/tồn/
           // set/bảng size/ship...) -> việc lượt này là TRẢ LỜI CÂU HỎI (luật cũ + sheet làm chuẩn). AI đòi
           // xin thông tin lúc này = bỏ rơi câu hỏi của khách ("Có đen k e" mà bị dí xin SĐT) -> ĐỨNG NHÌN.
-          const _cqAskKinds = ["COLOR_ASK", "ASK_COLOR", "MATERIAL_QA", "PRODUCT_DETAIL_QA", "STOCK", "SET_TYPE", "SIZE_CHART", "SHIP_FEE", "SHIP_TIME", "SHIP_ORIGIN", "INSPECT_REQUEST", "TRYON_REQUEST", "DISCOUNT", "PRICE_OBJECTION"];
+          // [SOÁT LẠI 24/08/2026] Danh sách này TỪNG có 6 tên KHÔNG TỒN TẠI trong bộ nhãn
+          // của ai_intent.js — ASK_COLOR, SHIP_FEE, SHIP_TIME, SHIP_ORIGIN, INSPECT_REQUEST,
+          // TRYON_REQUEST (tàn dư của tầng regex cũ intent_detector.js). mem._aiIntent chỉ
+          // nhận nhãn từ classifyIntent, nên 6 tên đó KHÔNG BAO GIỜ khớp -> rào chỉ che được
+          // 8 nhãn thật, còn hàng chục nhãn HỎI khác lọt qua.
+          //
+          // Đo trên page thật: khách hỏi "shop có cho kiểm hàng k ạ" (nhãn DELIVERY_QA, KHÔNG
+          // có trong danh sách) -> AI-QUYẾT phát XIN_SDT -> bot đáp "em nhận được thông tin
+          // của chị rồi ạ, cho em xin số điện thoại" trong khi bot CÓ SẴN nhánh trả lời đúng
+          // câu hỏi đó. Cùng cơ chế với ca "tư vấn e mẫu này nữa".
+          //
+          // Nguyên tắc: khách đang HỎI thì việc của lượt này là TRẢ LỜI. AI không được chen
+          // vào xin thông tin. Nhãn khách CHO dữ liệu (SIZE/PHONE/ADDRESS) và nhãn ý MUA
+          // (ORDER_CLOSE/ADD_TO_ORDER) CỐ Ý không nằm đây — đó mới là lúc AI-QUYẾT làm việc.
+          // Nhóm hậu mãi đã có rào riêng ngay bên dưới.
+          const _cqAskKinds = [
+            // hỏi giá / tiền
+            "TOTAL_PAYMENT", "PRICE_DISCREPANCY", "PAYMENT_METHOD", "DISCOUNT", "PRICE_OBJECTION", "WHOLESALE",
+            // hỏi hàng / tồn
+            "STOCK", "STORE_STOCK", "RESTOCK_PREORDER",
+            // hỏi size
+            "SIZE_CHART", "SIZE_ADVICE", "SIZE_CONSISTENCY",
+            // hỏi mẫu mã / chất / kiểu
+            "COLOR_ASK", "MATERIAL_QA", "WASH_CARE", "PRODUCT_DETAIL_QA", "STYLING_QA", "SET_TYPE",
+            "AUTHENTICITY_QA", "OCCASION_QA", "FIT_SUITABILITY", "PREGNANCY_FIT", "MODEL_REFERENCE", "BUY_SEPARATE",
+            // xin xem thêm
+            "IMAGE_REQ", "VIDEO_REQ", "BACK_VIEW", "SIMILAR_MODELS", "COMPARE_MODELS", "MULTI_MODEL", "BROWSE_CATALOG",
+            // hỏi chính sách / shop
+            "RETURN_POLICY", "RISK_RECOURSE", "DELIVERY_QA", "STORE_VISIT", "STORE_ADDRESS", "SAME_SHOP_QA", "ASK_SHOPEE", "ASK_TIKTOK",
+            // tra đơn ĐÃ ĐẶT — [THÊM 26/08/2026, ca Hà Giang]
+            // Khách vừa chốt đơn xong hỏi "tầm bao giờ ship về đấy ạ". Prompt AI-READ (ai_intent.js
+            // dòng 177) CỐ Ý gắn nhãn này chứ không phải DELIVERY_QA, để "code tra đơn thật".
+            // Đúng là code CÓ handler tra đơn qua POS (~dòng 9990): tra theo sđt, báo trạng thái thật,
+            // thiếu sđt thì xin, POS chưa cấu hình thì nhường người thật.
+            // Nhưng nhãn này không nằm trong danh sách đứng-nhìn nên AI-QUYẾT cướp lượt trước dispatch
+            // và phát IM_NHUONG_NGUOI -> gắn 183 rồi im. Handler tra đơn KHÔNG BAO GIỜ chạy tới.
+            // Nhường lại cho nó: mọi đường hỏng của handler đều kết bằng đúng cái handoff kia, nên
+            // không mất gì, mà đường tốt thì khách được trả lời bằng dữ liệu đơn THẬT.
+            "ORDER_STATUS",
+            // khách còn đang bàn với người nhà
+            "CONSULT_FAMILY"
+          ];
           if (_cqAskKinds.includes(String(mem._aiIntent || ""))) {
             console.log(`[AI-QUYẾT] ĐỨNG NHÌN (nhãn ${mem._aiIntent} = khách đang HỎI sản phẩm) -> luật cũ trả lời câu hỏi, AI không xin thông tin đè.`);
             return false;
@@ -7991,15 +9545,65 @@ async function processOneConversation(conversation) {
         // chuyển khoản...) -> việc của NHÂN VIÊN đối chiếu đơn cũ. AI có đề xuất XIN_*/CHOT_DON cũng KHÔNG
         // được làm — ép về IM_NHUONG_NGUOI (rào cứng, kể cả khi prompt trượt).
         const _cqAfterSale = ["EXCHANGE_REQUEST", "REFUND_REQUEST", "EDIT_ORDER", "DEFECT_REPORT", "CK_PROOF", "REFUSE_DELIVERY", "CANCEL_ORDER"].includes(String(mem._aiIntent || ""));
-        if (_cqAfterSale && _cq.hanh_dong !== "IM_NHUONG_NGUOI") {
+        // [27/08/2026] SỬA BẢN NHÁP ≠ SỬA ĐƠN ĐÃ LÊN.
+        // Bước "đọc lại đơn chờ khách xác nhận" (thêm hôm nay) sinh ra một trạng thái
+        // mà rào hậu mãi chưa biết tới: đơn CHƯA lên, khách đang soát bản nháp. Đo thật:
+        //   14:37:22  bot đọc lại đơn -> giao 67 Nguyễn Xiển
+        //   14:38:04  khách "đổi địa chỉ về 188 khương thượng, đống đa, hà nội nhé"
+        //   -> nhãn EDIT_ORDER -> rào hậu mãi ép IM_NHUONG_NGUOI -> gắn 183, bot câm.
+        // Khách sửa đúng chỗ cần sửa mà bị đẩy sang người thật, trong khi CHƯA CÓ ĐƠN
+        // nào để nhân viên đối chiếu. orderClosed=false là bằng chứng đủ: không có đơn
+        // thì "sửa đơn" chỉ có thể là sửa bản nháp -> để luồng dưới dựng nháp MỚI theo
+        // địa chỉ mới rồi đọc lại. Mấy nhãn hậu mãi còn lại vẫn nhường người như cũ.
+        const _suaNhapChuaCoDon = String(mem._aiIntent || "") === "EDIT_ORDER" && !mem.orderClosed;
+        if (_suaNhapChuaCoDon) {
+          console.log(`[AI-QUYẾT] EDIT_ORDER nhưng CHƯA có đơn nào chốt -> đây là sửa BẢN NHÁP, không nhường người thật. Dựng lại nháp theo thông tin mới.`);
+        }
+        if (_cqAfterSale && !_suaNhapChuaCoDon && _cq.hanh_dong !== "IM_NHUONG_NGUOI") {
           console.log(`[AI-QUYẾT] nhãn hậu mãi ${mem._aiIntent} -> ép ${_cq.hanh_dong} về IM_NHUONG_NGUOI (đổi/hoàn là việc người thật).`);
           _cq.hanh_dong = "IM_NHUONG_NGUOI"; _cq.tin_nhan = "";
         }
         // AI gộp được địa chỉ chuẩn từ các mảnh -> nhận vào mem (qua rào địa danh thật)
         if (_cq.dia_chi && _cq.dia_chi.dia_chi_chuan && _aqLooksAddr(_cq.dia_chi.dia_chi_chuan)) {
-          mem.address = _cq.dia_chi.dia_chi_chuan;
+          // Địa chỉ MỚI NHẤT khách đưa là địa chỉ dùng cho mọi đơn về sau. Ghi đè + lưu
+          // xuống đĩa ngay (updateConversationState ở cuối nhánh), và log lại mốc đổi để
+          // sau này truy được đơn nào đi theo địa chỉ nào.
+          datDiaChi(mem, _cq.dia_chi.dia_chi_chuan, "AI-QUYẾT gộp địa chỉ");
+        }
+        // [27/08/2026] ĐỪNG ĐI XIN THỨ MÌNH ĐANG CÓ.
+        // Khách cho địa chỉ ở lượt trước, ta đã lưu xuống đĩa. Lượt sau khách nhắn
+        // "lấy thêm mẫu này" (không nhắc lại địa chỉ) -> AI đọc tin mới, không thấy
+        // địa chỉ -> báo THIEU -> bot hỏi lại địa chỉ khách vừa đưa xong. Đo thật
+        // 27/08/2026 sau khi khách đổi sang 188 Khương Thượng.
+        // Có địa chỉ hợp lệ trong bộ nhớ thì DÙNG nó — đó là địa chỉ MỚI NHẤT khách
+        // đưa; rồi đọc lại đơn cho khách xác nhận, chứ không bắt gõ lại.
+        if (_cq.dia_chi && _cq.dia_chi.trang_thai === "THIEU" && _aqLooksAddr(mem.address)) {
+          console.log(`[AI-QUYẾT] AI báo THIẾU địa chỉ nhưng bộ nhớ đang giữ "${mem.address}" -> DÙNG địa chỉ đã lưu, KHÔNG hỏi lại khách.`);
+          _cq.dia_chi.trang_thai = "DU";
+          _cq.dia_chi.dia_chi_chuan = mem.address;
+          // Chỉ nâng lên CHỐT khi AI đã nêu được món; chưa có món thì để nhánh dưới lo,
+          // đừng ép chốt một đơn rỗng rồi rơi vào thẩm định trượt -> nhường người thật.
+          if (_cq.hanh_dong === "XIN_DIA_CHI" && _cq.don && (_cq.don.san_pham || []).length) {
+            _cq.hanh_dong = "CHOT_DON";
+          }
         }
         if (_cq.hanh_dong === "IM_NHUONG_NGUOI") {
+          // [A · 25/08/2026] CHỌN ĐÚNG THẺ theo LOẠI việc nhường. Trước đây mọi ca đều gắn 183.
+          // Yêu cầu tính năng, nguyên tắc 6: "Gắn thẻ phải đúng. Mỗi thẻ có một ý nghĩa riêng…
+          // Nhân viên lọc theo thẻ để làm việc, thẻ SAI là bỏ sót khách hoặc làm nhầm việc."
+          //
+          // Đo trên page thật: khách chốt đơn xong nhắn "gửi sớm nhé e cần gấp" (nhãn URGENT)
+          // -> AI phát IM_NHUONG_NGUOI -> gắn 183 CHỜ XL. Sai hai lần:
+          //   · 183 = "AI bó tay, người xử cả hội thoại" -> bot ĐỨNG NGOÀI VĨNH VIỄN
+          //   · đúng ra là 185 ĐƠN ƯU TIÊN = "người thật đẩy đơn gấp", bot vẫn phục vụ được
+          // Lõi đã có sẵn nhánh (C2) gắn 185 cho URGENT, nhưng AI-QUYẾT chặn trước nên không tới lượt.
+          const _giucGap = _ai("URGENT") || (typeof isUrgentSpecificDate === "function" && isUrgentSpecificDate(latestText));
+          if (_giucGap) {
+            await tagDonUuTienVaUnread(conversationId);
+            mem.botHandoffAt = Date.now();
+            console.log(`[AI-QUYẾT] IM_NHUONG_NGUOI + khách GIỤC GẤP -> gắn ĐƠN ƯU TIÊN (185), KHÔNG phải Chờ-XL.`);
+            updateConversationState(conversationId, mem); markProcessed(batch); return true;
+          }
           await tagChoXuLyVaUnread(conversationId);
           mem.botHandoffAt = Date.now();
           console.log(`[AI-QUYẾT] IM_NHUONG_NGUOI -> gắn Chờ-XL, bot đứng ngoài.`);
@@ -8015,10 +9619,52 @@ async function processOneConversation(conversation) {
             HOI_MAU: "Dạ chị lấy màu nào ạ để em lên đơn cho mình nha"
           };
           let _cqMsg = String(_cq.tin_nhan || "").trim();
-          if (!_cqMsg || _cqMsg.length > 350 || /\d[\d.,]{2,}\s*(đ|vnđ|vnd)\b/i.test(_cqMsg)) _cqMsg = _cqDef[_cq.hanh_dong];
+          // ===== RANH GIỚI "CODE LO SỐ / KỊCH BẢN LO LỜI" — THI HÀNH ĐỀU Ở MỌI ĐƯỜNG =====
+          // Nguyên tắc này đã được viết ra ở reasoning_engine (mục 0c3) và đã có sẵn bộ soi
+          // đủ 9 luật (reply_guard.vetAdvisoryReply), NHƯNG trước đây chỉ chặn ở đường
+          // reasoning. Đường AI-QUYẾT này chỉ có MỘT dòng regex bắt "...đ/vnđ" -> lọt hết
+          // "990k", "freeship", "đã lên đơn", và cả SỐ ĐIỆN THOẠI đọc ngược lại cho khách.
+          // Nay dùng CHUNG một bộ soi. RANH_GIOI_MODE:
+          //   "shadow" (mặc định): CHỈ ghi log, giữ nguyên hành vi cũ -> gom số liệu trước.
+          //   "on"   : dính luật -> dùng phom code (5 phom ngay trên đều PASS bộ soi).
+          //   "off"  : tắt hẳn, về đúng luật cũ.
+          const _rgMode = (process.env.RANH_GIOI_MODE || "shadow").toLowerCase();
+          const _cqVet = _cqMsg ? vetAdvisoryReply(_cqMsg) : { allow: false, reasons: ["rỗng"] };
+          if (_rgMode !== "off" && _cqMsg && !_cqVet.allow) {
+            console.log(`[RANH-GIỚI ${_rgMode}] câu AI-QUYẾT dính ${_cqVet.reasons.join(",")} -> ` +
+                        `${_rgMode === "on" ? "DÙNG PHOM CODE" : "giữ nguyên (chế độ bóng)"}: "${_cqMsg.slice(0, 70)}"`);
+          }
+          const _cqPhamLuat = _rgMode === "on" ? !_cqVet.allow : (/\d[\d.,]{2,}\s*(đ|vnđ|vnd)\b/i.test(_cqMsg));
+          if (!_cqMsg || _cqMsg.length > 350 || _cqPhamLuat) _cqMsg = _cqDef[_cq.hanh_dong];
           // Không hỏi lại thứ ĐÃ có (rào chống lặp kiểu Mỹ Linh)
           if (_cq.hanh_dong === "XIN_SDT" && mem.phone) { console.log(`[AI-QUYẾT] BỎ XIN_SDT: đã có sđt -> để luật cũ chạy.`); }
           else if (_cq.hanh_dong === "XAC_NHAN_TINH" && mem._provConfirmDone) { console.log(`[AI-QUYẾT] BỎ XAC_NHAN_TINH: đã hỏi rồi -> để luật cũ chạy.`); }
+          // [FIX Hà Giang 2026-08-26] Chuỗi rào này che XIN_SDT, XAC_NHAN_TINH, HOI_SIZE
+          // — nhưng KHÔNG che XIN_DIA_CHI. Cùng một lỗi, sót một hành động.
+          // Đo trên page thật: khách đã cho địa chỉ từ 10:28 và bot đã chốt 4 đơn về đúng
+          // địa chỉ đó, vẫn có thể bị hỏi "chị cho em xin địa chỉ và số điện thoại".
+          // CHỈ bỏ khi địa chỉ ĐỦ TẦNG (addrReady). Thiếu phường/quận/tỉnh thì KHÔNG bỏ:
+          // luật cũ có addressGapReply xin đúng mảnh còn thiếu, tốt hơn hẳn xin lại cả câu.
+          else if (_cq.hanh_dong === "XIN_DIA_CHI" && mem.address && addrReady(mem)) {
+            console.log(`[AI-QUYẾT] BỎ XIN_DIA_CHI: đã có địa chỉ đủ tầng -> để luật cũ chạy.`);
+          }
+          // [FIX Hà Giang 2026-08-26 — page PHOM] Rào trên chỉ che XIN_SDT và XAC_NHAN_TINH.
+          // HOI_SIZE KHÔNG ai canh, nên AI-QUYẾT xin lại số đo khách vừa đưa. Đo trên page thật:
+          //   10:08:29 bot xin chiều cao + cân nặng
+          //   10:08:55 khách "e cao m6 nặng 53kg ạ"        <- đã trả lời
+          //   10:09:16 bot hỏi "thường mặc size nào"
+          //   10:09:47 khách "bth e mặc size M"            <- đã trả lời nốt
+          //   10:16:49 bot LẠI xin chiều cao cân nặng     <- về đúng câu đầu vòng
+          // Vi phạm Nguyên tắc 4 (docs/YEU_CAU_TINH_NANG.txt): "đã có size, màu, địa chỉ,
+          // số điện thoại trong lịch sử thì TUYỆT ĐỐI không hỏi lại".
+          // Soi CẢ bộ nhớ LẪN tin lượt này: khách vừa gõ số đo thì mem có thể chưa kịp ghi,
+          // mà chính lượt đó AI đã đòi hỏi lại rồi (đúng cách hàm đuôi sizeTailForProduct làm).
+          else if (_cq.hanh_dong === "HOI_SIZE"
+                   && (mem.customerSize || mem.weightKg || mem.customerWeightKg || mem.measure3V
+                       || parseWeightKg(mem._aiDoLuong || "") || parseWeightKg(latestText || ""))) {
+            console.log(`[AI-QUYẾT] BỎ HOI_SIZE: đã có size/số đo ` +
+                        `(size=${mem.customerSize || "-"}, kg=${mem.weightKg || mem.customerWeightKg || parseWeightKg(latestText || "") || "-"}) -> để luật cũ chạy.`);
+          }
           else {
             if (_cq.hanh_dong === "XAC_NHAN_TINH") { mem._addrAwaitProvince = true; mem._provConfirmDone = true; }
             if (_cq.hanh_dong === "XIN_DIA_CHI" || _cq.hanh_dong === "XAC_NHAN_TINH") mem._reaskedAddr = true;
@@ -8057,42 +9703,113 @@ async function processOneConversation(conversation) {
           const _cqAddr = String((_cq.don && _cq.don.dia_chi) || (_cq.dia_chi && _cq.dia_chi.dia_chi_chuan) || mem.address || "").trim();
           if (!_aqLooksAddr(_cqAddr)) _cqFail.push(`địa chỉ "${_cqAddr.slice(0, 30)}" không có địa danh thật`);
           if (_cqFail.length) {
+            // [FIX Hà Giang 2026-08-26] TRƯỚC: chỉ gắn thẻ rồi im. Đo trên page thật:
+            // khách nhắn "gộp đơn này với đơn trước thành 1 đơn cho em" + "để trả phí
+            // ship luôn 1 lần" -> thẩm định chốt trượt (đúng: gộp/sửa đơn là việc người
+            // thật) -> bot gắn thẻ 183 và KHÔNG NÓI GÌ. Khách ngồi chờ, nhân viên chỉ
+            // thấy một cái thẻ trống.
+            // Nhường người thật KHÁC im lặng. Vẫn không tự xử, nhưng phải nói một câu.
+            // Câu nằm trong kho -> shop sửa được, không phải mở mã. Tuyệt đối tránh cụm
+            // "chờ em kiểm tra…" vì isWaitHandoffMsg (dòng ~324) sẽ NUỐT nó -> lại im.
+            try {
+              // KHÔNG đặt phom code ở đây: câu này không có ô biến nên phom sẽ là
+              // BẢN SAO của kho -> shop sửa kho mà bot vẫn nói câu cũ. Tra hụt thì
+              // câu dính MỐC HỤT và hàm gửi tin chặn, kèm đúng tên khoá — kêu to
+              // hơn nhiều so với âm thầm nói câu cũ.
+              const _cauChuyen = KB.cau("chuyen_nguoi_that");
+              await sendInboxMessage(conversationId, _cauChuyen);
+              mem.lastBotReply = _cauChuyen;
+            } catch (e) { console.log(`[AI-QUYẾT] không gửi được câu chuyển người thật: ${e.message}`); }
             await tagChoXuLyVaUnread(conversationId);
             mem.botHandoffAt = Date.now();
             console.log(`[AI-QUYẾT] CHOT_DON bị CHẶN (thẩm định trượt: ${_cqFail.join("; ")}) -> gắn người thật, KHÔNG chốt bừa.`);
             updateConversationState(conversationId, mem); markProcessed(batch); return true;
           }
-          // Thẩm định OK -> ghi trường vào mem rồi chốt. COD do code tra sheet, KHÔNG lấy số của AI.
-          mem.phone = _cqSdt; mem.address = _cqAddr;
-          mem.orderColorByCode = mem.orderColorByCode || {};
-          for (const it of _cqItems) { if (it.color) mem.orderColorByCode[String(it.prod.code).toUpperCase()] = it.color; }
-          const _cqSameSize = _cqItems.every(it => !it.size || it.size === _cqItems[0].size);
-          if (_cqItems[0].size && _cqSameSize) { mem.customerSize = _cqItems[0].size; mem.sizeFromCustomer = true; }
+          // ===== THẨM ĐỊNH XONG -> KHÔNG CHỐT NGAY, ĐỌC LẠI CHO KHÁCH SOÁT =====
+          // Xem khối chú thích ở mauCoThatCuaMau / gomDongTheoNoiGiao.
+
+          // (1) MÀU phải là màu THẬT của mẫu. Bảng thẩm định cũ kiểm mã/size/sđt/địa
+          //     chỉ mà KHÔNG kiểm màu, nên AI tự đổi "trắng" -> "kem" trót lọt.
+          {
+            const _sai = _cqItems.find(it => it.color && !mauCoThatCuaMau(it.prod.code, it.color));
+            const _thieu = _cqItems.find(it => !it.color && (getCodeColors(it.prod.code) || []).length >= 2);
+            const _it = _sai || _thieu;
+            if (_it) {
+              const _cols = (getCodeColors(_it.prod.code) || []).join(", ");
+              const _hoi = _sai
+                ? KB.cau("chot_don__mau_khong_co", { ten: productLabel(_it.prod), mau: _it.color, ds: _cols ? `, mẫu này có ${_cols}` : "" })
+                : KB.cau("chot_don__hoi_mau_nao", { ten: productLabel(_it.prod), ds_mau: _cols });
+              await sendInboxMessage(conversationId, _hoi);
+              console.log(`[AI-QUYẾT] CHOT_DON DỪNG: màu "${_it.color || "(trống)"}" không dùng được cho mẫu ${_it.prod.code} (mẫu có: ${_cols}) -> hỏi lại, KHÔNG tự đoán màu.`);
+              mem.lastBotReply = _hoi; updateConversationState(conversationId, mem); markProcessed(batch); return true;
+            }
+          }
+
+          // (2) Dựng dòng hàng, MỖI DÒNG mang nơi giao của riêng nó.
+          mem.phone = _cqSdt;
+          const _cqLines = _cqItems.map(it => ({
+            code: String(it.prod.code).toUpperCase(),
+            label: productLabel(it.prod),
+            color: it.color, size: it.size, qty: 1,
+            address: diaChiCuaMon(it, mem, _cqAddr)
+          }));
+          // AI dồn cả hai nơi giao vào một chuỗi -> đọc thẳng câu khách rồi ĐÈ lên.
+          {
+            // Đọc bản GỐC: latestText đã bị normalizeViet hạ hết chữ thường ->
+            // địa chỉ lấy ra thành "118 khương thượng, đống đa, hà nội".
+            const _noiGiao = tachNoiGiaoTheoMon(latestTextRaw, mem);
+            if (_noiGiao.length >= 2) {
+              const _conLai = _noiGiao.slice();
+              for (const ln of _cqLines) {
+                if (!_conLai.length) break;
+                let k = _conLai.findIndex(x => x.color && ln.color && colorMatches(x.color, ln.color));
+                if (k < 0) k = _conLai.findIndex(x => !x.color);
+                if (k < 0) k = 0;
+                ln.address = _conLai[k].address;
+                if (!ln.color && _conLai[k].color) ln.color = _conLai[k].color;
+                _conLai.splice(k, 1);
+              }
+              console.log(`[AI-QUYẾT] Câu khách nêu ${_noiGiao.length} NƠI GIAO -> đè địa chỉ theo từng món: ${_cqLines.map(l => `${l.color || "?"}->${String(l.address).slice(0, 24)}`).join(" | ")}`);
+            }
+          }
+          {
+            const _thieuDC = _cqLines.find(ln => !ln.address || !_aqLooksAddr(ln.address));
+            if (_thieuDC) {
+              const _hoi = KB.cau("chot_don__xin_dia_chi_mon",
+                { mon: `${_thieuDC.label}${_thieuDC.color ? " màu " + _thieuDC.color : ""}` });
+              await sendInboxMessage(conversationId, _hoi);
+              console.log(`[AI-QUYẾT] CHOT_DON DỪNG: món ${_thieuDC.code} chưa rõ nơi giao -> xin địa chỉ, KHÔNG mượn địa chỉ món khác.`);
+              mem.lastBotReply = _hoi; updateConversationState(conversationId, mem); markProcessed(batch); return true;
+            }
+          }
+
           const _cqProds = _cqItems.map(it => it.prod);
           mem.quotedProducts = _cqProds; mem.currentProduct = _cqProds[0]; productInfo = _cqProds[0];
-          if (_cqItems.length > 1) {
-            // ĐƠN NHIỀU MẪU -> dựng orderLines: buildOrderConfirmation/computeOrderTotal render từng dòng + cộng tiền từng món.
-            mem.orderLines = _cqItems.map(it => ({ code: String(it.prod.code).toUpperCase(), color: it.color, size: it.size, qty: 1 }));
+          const _cqSameSize2 = _cqItems.every(it => !it.size || it.size === _cqItems[0].size);
+          if (_cqItems[0].size && _cqSameSize2) { mem.customerSize = _cqItems[0].size; mem.sizeFromCustomer = true; }
+
+          // (3) Gom theo nơi giao + tính tiền TỪNG NHÓM (mượn computeOrderTotal bằng
+          //     cách thay orderLines tạm, rồi trả lại nguyên trạng).
+          const _nhomGiao = gomDongTheoNoiGiao(_cqLines);
+          const _luuLines = mem.orderLines, _luuLinesCode = mem.orderLinesCode;
+          const _tienNhom = _nhomGiao.map(g => {
+            mem.orderLines = g.lines.map(ln => ({ code: ln.code, color: ln.color, size: ln.size, qty: ln.qty }));
             mem.orderLinesCode = null;
-          }
-          await sendOrderCreatingWithImages(conversationId, mem, _cqProds[0]);
-          // Tin xác nhận: đơn 1 mẫu ưu tiên phom AI soạn (phải có {COD} + đúng sđt); đơn NHIỀU mẫu / phom
-          // AI thiếu trường -> phom code dựng (buildOrderConfirmation render đủ từng dòng, COD từ sheet).
-          let _cqConfirm = String(_cq.tin_nhan || "");
-          const _cqTot = computeOrderTotal(mem, _cqProds[0]);
-          const _cqCod = (_cqTot.known && _cqTot.total > 0) ? (_fmtMoney(_cqTot.total) + "đ") : "";
-          if (_cqItems.length === 1 && _cqConfirm.includes("{COD}") && _cqConfirm.includes(_cqSdt) && /Sản phẩm/i.test(_cqConfirm) && _cqCod) {
-            _cqConfirm = _cqConfirm.replace(/\{COD\}/g, _cqCod) + "\n" + orderGreeting(mem);
-          } else {
-            _cqConfirm = buildOrderConfirmation(mem, _cqProds[0]);
-            if (_cqItems.length === 1) console.log(`[AI-QUYẾT] phom AI soạn thiếu trường -> dùng phom code dựng (an toàn).`);
-          }
-          await sendInboxMessage(conversationId, _cqConfirm);
-          await tagAiChot(conversationId);
-          mem.orderClosed = true; mem.orderState = "DA_CHOT"; mem.everOrdered = true;
-          cancelFollowup(conversationId);
-          console.log(`[AI-QUYẾT] CHỐT ĐƠN ${_cqItems.length} MẪU: ${_cqItems.map(it => String(it.prod.code).toUpperCase() + (it.size ? "/" + it.size : "")).join(", ")} | COD sheet=${_cqCod || "?"} | tin cậy ${_cq.do_tin_cay}.`);
-          mem.lastBotReply = _cqConfirm; updateConversationState(conversationId, mem); markProcessed(batch); return true;
+            const t = computeOrderTotal(mem, _cqProds[0]);
+            return (t.known && t.total > 0) ? t.total : 0;
+          });
+          mem.orderLines = _luuLines; mem.orderLinesCode = _luuLinesCode;
+
+          // (4) ĐỌC LẠI cho khách soát. CHƯA gắn thẻ 182, CHƯA orderClosed —
+          //     order_worker chỉ đụng hội thoại có thẻ 182 nên chưa có đơn nào được tạo.
+          mem.donChoXacNhan = {
+            nhom: _nhomGiao.map(g => ({ address: g.address, lines: g.lines })),
+            phone: _cqSdt, luc: Date.now()
+          };
+          const _docLai = buildDocLaiDon(_nhomGiao, mem, _tienNhom);
+          await sendInboxMessage(conversationId, _docLai);
+          console.log(`[AI-QUYẾT] ĐỌC LẠI ĐƠN chờ khách xác nhận: ${_cqLines.length} món về ${_nhomGiao.length} nơi giao -> CHƯA lên đơn.`);
+          mem.lastBotReply = _docLai; updateConversationState(conversationId, mem); markProcessed(batch); return true;
         }
       }
       return false;   // AI nói TU_VAN / công tắc tắt / không đủ tự tin -> luật cũ cầm lái
@@ -8114,6 +9831,9 @@ async function processOneConversation(conversation) {
         const _sizeOk = !_pi || !orderNeedsSize(mem, _pi) || mem.customerSize;
         if (_pi && mem.phone && addrReady(mem) && _sizeOk) {
           const reply = await sendOrderClose(conversationId, mem, _pi);
+          // Chưa xác nhận -> sendOrderClose mới chỉ ĐỌC LẠI đơn: dừng lượt tại đây,
+          // KHÔNG gắn 182, KHÔNG đặt orderClosed. Khách gật thì nhánh đầu lượt mới chốt.
+          if (mem._dangChoXacNhan) { mem._dangChoXacNhan = false; mem.lastBotReply = reply; updateConversationState(conversationId, mem); markProcessed(batch); return true; }
           await tagAiChot(conversationId);
           mem.orderClosed = true; mem.orderState = "DA_CHOT"; mem.everOrdered = true; cancelFollowup(conversationId);
           console.log(`[${BOT_NAME}] Khách cho tỉnh "${_provDisp}" -> địa chỉ đủ -> CHỐT ĐƠN.`);
@@ -8150,6 +9870,9 @@ async function processOneConversation(conversation) {
       const _sizeOk = !_pi || !orderNeedsSize(mem, _pi) || mem.customerSize;
       if (_pi && mem.phone && addrReady(mem) && _sizeOk && !mem.orderClosed) {
         const reply = await sendOrderClose(conversationId, mem, _pi);
+        // Chưa xác nhận -> sendOrderClose mới chỉ ĐỌC LẠI đơn: dừng lượt tại đây,
+        // KHÔNG gắn 182, KHÔNG đặt orderClosed. Khách gật thì nhánh đầu lượt mới chốt.
+        if (mem._dangChoXacNhan) { mem._dangChoXacNhan = false; mem.lastBotReply = reply; updateConversationState(conversationId, mem); markProcessed(batch); return true; }
         await tagAiChot(conversationId);
         mem.orderClosed = true; mem.orderState = "DA_CHOT"; mem.everOrdered = true; cancelFollowup(conversationId);
         console.log(`[${BOT_NAME}] Khách XÁC NHẬN tỉnh "${prov}" -> ghép địa chỉ + CHỐT ĐƠN.`);
@@ -8172,9 +9895,24 @@ async function processOneConversation(conversation) {
     {
       const _phoneNow = /(?:\+?84|0)(?:[\s.\-]?\d){6,11}(?![\d])/.test(latestText);
       // [GUARD] nhãn AI là câu HỎI (hỏi hàng đẹp như hình, hỏi giá, bảng size...) -> KHÔNG coi là "vừa cho contact để chốt".
-      const _askKindsClose = ["AUTHENTICITY_QA", "PRICE_ASK", "SIZE_CHART", "QUALITY_CONCERN", "POLICY_QA", "POST_ORDER_CHITCHAT", "POST_ORDER_REQUEST", "POST_ORDER_CONFIRMED", "THANKS", "URGENT"];
-      const _isAskLabelClose = _askKindsClose.includes(String(mem._aiIntent || "").toUpperCase());
-      const _gaveContactNow = (mem._addrJustGiven || (_phoneNow && mem.phone)) && !looksLikeQuestion(latestText) && !_isAskLabelClose;
+      const _isAskLabelClose = isAskKind(mem._aiIntent);
+      // [VÁ 27/08/2026 — ca Hà Giang, ĐO TRÊN PAGE THẬT] Khách nhắn "mua về mà k giống
+      // được thế thì sao shop". Bot đáp lại bằng CÂU CHỐT ĐƠN đầy đủ ("Cảm ơn chị đã đặt
+      // hàng - Váy Giannal - kem - M - COD: 890.000đ - SĐT... - Địa chỉ..."). Khách cãi
+      // "ủa chưa đặt mà đã chốt đâu" -> bot gửi câu chốt đơn LẦN HAI.
+      //
+      // Đúng cái bẫy đã ghi ở đầu tệp (dòng ~2015) nhưng lọt qua cả hai rào:
+      //   · AI gắn nhãn SIZE_ADVICE — mà SIZE_ADVICE KHÔNG nằm trong _ASK_KINDS_RIENG và
+      //     cũng không khớp khuôn tên (*_QA/*_ASK/CHART/CONCERN) -> isAskKind = false.
+      //   · looksLikeQuestion không bắt khuôn "... thì sao" -> cũng false.
+      // Hai rào cùng mù -> câu hỏi bị đọc thành "khách vừa cho địa chỉ để chốt".
+      //
+      // Nhãn RISK_RECOURSE mới đã có trong _ASK_KINDS_RIENG nên rào 1 kín lại. Nhưng nếu
+      // AI lại gắn nhầm nhãn lần nữa thì rào vẫn thủng, mà nhánh RISK_RECOURSE thì đứng
+      // tận dưới (~11310) — chốt đơn xảy ra ở ĐÂY, sớm hơn nhiều, nên nó không cứu kịp.
+      // Vì vậy chặn thẳng bằng regex ngay tại rào: hỏi "thì sao" thì KHÔNG BAO GIỜ là chốt.
+      const _gaveContactNow = (mem._addrJustGiven || (_phoneNow && mem.phone))
+        && !looksLikeQuestion(latestText) && !_isAskLabelClose && !asksRiskRecourse(latestText);
       if (_gaveContactNow && productInfo && !mem.orderClosed) {
         const _availC = parseAvailableSizes(productInfo.size);
         const _needSizeC = _availC.size > 0 && !_availC.has("FREESIZE");
@@ -8233,7 +9971,7 @@ async function processOneConversation(conversation) {
           && !(typeof chosenColorForCode === "function" && chosenColorForCode(mem, productInfo));
         const _missC = [];
         // XOÁ địa chỉ RÁC tồn đọng (ký tự lạ / data catalog) để không chốt nhầm về rác.
-        if (mem.address && isGarbageAddress(mem.address)) { mem.address = null; }
+        if (mem.address && isGarbageAddress(mem.address)) { xoaDiaChi(mem, "chỗ 9922"); }
         const _addrOkC = addrReady(mem);
         if (!mem.phone) _missC.push("số điện thoại");
 
@@ -8277,6 +10015,9 @@ async function processOneConversation(conversation) {
         } catch (_) {}
         if (!_missC.length && _haveSizeC && !_needColorC && _addrOkC) {
           const reply = await sendOrderClose(conversationId, mem, productInfo);
+          // Chưa xác nhận -> sendOrderClose mới chỉ ĐỌC LẠI đơn: dừng lượt tại đây,
+          // KHÔNG gắn 182, KHÔNG đặt orderClosed. Khách gật thì nhánh đầu lượt mới chốt.
+          if (mem._dangChoXacNhan) { mem._dangChoXacNhan = false; mem.lastBotReply = reply; updateConversationState(conversationId, mem); markProcessed(batch); return true; }
           await tagAiChot(conversationId);
           mem.orderClosed = true; mem.orderState = "DA_CHOT"; mem.everOrdered = true;
           cancelFollowup(conversationId);
@@ -8313,8 +10054,31 @@ async function processOneConversation(conversation) {
     // ===== [NHÃN AI] ORDER_CLOSE -> CODE đi tới CHỐT (AI gắn nhãn, code làm theo) =====
     // Đặt CAO hơn nhánh "xem màu" (8143) + báo giá lại để chúng KHÔNG cướp lượt chọn-màu-để-chốt.
     // Vẫn giữ rào an toàn: CODE tự dựng câu chốt (buildOrderConfirmation), KHÔNG cho AI soạn lời.
+    // [25/08/2026] HAI RÀO THÊM. Đo trên page thật: khách nhắn "tư vấn cho mình những mẫu
+    // này với" + 3 ảnh -> AI-READ gắn nhãn ORDER_CLOSE (sai) -> nhánh này cướp lượt -> bot đáp
+    // "Dạ chị cho em xin thêm số nhà để em ghi địa chỉ giao cho chuẩn ạ".
+    // Trong khi CÙNG LƯỢT đó bot đã ra 2 mẫu MỚI và có giá cả hai:
+    //     MẪU: Arlisse(NRSQ626)=1750000 | Zoise(MRKSQ6040)=1650000
+    // (AI-QUYẾT đọc đúng là TU_VAN, nhưng nhánh này chạy theo nhãn của AI-READ.)
+    //
+    // Rào 1 — LƯỢT NÀY CÓ MẪU CHƯA ĐƯỢC BÁO GIÁ: kich_ban/luat.txt mục 13 chốt "tin ĐẦU TIÊN của
+    //   khách về một mẫu thì nhịp trả lời LUÔN là 1) báo giá 2) ba ảnh 3) trả lời câu hỏi
+    //   4) câu đuôi". Nhảy sang xin số nhà là bỏ hẳn ba bước đầu.
+    // Rào 2 — KHÁCH XIN TƯ VẤN: động từ "tư vấn / xem giúp / tham khảo" là nhờ tư vấn, không
+    //   phải chốt đơn. Chặn ở CODE chứ không chỉ dạy prompt, vì đây là lần thứ ba nhãn
+    //   ORDER_CLOSE bị gắn nhầm cho câu xin tư vấn.
+    const _mauMoiChuaBaoGia = (thisTurn || []).some(p => {
+      const c = String((p && p.code) || "").toUpperCase();
+      return c && !(mem.pricedCodes || []).map(x => String(x).toUpperCase()).includes(c);
+    });
+    const _xinTuVan = /(tư vấn|tu van|xem giúp|xem giup|tham khảo|tham khao|xem hộ|xem ho)/i.test(String(latestText || ""));
+    if (_ai("ORDER_CLOSE") && (_mauMoiChuaBaoGia || _xinTuVan) && !mem.orderClosed) {
+      console.log(`[${BOT_NAME}] [NHÃN ORDER_CLOSE] BỎ QUA nhánh chốt: ${_mauMoiChuaBaoGia ? "lượt này có mẫu CHƯA báo giá" : "khách XIN TƯ VẤN"} -> báo giá/tư vấn trước đã.`);
+    }
     if (!mem.orderClosed
         && _ai("ORDER_CLOSE")
+        && !_mauMoiChuaBaoGia
+        && !_xinTuVan
         && !looksLikeQuestion(latestText)
         && !shopRepliedAfterLastCustomer(data.messages)) {
       const _piCl = productInfo || (mem.quotedProducts && mem.quotedProducts[0]) || null;
@@ -8718,13 +10482,15 @@ async function processOneConversation(conversation) {
         //  (1) có SỐ ĐO 3 vòng (ngực/eo/hông) -> "với số đo của chị..."
         //  (2) có CÂN NẶNG hoặc SIZE -> "với thông số của chị..."
         //  (3) KHÔNG có gì -> trấn an + XIN chiều cao/cân nặng để tư vấn.
+        // [BƯỚC 1 · 25/08/2026] Ba câu lấy từ KHO KỊCH BẢN theo trạng thái; chuỗi thứ ba
+        // trong mỗi lời gọi là phom code đỡ khi kho hụt -> hành vi y hệt bản cũ.
         let reply;
         if (mem.measure3V) {
-          reply = "Dạ chị yên tâm ạ, mẫu này khá dễ mặc và không kén dáng đâu ạ. Với số đo của chị thì em tự tin chị mặc sẽ rất đẹp ạ";
+          reply = KB.cau("tran_an_hop_dang__co_so_do");
         } else if (mem.weightKg || mem.customerSize) {
-          reply = "Dạ chị yên tâm ạ, mẫu này khá dễ mặc và không kén dáng đâu ạ. Với thông số của chị thì em tự tin chị mặc sẽ rất đẹp ạ";
+          reply = KB.cau("tran_an_hop_dang__co_thong_so");
         } else {
-          reply = "Dạ chị yên tâm ạ, mẫu này khá dễ mặc và không kén dáng đâu ạ. Chị cho em xin chiều cao, cân nặng em tư vấn cho mình nhe";
+          reply = KB.cau("tran_an_hop_dang__chua_co_gi");
         }
         await sendInboxMessage(conversationId, reply);
         console.log(`[${BOT_NAME}] Khách lo MẶC CÓ HỢP/ĐẸP (look) -> trấn an dáng (${mem.measure3V ? "có số đo" : (mem.weightKg || mem.customerSize) ? "có thông số" : "xin cao/nặng"}).`);
@@ -8952,9 +10718,12 @@ async function processOneConversation(conversation) {
     // (a2) "KO ƯNG ĐC ĐỔI KO" = hỏi chính sách đổi (KHÔNG phải đồng ý chốt) -> trả điều kiện đổi NGAY,
     //      ưu tiên cao, không bị chặn bởi exchangeGuided, chạy TRƯỚC mọi luồng chốt đơn.
     if (asksExchangeIfNotLike(latestText) && !_nhanCamRegex(mem, "asksExchangeIfNotLike", ["RETURN_POLICY", "EXCHANGE_REQUEST"])) {
-      const reply = "Dạ chị yên tâm, bên em hỗ trợ đổi trong 15 ngày nha. Mình chỉ cần giữ sản phẩm chưa qua sử dụng và còn nguyên tem mác là đổi thoải mái ạ, có gì không vừa ý chị cứ nhắn em hỗ trợ liền.";
+      const _phi = hoiPhiDoiTra(latestText);
+      const reply = "Dạ chị yên tâm, bên em hỗ trợ đổi trong 15 ngày nha. Mình chỉ cần giữ sản phẩm chưa qua sử dụng và còn nguyên tem mác là đổi thoải mái ạ, có gì không vừa ý chị cứ nhắn em hỗ trợ liền."
+        + (_phi ? " " + cauPhiDoiTra() : "");
       await sendInboxMessage(conversationId, reply);
       console.log(`[${BOT_NAME}] Khách hỏi "ko ưng có đổi được không" -> trả chính sách đổi 15 ngày (không nhầm là chốt).`);
+      if (_phi) await nhuongNVChotPhiDoiTra(conversationId, mem);
       mem.lastBotReply = reply; updateConversationState(conversationId, mem); markProcessed(batch); return true;
     }
 
@@ -8977,9 +10746,12 @@ async function processOneConversation(conversation) {
 
     // (b) HỎI CHÍNH SÁCH đổi (chưa chắc đã mua) -> trả lời điều kiện đổi, KHÔNG gửi hướng dẫn gửi hàng vội.
     if (asksExchangePolicy(latestText) && !mem.exchangeGuided) {
-      const reply = "Dạ chị yên tâm, bên em hỗ trợ đổi trong 15 ngày nha. Mình chỉ cần giữ sản phẩm chưa qua sử dụng và còn nguyên tem mác là đổi thoải mái ạ, có gì không vừa ý chị cứ nhắn em hỗ trợ liền.";
+      const _phi = hoiPhiDoiTra(latestText);
+      const reply = "Dạ chị yên tâm, bên em hỗ trợ đổi trong 15 ngày nha. Mình chỉ cần giữ sản phẩm chưa qua sử dụng và còn nguyên tem mác là đổi thoải mái ạ, có gì không vừa ý chị cứ nhắn em hỗ trợ liền."
+        + (_phi ? " " + cauPhiDoiTra() : "");
       await sendInboxMessage(conversationId, reply);
       console.log(`[${BOT_NAME}] Khách hỏi CHÍNH SÁCH đổi -> trả lời điều kiện đổi.`);
+      if (_phi) await nhuongNVChotPhiDoiTra(conversationId, mem);
       mem.lastBotReply = reply; updateConversationState(conversationId, mem); markProcessed(batch); return true;
     }
 
@@ -9052,10 +10824,20 @@ async function processOneConversation(conversation) {
     // Khớp PAGE khách đang nhắn; CHỈ xét trạng thái 1/2/4/5; xử lý TÁCH ĐƠN (khách nhiều đơn).
     if (asksOrderStatus(latestText) || _ai("ORDER_STATUS")) {
       const phone = mem.phone || (latestTextRaw.match(/(?:\+?84|0)(?:\d[\s.-]?){8,10}\d/) || [])[0] || null;
+      // [FIX 26/08/2026] Nhường người thật KHÁC im lặng — xem test nhuong_nguoi_khong_duoc_im.
+      // KHÔNG gửi HUMAN_CHECK_REPLY: chứa "chờ… kiểm tra" nên bị isWaitHandoffMsg nuốt.
       const handoff = async (logMsg) => {
+        try {
+          const _cauChuyen = KB.cau("chuyen_nguoi_that");
+          await sendInboxMessage(conversationId, _cauChuyen);
+          mem.lastBotReply = _cauChuyen;
+        } catch (e) {
+          console.log(`[đơn] không gửi được câu chuyển người thật: ${e.message}`);
+          mem.lastBotReply = HUMAN_CHECK_REPLY;
+        }
         await tagChoXuLyVaUnread(conversationId);
         console.log(logMsg);
-        mem.lastBotReply = HUMAN_CHECK_REPLY; mem.botHandoffAt = Date.now();
+        mem.botHandoffAt = Date.now();
         updateConversationState(conversationId, mem); markProcessed(batch);
       };
       if (!posConfigured()) { await handoff("Hỏi trạng thái đơn nhưng POS chưa cấu hình -> thẻ AI-CHỜ XLY."); return true; }
@@ -9264,7 +11046,7 @@ async function processOneConversation(conversation) {
             : ", chị thường mặc size nào để em tư vấn cho mình nha";
         reply = sizesTxt
           ? `Dạ mẫu này bên em có size ${sizesTxt} ạ${tail}.`
-          : `Dạ chị thường mặc size nào để em tư vấn cho mình nha ạ?`;
+          : cauHoiSize("?");
       }
       // [FIX Trang Đặng] Mẫu CHƯA báo giá mà khách hỏi "có size nào" -> BÁO GIÁ + ẢNH trước rồi mới trả size.
       const _szUp = String(productInfo.code || "").toUpperCase();
@@ -9588,7 +11370,7 @@ async function processOneConversation(conversation) {
     if ((_aiOr(asksSizeChart(latestText), "SIZE_CHART")) && !_hasNewModelToQuote) {
       let sentImg = false;
       if (SIZE_GUIDE_IMG && (SIZE_GUIDE_IMG.url || SIZE_GUIDE_IMG.contentId)) {
-        await sendInboxMessage(conversationId, "Dạ em gửi chị bảng size để mình tham khảo nha ạ");
+        await sendInboxMessage(conversationId, KB.cau("bang_size_dan"));
         // Gửi qua HÀM CHUẨN: content_id (đáng tin) trước, URL sau -> 1 ảnh bảng size.
         const sres = await sendImages3(conversationId, [{ url: SIZE_GUIDE_IMG.url, contentId: SIZE_GUIDE_IMG.contentId }]);
         sentImg = !!(sres && sres.ok);
@@ -9606,7 +11388,7 @@ async function processOneConversation(conversation) {
           } else if (mem.customerSize && (a.size === 0 || a.has(mem.customerSize))) {
             action = `Dạ ${orderActionLine(mem, mem.customerSize)}`;
           } else {
-            action = "Dạ chị thường mặc size nào để em tư vấn cho mình nha ạ";
+            action = cauHoiSize();
           }
           await sendInboxMessage(conversationId, action);
         } else {
@@ -9693,6 +11475,53 @@ async function processOneConversation(conversation) {
       updateConversationState(conversationId, mem);
       markProcessed(batch);
       return true;
+    }
+
+    // ===== KHÁCH XIN SIZE LỚN HƠN / NHỎ HƠN -> TRA BẢNG CÂN NẶNG, KHÔNG ĐOÁN =====
+    // Ca Hà Giang 27/08/2026: "dạo này em tăng lên 57kg rồi shop, có size lớn hơn
+    // cho e k ạ". Bot đáp "mẫu này có size L" — ĐÚNG, nhưng đúng do ăn may: chữ "L"
+    // nó nhặt được từ "size **l**ớn" (xem asksWhichSpecificSize). Con số 57kg không
+    // được dùng lần nào, và "size to hơn" / "rộng hơn" thì trượt sạch.
+    //
+    // Bảng cân nặng có sẵn trong kịch bản và ghi rõ đúng ca này:
+    //   kich_ban/mysp.json -> bang_can_nang_size:
+    //   "Vùng chồng 56-57kg thuộc cả M lẫn L -> L đứng trước nên được chọn khi còn hàng."
+    // Nay tra đúng bảng đó (resolveSizeByWeight), và nối sang mời chốt — trước đây
+    // bot vừa hỏi xin cân nặng, khách đưa 57kg, rồi nó bỏ luôn không dùng.
+    {
+      const _huong = hoiSizeKhac(latestText);
+      if (_huong && productInfo && !_multiAttrQ && !priceAsk) {
+        const _kg = parseWeightKg(latestText) || mem.weightKg || 0;
+        const _co = parseAvailableSizes(productInfo.size);
+        const _dsSize = ["XS", "S", "M", "L", "XL", "XXL", "XXXL", "FREESIZE"].filter(x => _co.has(x));
+        let reply = null, _viSao = "";
+        if (_kg) {
+          const _sz = resolveSizeByWeight(_kg, productInfo.size);
+          if (_sz === "OVER") {
+            reply = noFitReply(_kg);  _viSao = `${_kg}kg vượt size lớn nhất của mẫu`;
+          } else if (_sz === "FREESIZE") {
+            reply = `Dạ mẫu này là freesize ạ, ${_kg}kg mình mặc vẫn vừa đẹp nha. Em lên đơn cho mình luôn nha chị?`;
+            _viSao = `${_kg}kg -> freesize`;
+          } else if (_sz) {
+            reply = `Dạ ${_kg}kg mình mặc size ${_sz} là vừa đẹp ạ. Mẫu này có size ${_sz}, em lên đơn size ${_sz} cho mình luôn nha chị?`;
+            _viSao = `${_kg}kg -> size ${_sz} (bảng cân nặng)`;
+          }
+        }
+        if (!reply) {
+          // Chưa biết cân nặng -> KHÔNG đoán size. Nêu đúng dải size mẫu có rồi xin số đo.
+          const _listTxt = _dsSize.length ? _dsSize.join(", ") : "S, M, L";
+          const _lonNhat = _dsSize.filter(x => x !== "FREESIZE").slice(-1)[0];
+          const _nhoNhat = _dsSize.filter(x => x !== "FREESIZE")[0];
+          const _mep = _huong === "lon" ? _lonNhat : _nhoNhat;
+          reply = `Dạ mẫu này có size ${_listTxt} ạ${_mep ? `, size ${_huong === "lon" ? "lớn" : "nhỏ"} nhất là ${_mep}` : ""}. ` +
+                  `Chị cho em xin chiều cao và cân nặng để em tư vấn size chuẩn cho mình nha!`;
+          _viSao = "chưa có cân nặng -> nêu dải size + xin số đo";
+        }
+        await sendInboxMessage(conversationId, reply);
+        console.log(`[${BOT_NAME}] Xin size ${_huong === "lon" ? "LỚN HƠN" : "NHỎ HƠN"} -> ${_viSao}. Mẫu có [${_dsSize.join("/")}].`);
+        mem.lastBotReply = reply; scheduleFollowup(conversationId, mem, productInfo, reply);
+        updateConversationState(conversationId, mem); markProcessed(batch); return true;
+      }
     }
 
     // ===== KHÁCH HỎI CÓ 1 SIZE CỤ THỂ KHÔNG ("co xl ko", "có size L ko") -> trả ĐÚNG bảng size (KHÔNG bịa) =====
@@ -9874,9 +11703,12 @@ async function processOneConversation(conversation) {
     }
 
     if (_aiOr(asksReturnPolicy(latestText), "RETURN_POLICY")) {
-      const reply = "Dạ bên em hỗ trợ ĐỔI size/mẫu trong 15 ngày chị nha, điều kiện sản phẩm chưa qua sử dụng và còn nguyên tem mác ạ. Bên em chưa hỗ trợ hoàn/trả tiền nha chị";
+      const _phi = hoiPhiDoiTra(latestText);
+      const reply = "Dạ bên em hỗ trợ ĐỔI size/mẫu trong 15 ngày chị nha, điều kiện sản phẩm chưa qua sử dụng và còn nguyên tem mác ạ. Bên em chưa hỗ trợ hoàn/trả tiền nha chị"
+        + (_phi ? ". " + cauPhiDoiTra() : "");
       await sendInboxMessage(conversationId, reply);
       console.log(`[${BOT_NAME}] Khách hỏi chính sách hoàn/hủy/đổi -> trả chính sách (chỉ khi được hỏi).`);
+      if (_phi) await nhuongNVChotPhiDoiTra(conversationId, mem);
       mem.lastBotReply = reply; updateConversationState(conversationId, mem); markProcessed(batch); return true;
     }
 
@@ -10178,6 +12010,28 @@ async function processOneConversation(conversation) {
       mem.lastBotReply = reply; updateConversationState(conversationId, mem); markProcessed(batch); return true;
     }
 
+    // ===== LO "MUA VỀ KHÔNG GIỐNG ẢNH THÌ SAO" (nhãn RISK_RECOURSE) -> trả QUYỀN LỢI =====
+    // Đo thật 27/08/2026: câu "mua về mà k giống được thế thì sao shop" bị AI gắn nhãn
+    // SIZE_ADVICE (tin_cay 0.8) -> bot đáp "mẫu này bên em có nhiều size, cho em xin chiều
+    // cao cân nặng". Khách lo HÌNH THỨC, bot trả lời chuyện SIZE. Trôi chảy nhưng lệch hẳn
+    // câu hỏi — kiểu sai khó thấy nhất vì đọc qua vẫn tưởng "có trả lời".
+    //
+    // Khách hỏi "THÌ SAO" = hỏi QUYỀN LỢI của mình. Câu trấn an suông (buildLooksReassure)
+    // cũng là né, vì nó cố ý KHÔNG nhắc đổi/trả. Ở đây được phép nhắc, và phải nhắc, vì
+    // khách đang hỏi đúng chuyện đó. Ranh giới: chỉ nhãn này mới mời đổi trả; khách chỉ
+    // lăn tăn chung chung thì vẫn về tran_an_ngoai_doi như cũ.
+    //
+    // Đứng TRƯỚC nhánh SIZE_ADVICE bên dưới: nếu AI vẫn gắn nhầm nhãn size thì regex
+    // asksRiskRecourse còn đỡ được, chứ đứng sau thì nhánh size nuốt mất lượt.
+    if (_aiOr(asksRiskRecourse(latestText), "RISK_RECOURSE") && !priceAsk) {
+      const reply = _rotLine(mem, "riskIdx", KB.cacCau("lo_khong_giong_anh"));
+      await sendInboxMessage(conversationId, reply);
+      console.log(`[${BOT_NAME}] Khách lo "mua về không giống thì sao" (RISK_RECOURSE) -> trả quyền lợi: ảnh thật + kiểm hàng trước khi trả tiền + đổi 15 ngày.`);
+      mem.lastBotReply = reply;
+      scheduleFollowup(conversationId, mem, productInfo, reply);
+      updateConversationState(conversationId, mem); markProcessed(batch); return true;
+    }
+
     // ===== LO SIZE KHÔNG VỪA (nhãn AI SIZE_ADVICE: "sợ không vừa/sợ chật") -> trấn an + XIN SỐ ĐO tư vấn size =====
     // Tách khỏi "lăn tăn chất lượng" (buildReassureReply). Đây là lo VỪA NGƯỜI -> hỏi số đo để tư vấn size đúng.
     if (_ai("SIZE_ADVICE") && !priceAsk && !asksSizeChart(latestText)
@@ -10222,6 +12076,39 @@ async function processOneConversation(conversation) {
     }
 
     // ===== KHÁCH HỎI MÀU CÓ HỢP TÔNG DA KHÔNG -> NGHIÊNG HẲN 1 MÀU + mời chốt (KHÔNG lặp gửi ảnh) =====
+    // ===== "MẪU NÀY MẶC ĐI <DỊP> ĐƯỢC KHÔNG" -> TRẢ LỜI, ĐỪNG ĐỂ RƠI LẶNG =====
+    // [25/08/2026] Có HAI kiểu câu hỏi dịp, và trước hôm nay chỉ một kiểu được xử:
+    //   · "có đồ đi biển không"          -> nhánh ĐI BIỂN gửi gallery (lọc cột beach)
+    //   · "mẫu NÀY mặc đi tiệc được ko"  -> nhánh ĐI BIỂN CỐ Ý loại ra (nó gửi gallery, không
+    //                                       trả lời về mẫu đang xem) -> KHÔNG nhánh nào nhận
+    // Kiểu thứ hai nằm sẵn trong danh sách 4 ca im lặng ghi ở cổng chặn cuối:
+    //   "váy này mặc đi ăn cưới có hợp không em" -> [AI-READ] nhãn=OCCASION_QA rồi ... hết.
+    // Shop chỉ ra khi đọc tin thật: bot trả lời mà "thiếu mục trả lời câu hỏi chính của khách".
+    //
+    // Sheet CHỈ có đúng một cột dịp là beach. Các dịp khác không có dữ liệu, nên câu trả lời
+    // bám vào thứ CÓ THẬT trong dòng hàng: chủng loại + chất liệu. Không phán bừa "hợp lắm ạ"
+    // cho mọi mẫu — set raw denim mà bảo hợp dạ tiệc là đúng kiểu bịa shop sợ nhất.
+    // Shop muốn nói chắc hơn thì sửa câu trong kho kịch bản, không phải sửa mã.
+    {
+      const _dipHoi = dipKhachHoi(latestText);
+      const _hoiMauNay = /(mẫu|váy|đầm|set|áo|quần|bộ|cái|em nó)\s*(này|đó|kia)|mẫu\s*trên/i.test(String(latestText || ""));
+      if (_dipHoi && productInfo && (_ai("OCCASION_QA") || _ai("FIT_SUITABILITY") || _hoiMauNay)
+          && !asksBeachWear(latestText)) {   // đi biển đã có nhánh riêng dùng dữ liệu cột beach
+        mem._boughtForOccasion = true;       // để câu chúc sau khi chốt bám đúng dịp
+        // Cột chất liệu TRỐNG ở nhiều mã -> ghép sẵn cả dấu phẩy, tránh câu cụt kiểu
+        // "là set quần, ạ". Có thì thành ", chất raw denim"; không có thì rỗng hẳn.
+        const _chat = String(productInfo.material || "").trim();
+        const _chatVe = _chat ? ", chất " + _chat.toLowerCase() : "";
+        const _loai = String(productInfo.category || "mẫu").toLowerCase();
+        const reply = KB.cau("hop_dip__mau_nay", { dip: _dipHoi, loai: _loai, chatVe: _chatVe });
+        await sendInboxMessage(conversationId, reply);
+        console.log(`[${BOT_NAME}] Khách hỏi mẫu NÀY hợp dịp "${_dipHoi}" -> đã trả lời theo dòng Sheet (${productInfo.code}), KHÔNG rơi lặng.`);
+        mem.lastBotReply = reply;
+        scheduleFollowup(conversationId, mem, productInfo, reply);
+        updateConversationState(conversationId, mem); markProcessed(batch); return true;
+      }
+    }
+
     if (asksSkinToneFit(latestText) && !_nhanCamRegex(mem, "asksSkinToneFit", ["FIT_SUITABILITY", "COLOR_ASK", "OCCASION_QA"])) {
       const t = latestText.toLowerCase();
       const dark = _isDarkSkin(t);
@@ -10694,7 +12581,10 @@ async function processOneConversation(conversation) {
       } else if (colors.length === 1) {
         // 1 MÀU: KHÔNG nói "chỉ có" -> nói "làm riêng màu X" + điểm cộng để khách yên tâm.
         const _c1Pl = !(mem.pricedCodes || []).includes(String(productInfo.code || "").toUpperCase()) ? priceLine(productInfo) : "";
-        reply = `${_c1Pl ? `Dạ ${productLabel(productInfo)} ${_c1Pl} ạ.\n` : ""}${_c1Pl ? "Mẫu" : "Dạ mẫu này"} bên em làm riêng màu ${colors[0]} ạ — màu này đang rất được ưa chuộng, dễ phối đồ, hợp nhiều dáng người chị nha.`;
+        reply = `${_c1Pl ? `Dạ ${productLabel(productInfo)} ${_c1Pl} ạ.
+` : ""}` + KB.cau("hoi_mau__mot_mau",
+          { mo: _c1Pl ? "Mẫu" : "Dạ mẫu này", mau: colors[0] },
+          `${_c1Pl ? "Mẫu" : "Dạ mẫu này"} bên em làm riêng màu ${colors[0]} ạ — màu này đang rất được ưa chuộng, dễ phối đồ, hợp nhiều dáng người chị nha.`);
         if (_c1Pl) markPriced(mem, String(productInfo.code || "").toUpperCase());
         await sendInboxMessage(conversationId, reply);
         console.log(`[${BOT_NAME}] Hỏi màu -> mẫu 1 màu (${colors[0]}).`);
@@ -10706,7 +12596,9 @@ async function processOneConversation(conversation) {
         // tư vấn màu theo sau (luật chỉ-báo-giá: không được tư vấn màu chay nuốt mất giá).
         const _clPl = !(mem.pricedCodes || []).includes(String(productInfo.code || "").toUpperCase()) ? priceLine(productInfo) : "";
         const _clGia = _clPl ? `Dạ ${productLabel(productInfo)} ${_clPl} ạ.\n` : "";
-        reply = `${_clGia}${_clGia ? "Mẫu" : "Dạ mẫu này"} bên em có ${joinVi(colors)} chị nha. Em gửi ảnh thật từng màu chị xem thích màu nào hơn ạ?`;
+        reply = _clGia + KB.cau("hoi_mau__nhieu_mau",
+          { mo: _clGia ? "Mẫu" : "Dạ mẫu này", mau: joinVi(colors) },
+          `${_clGia ? "Mẫu" : "Dạ mẫu này"} bên em có ${joinVi(colors)} chị nha. Em gửi ảnh thật từng màu để chị dễ chọn nha ạ.`);
         if (_clPl) markPriced(mem, String(productInfo.code || "").toUpperCase());
         mem.awaitingColorPick = true;   // khách chọn màu / "ok" -> luồng gửi ảnh từng màu lo
         const _codeC2 = String(productInfo.code || "").toUpperCase();
@@ -10917,6 +12809,41 @@ async function processOneConversation(conversation) {
       // (vd cổng AD vừa báo, HOẶC người thật gõ tay) + khách vẫn CHỈ hỏi giá -> KHÔNG báo lại, KHÔNG gửi lại 3 ảnh.
       // (Mẫu MỚI -> chưa quotedRecently/không có trong luồng -> vẫn báo bình thường. Hỏi ý KHÁC như size/màu/chất -> handler trên đã lo.)
       if (quotedRecently(mem, k) || _priceAlreadyInThread) {
+        // MỞ MÀN vừa báo giá + ảnh ở ĐẦU lượt này, mà khách chỉ hỏi mỗi giá nên
+        // không nhánh nào nhận câu hỏi -> phải gửi nốt CÂU ĐUÔI, kẻo nhịp cụt ở
+        // bước 2 (giá + ảnh rồi im). Đây chính là bước 4 của nhịp mở màn.
+        if (_daMoMan) {
+          const _duoi = String(sizeTailForProduct(mem, productInfo) || "").trim();
+          if (_duoi) {
+            await sendInboxMessage(conversationId, _duoi);
+            mem.lastBotReply = _duoi;
+            console.log(`[${BOT_NAME}] [MỞ MÀN] ${k}: khách chỉ hỏi giá -> gửi nốt câu đuôi.`);
+          }
+          updateConversationState(conversationId, mem);
+          markProcessed(batch); return true;
+        }
+        // [FIX Hà Giang 2026-08-26] KHÁCH HỎI THẲNG "GIÁ" THÌ LUÔN PHẢI ĐƯỢC TRẢ LỜI.
+        // Chốt chống lặp này dùng cửa sổ quotedRecently = 24 GIỜ, sinh ra cho ca "cổng
+        // AD vừa báo giá + gửi ảnh NGAY TRƯỚC ĐÓ". Nhưng 24 giờ là quá rộng để IM HẲN:
+        // đo trên page thật 16:37 — bot báo giá Váy Tatiana lúc 14:33, khách gửi lại
+        // ảnh mẫu đó kèm đúng một chữ "giá" -> bot không nói gì suốt. Bộ canh RƠI LẶNG
+        // bắt được ("[RƠI LẶNG shadow] ... khách: giá") nhưng đang ở chế độ bóng nên
+        // chỉ ghi sổ.
+        // Nay: vừa báo trong ${_VUA_BAO_GIA_PHUT} phút -> vẫn im (chống đúp thật sự);
+        // lâu hơn thế mà khách HỎI GIÁ -> nhắc lại giá. VẪN KHÔNG gửi lại ảnh.
+        const _vuaBaoGia = quotedRecently(mem, k, _VUA_BAO_GIA_PHUT / 60);
+        if (priceAsk && !_vuaBaoGia) {
+          const _plNhac = priceLine(productInfo);
+          if (_plNhac) {
+            const _nhacGia = buildCommentOpener(productInfo, mem);   // giá + câu đuôi theo size đã biết
+            await sendInboxMessage(conversationId, _nhacGia);
+            mem.lastBotReply = _nhacGia;
+            markPriced(mem, k);
+            console.log(`[${BOT_NAME}] Hỏi giá lại mẫu ${k} (đã báo cách đây >${_VUA_BAO_GIA_PHUT} phút) -> NHẮC LẠI GIÁ, không gửi lại ảnh.`);
+            updateConversationState(conversationId, mem);
+            markProcessed(batch); return true;
+          }
+        }
         console.log(`[${BOT_NAME}] Hỏi giá nhưng mẫu ${k} ĐÃ báo giá ${quotedRecently(mem, k) ? "lượt trước (bot)" : "trong luồng (NV/bot)"} -> KHÔNG báo lại / không gửi lại ảnh (chống lặp).`);
         markProcessed(batch); return true;
       }
@@ -10927,8 +12854,8 @@ async function processOneConversation(conversation) {
         markPriced(mem, k);
         mem._imgAllowSend = true;   // báo giá -> được kèm ảnh (kể cả đã gửi ảnh mẫu khác trước đó)
         if (data.fromAd) ensureSourceColorFromCaption(mem, k, `${data.adTitle || ""} ${data.postCaption || ""} ${(data.adCaptionCandidates || []).join(" ")}`);
-        await maybeSendImages(conversationId, k, mem, true);   // ĐẢO THỨ TỰ: gửi ẢNH TRƯỚC (§13: báo giá -> BẮT BUỘC kèm 3 ảnh, kể cả đã gửi)
-        await sendInboxMessage(conversationId, reply);          // ĐẢO THỨ TỰ: rồi mới gửi TEXT (giá + câu hành động ở cuối -> hành động luôn sau cùng)
+        await sendInboxMessage(conversationId, reply);          // §13: BÁO GIÁ trước (reply = giá + câu đuôi)
+        await maybeSendImages(conversationId, k, mem, true);     // §13: rồi BẮT BUỘC kèm 3 ảnh, kể cả đã gửi
         // 2 SP: khách bấm ADS mẫu KHÁC -> báo LIỀN mẫu ADS đang ghim (Plena) ngay sau mẫu ảnh khách (Mona).
         if (mem.pendingAdQuote && String(mem.pendingAdQuote).toUpperCase() !== k) {
           const _pc = String(mem.pendingAdQuote).toUpperCase();
@@ -10943,8 +12870,8 @@ async function processOneConversation(conversation) {
                 if (!mem.quotedProducts) mem.quotedProducts = [];
                 if (!mem.quotedProducts.some(x => String(x.code || "").toUpperCase() === _pc)) mem.quotedProducts.push(_pp);
                 if (data.fromAd) ensureSourceColorFromCaption(mem, _pc, `${data.adTitle || ""} ${data.postCaption || ""} ${(data.adCaptionCandidates || []).join(" ")}`);
-                await maybeSendImages(conversationId, _pc, mem, true);   // ĐẢO: ảnh trước
-                await sendInboxMessage(conversationId, _po);             // ĐẢO: text sau
+                await sendInboxMessage(conversationId, _po);             // §13: giá trước
+                await maybeSendImages(conversationId, _pc, mem, true);   // §13: ảnh sau
                 mem.lastBotReply = _po;
                 console.log(`[${BOT_NAME}] Báo LIỀN mẫu ADS đang ghim ${_pc} ngay sau mẫu ảnh ${k} (coi như 2 SP).`);
               }
@@ -11384,6 +13311,9 @@ async function processOneConversation(conversation) {
         const _tot = computeOrderTotal(mem, productInfo);
         if (mem.phone && addrReady(mem) && _tot.known) {
           const reply = await sendOrderClose(conversationId, mem, productInfo);
+          // Chưa xác nhận -> sendOrderClose mới chỉ ĐỌC LẠI đơn: dừng lượt tại đây,
+          // KHÔNG gắn 182, KHÔNG đặt orderClosed. Khách gật thì nhánh đầu lượt mới chốt.
+          if (mem._dangChoXacNhan) { mem._dangChoXacNhan = false; mem.lastBotReply = reply; updateConversationState(conversationId, mem); markProcessed(batch); return true; }
           await tagAiChot(conversationId);
           mem.orderClosed = true; mem.orderState = "DA_CHOT"; mem.everOrdered = true;
           console.log(`[${BOT_NAME}] [đơn nhiều dòng] CHỐT ${_lines.length} dòng (tổng ${_fmtMoney(_tot.total)}đ): ${JSON.stringify(_lines)}`);
@@ -11448,6 +13378,9 @@ async function processOneConversation(conversation) {
           if (mem.phone && addrReady(mem) && !mem.orderClosed
               && (customerWantsToOrder(latestText, mem.lastIntent) || wantsShipOldAddress(latestText) || mem._addrJustGiven)) {
             const oc = await sendOrderClose(conversationId, mem, productInfo);
+            // Chưa xác nhận -> sendOrderClose mới chỉ ĐỌC LẠI đơn: dừng lượt tại đây,
+            // KHÔNG gắn 182, KHÔNG đặt orderClosed. Khách gật thì nhánh đầu lượt mới chốt.
+            if (mem._dangChoXacNhan) { mem._dangChoXacNhan = false; mem.lastBotReply = oc; updateConversationState(conversationId, mem); markProcessed(batch); return true; }
             await tagAiChot(conversationId);
             mem.orderClosed = true; mem.orderState = "DA_CHOT"; mem.everOrdered = true;
             console.log(`[${BOT_NAME}] Khách cho SIZE + SĐT + ĐỊA CHỈ (+ý chốt) -> CHỐT ĐƠN luôn (không báo giá lại).`);
@@ -11510,6 +13443,13 @@ async function processOneConversation(conversation) {
     //   AI rỗng/timeout -> mới rớt về regex wantsBankInfo (lưới đỡ). Số STK vẫn do code (buildBankInfoReply).
     if (mem._aiOk ? _ai("PAYMENT_METHOD") : wantsBankInfo(latestText)) {
       const reply = buildBankInfoReply();
+      // Chưa khai số tài khoản -> KHÔNG bịa, KHÔNG mượn của shop khác: nhường người thật.
+      if (!reply) {
+        try { await tagChoXuLyVaUnread(conversationId); } catch (_) {}
+        mem.botHandoffAt = Date.now();
+        console.log(`[${BOT_NAME}] Khách xin STK nhưng shop chưa khai "ngan_hang" -> gắn Chờ-XL, nhường người thật.`);
+        updateConversationState(conversationId, mem); markProcessed(batch); return true;
+      }
       await sendInboxMessage(conversationId, reply);
       // Gửi KÈM ảnh mã QR (mặc định) nếu đã cấu hình QR_URL.
       if (QR_URL) {
@@ -11554,7 +13494,7 @@ async function processOneConversation(conversation) {
       // được RÀO ĐỊA DANH THẬT -> nhận vào bộ nhớ luôn, khỏi xin (thiếu sđt thì chỉ xin đúng sđt).
       if (!mem.address && mem._aiQ && mem._aiQ.ok && mem._aiQ.dia_chi
           && mem._aiQ.dia_chi.trang_thai === "DU" && _aqLooksAddr(mem._aiQ.dia_chi.dia_chi_chuan)) {
-        mem.address = mem._aiQ.dia_chi.dia_chi_chuan;
+        datDiaChi(mem, mem._aiQ.dia_chi.dia_chi_chuan, "AI gộp địa chỉ");
         console.log(`[${BOT_NAME}] [AI-QUYẾT cứu] khách nói "cho trên rồi" + AI đọc thấy địa chỉ trong lịch sử -> NHẬN "${String(mem.address).slice(0, 60)}" (qua rào địa danh), KHÔNG xin lại.`);
         updateConversationState(conversationId, mem);
         // KHÔNG return: chảy tiếp xuống dưới — đủ cả sđt thì luật chốt tự chạy, thiếu sđt thì nhánh dưới xin đúng sđt.
@@ -11640,9 +13580,10 @@ async function processOneConversation(conversation) {
           if (sres.ok) { sentExtra = true; mem.browseImgShown[code] = shown + (sres.n || urls.length || cids.length); }
         }
       }
+      // [BƯỚC 1 · 25/08/2026] Hai câu lùi-nhẹ lấy từ KHO KỊCH BẢN, phom code đỡ khi kho hụt.
       const reply = sentExtra
-        ? "Dạ chị cứ tham khảo thêm giúp em nha ạ. Em gửi thêm vài hình để mình nhìn rõ hơn chất liệu và phom dáng nhé."
-        : "Dạ chị cứ tham khảo thêm nha. Riêng mẫu này đang được khá nhiều khách bên em chọn vì phom lên rất xinh và tôn dáng ạ. Khi nào cần em tư vấn thêm chị cứ nhắn em nha.";
+        ? KB.cau("tham_khao_them__co_gui_anh")
+        : KB.cau("tham_khao_them__khong_gui_anh");
       await sendInboxMessage(conversationId, reply);
       console.log(`[${BOT_NAME}] Khách THAM KHẢO THÊM -> lùi nhẹ${sentExtra ? " + gửi 3 ảnh khác" : ""}, không gặng chốt/hỏi màu.`);
       mem.lastBotReply = reply;
@@ -11897,6 +13838,9 @@ async function processOneConversation(conversation) {
       if (customerGaveContact(latestText) && botAskedOrInvited && (!needSizeC || mem.customerSize) && mem.phone && addrReady(mem)
           && nProdC >= 1 && !looksLikeQuestion(latestText) && !mem.orderClosed) {
         const reply = await sendOrderClose(conversationId, mem, productInfo);
+        // Chưa xác nhận -> sendOrderClose mới chỉ ĐỌC LẠI đơn: dừng lượt tại đây,
+        // KHÔNG gắn 182, KHÔNG đặt orderClosed. Khách gật thì nhánh đầu lượt mới chốt.
+        if (mem._dangChoXacNhan) { mem._dangChoXacNhan = false; mem.lastBotReply = reply; updateConversationState(conversationId, mem); markProcessed(batch); return true; }
         mem.orderClosed = true;
         await tagAiChot(conversationId);
         console.log(`[${BOT_NAME}] Khách cho đủ SĐT+địa chỉ -> CHỐT ĐƠN (cú pháp đầy đủ), không hỏi lại.`);
@@ -11923,6 +13867,9 @@ async function processOneConversation(conversation) {
         }
         if (fullInfo) {
           const reply = await sendOrderClose(conversationId, mem, productInfo);
+          // Chưa xác nhận -> sendOrderClose mới chỉ ĐỌC LẠI đơn: dừng lượt tại đây,
+          // KHÔNG gắn 182, KHÔNG đặt orderClosed. Khách gật thì nhánh đầu lượt mới chốt.
+          if (mem._dangChoXacNhan) { mem._dangChoXacNhan = false; mem.lastBotReply = reply; updateConversationState(conversationId, mem); markProcessed(batch); return true; }
           await tagAiChot(conversationId);
           console.log(`[${BOT_NAME}] Khách ĐỒNG Ý sau câu mời -> CHỐT ĐƠN (cú pháp đầy đủ) + thẻ AI chốt.`);
           mem.orderClosed = true;
@@ -12019,10 +13966,13 @@ async function processOneConversation(conversation) {
     // ===== KHÁCH VỪA CUNG CẤP ĐỊA CHỈ (mem._addrJustGiven) -> xác nhận/chốt, KHÔNG để rơi xuống AI -> người thật =====
     // Bắt ở đây (sát trước AI) nên MỌI handler đơn ở trên vẫn được ưu tiên; chỉ khi địa chỉ rơi tới đây mới đỡ.
     if (mem._addrJustGiven && (productInfo || (mem.quotedProducts && mem.quotedProducts.length))) {
-      if (mem.address && isGarbageAddress(mem.address)) { mem.address = null; }   // xoá địa chỉ rác tồn đọng
+      if (mem.address && isGarbageAddress(mem.address)) { xoaDiaChi(mem, "xoá địa chỉ rác tồn đọng"); }   // xoá địa chỉ rác tồn đọng
       const _fullInfo = (!orderNeedsSize(mem, productInfo) || mem.customerSize) && mem.phone && addrReady(mem);
       if (_fullInfo && !mem.orderClosed) {
         const reply = await sendOrderClose(conversationId, mem, productInfo);
+        // Chưa xác nhận -> sendOrderClose mới chỉ ĐỌC LẠI đơn: dừng lượt tại đây,
+        // KHÔNG gắn 182, KHÔNG đặt orderClosed. Khách gật thì nhánh đầu lượt mới chốt.
+        if (mem._dangChoXacNhan) { mem._dangChoXacNhan = false; mem.lastBotReply = reply; updateConversationState(conversationId, mem); markProcessed(batch); return true; }
         await tagAiChot(conversationId);
         mem.orderClosed = true;
         console.log(`[${BOT_NAME}] Khách vừa cho ĐỊA CHỈ + đủ info -> CHỐT ĐƠN (không đẩy người).`);
@@ -12057,7 +14007,7 @@ async function processOneConversation(conversation) {
           const isFree = a && a.size === 1 && a.has("FREESIZE");
           reply = isFree
             ? "Dạ mẫu này là freesize, chị cho em xin chiều cao và cân nặng để em tư vấn cho mình nha ạ."
-            : "Dạ chị thường mặc size nào để em tư vấn cho mình nha ạ.";
+            : cauHoiSize(".");
         } else if (mem.phone && mem.address) {
           // ĐỦ size + sđt + địa chỉ (ok lúc KẾT) -> xác nhận lên đơn địa chỉ cũ (đơn thật do người/auto-order)
           reply = `Dạ em lên đơn${noiNhanAddr(mem)} cho mình nhe ạ.`;
@@ -12107,6 +14057,14 @@ async function processOneConversation(conversation) {
         reply = `Dạ em gửi chị xem ảnh ${productLabel(productInfo)} nhe ạ.`;
       }
       askImages = true;
+      // [FIX Hà Giang 2026-08-26 — page PHOM] Bật LUÔN cờ cho phép gửi ảnh.
+      // mem._imgAllowSend chốt ở dòng ~7404 bằng `(imageCount > 0) || askImages`, mà lúc
+      // đó askImages mới chỉ là kết quả REGEX wantsImages. Khách xin ảnh bằng câu regex
+      // không bắt ("có ảnh khách thật mặc không shop") thì chỉ NHÃN AI IMAGE_REQ vớt được
+      // -> tới đây askImages=true nhưng cờ vẫn false. Chốt "đã gửi ảnh trong hội thoại"
+      // ở maybeSendImages (dòng ~5146) chặn TRƯỚC mọi force, nên ảnh không đi, mà câu dẫn
+      // "Em gửi chị xem ảnh ..." VẪN đi -> bot hứa rồi im. Đo trên page thật 10:38:17.
+      mem._imgAllowSend = true;
     }
 
     // (a3b) CÂU CHÀO HỎI chung ("alo shop", "shop ơi"...) mà ĐANG CÓ MẪU khoá -> trả CÂU MẪU
@@ -12332,6 +14290,14 @@ async function processOneConversation(conversation) {
         const d = _m[1]; _hcm = d.length === 1 ? 100 + parseInt(d, 10) * 10 : 100 + parseInt(d, 10);
       } else if ((_m = _ht.match(/\b(1[0-9]{2})\s*c?m?\b/))) {      // 152 / 152cm
         _hcm = parseInt(_m[1], 10);
+      } else if ((_m = _ht.match(/(?:^|[^0-9a-zà-ỹ])m\s?([0-9]{1,2})(?![0-9])/))) {
+        // "m6" / "m58" — khách gõ nhanh, BỎ số 1 đằng trước. Đo trên page thật
+        // 24/08/2026: "e cao m6, nặng 53kg thì size gì ạ" -> ba nhánh trên đều trượt,
+        // bot tưởng chưa có chiều cao nên đi hỏi lại đúng thứ khách vừa đưa.
+        // Chỉ nhận khi ra chiều cao NGƯỜI hợp lý, để không nuốt "size m6" hay mã hàng.
+        const d = _m[1];
+        const h = d.length === 1 ? 100 + parseInt(d, 10) * 10 : 100 + parseInt(d, 10);
+        if (h >= 130 && h <= 199) _hcm = h;
       }
       // Chỉ tư vấn khi trích được chiều cao THẤP hợp lệ: 130–156cm.
       if (_hcm >= 130 && _hcm <= 156) {
@@ -12351,15 +14317,24 @@ async function processOneConversation(conversation) {
     //      - "shadow" : VẪN đẩy người như cũ, NHƯNG IN LOG câu AI định nói + bộ soi PASS/BLOCK -> mày soi traffic thật.
     //      - "on"     : nếu bộ soi PASS (câu sạch, KHÔNG dính tiền/sđt/chốt-đơn/ship/tồn) -> CHO AI tư vấn;
     //                   BLOCK -> đẩy người. (Giá/đơn vẫn 100% do code ở các nhánh trên.)
-    if (action === "NONE" && !askImages && !_greetScripted) {
+    // [VÁ LỖ 25/08/2026] Cổng này TỪNG có thêm điều kiện `!askImages`. Hệ quả: mỗi khi lượt đó
+    //   CÓ GỬI ẢNH (khách xin xem ảnh + đang khoá mẫu), câu AI TỰ SOẠN đi thẳng tới khách,
+    //   KHÔNG qua bộ soi, BẤT KỂ AI_REPLY_MODE=off. Tức công tắc "off" không thật sự off —
+    //   và mọi số đo về "bot nói câu từ đâu ra" đều sai theo.
+    //   Nay cổng áp cho MỌI câu AI tự soạn; khác biệt duy nhất là HÌNH PHẠT:
+    //     · không gửi ảnh -> nhường người thật (như cũ)
+    //     · CÓ gửi ảnh    -> VẪN gửi ảnh, chỉ THAY câu dẫn bằng phom cố định (đừng giết luồng ảnh)
+    if (action === "NONE" && !_greetScripted) {
       // CHỈ là lời CHÀO (GREETING) - KHÔNG phải câu hỏi cần trả -> KHÔNG đẩy người thật.
       // (Bot đã chào / đã BÁO GIÁ + ảnh + dẫn size ở nhánh trên nếu có; còn lại đứng yên,
       //  tránh gắn AI-CHỜ XL OAN cho tin chỉ là "Bắt đầu" / "hi" kèm ảnh mẫu — ca Thanh Stubborn.)
-      if (_ai("GREETING")) {
+      // `!askImages`: lượt này đang gửi ảnh thì KHÔNG được thoát sớm ở đây, kẻo khách chào kèm
+      //  xin ảnh bị nuốt mất loạt ảnh (chốt này vốn nằm sau `!askImages` của cổng cũ).
+      if (_ai("GREETING") && !askImages) {
         console.log(`[${BOT_NAME}] Chỉ là lời chào (GREETING), không có câu hỏi cần trả -> KHÔNG đẩy người thật.`);
         updateConversationState(conversationId, mem); markProcessed(batch); return true;
       }
-      const _aiMode = (process.env.AI_REPLY_MODE || "off").toLowerCase();
+      const _aiMode = String(KB.caiDat("AI_REPLY_MODE", "off")).toLowerCase();
       const _vet = vetAdvisoryReply(reply);
       if (_aiMode === "on" && _vet.allow && reply && String(reply).trim()
           && !isAngryOrSensitive(latestText) && !isSensitiveHandoff(latestText)
@@ -12380,7 +14355,15 @@ async function processOneConversation(conversation) {
         } else {
           console.log(`[${BOT_NAME}] Câu CHƯA CÓ KỊCH BẢN DẠY (AI định tự trả lời) -> ĐẨY NGƯỜI THẬT, không tự ý chế.`);
         }
-        action = "TAG_HUMAN"; reply = "";
+        if (askImages) {
+          // Lượt này CÓ gửi ảnh: giết câu = giết luôn loạt ảnh khách vừa xin. Giữ luồng ảnh,
+          // chỉ thay câu dẫn của AI bằng phom cố định (kho kịch bản, có phom code đỡ).
+          const _dan = KB.cau("dan_gui_anh", { mau: productInfo ? productLabel(productInfo) : "mẫu này" });
+          console.log(`[${BOT_NAME}] Câu AI tự soạn bị cổng chặn NHƯNG lượt này có gửi ảnh -> GIỮ luồng ảnh, thay câu dẫn bằng phom cố định.`);
+          reply = _dan;
+        } else {
+          action = "TAG_HUMAN"; reply = "";
+        }
       }
     }
     // (b) TAG_HUMAN: nhường người thật. CÓ câu riêng (vd cáu giận) -> nhắn; KHÔNG có (AI ko trả lời được) -> CHỈ gắn thẻ, KHÔNG nhắn "chờ đợi" (tránh nhàm).
@@ -12401,7 +14384,8 @@ async function processOneConversation(conversation) {
 
     // (c) SEND_IMAGES: AI đề nghị -> code GÁC CỔNG. Chỉ bật cờ gửi ảnh khi ĐÃ rõ mẫu;
     //     việc gửi đúng mẫu/màu, không trùng, tối đa 3 ảnh do maybeSendImages() lo.
-    if (action === "SEND_IMAGES" && productInfo) askImages = true;
+    // AI phát SEND_IMAGES cũng là "khách xin ảnh" -> bật cờ, cùng lý do như (a3).
+    if (action === "SEND_IMAGES" && productInfo) { askImages = true; mem._imgAllowSend = true; }
 
     if (!reply || !String(reply).trim()) {
       console.log("AI không trả lời.");
@@ -12493,6 +14477,9 @@ async function processOneConversation(conversation) {
     reply = prettifyAddressList(reply);
     await sendInboxMessage(conversationId, reply);
     console.log("REPLY:", reply);
+    // Câu vừa gửi nêu ĐÚNG MỘT màu -> đó là LỜI HỨA, ảnh gửi ngay dưới đây phải theo.
+    // (Câu liệt kê nhiều màu thì mauDuyNhat trả null -> không ràng buộc gì.)
+    mem._mauVuaHua = mauDuyNhat(reply) || null;
 
     // gửi ảnh: khách GỬI ẢNH 1 mẫu lượt này -> LUÔN kèm 3 ảnh (§13). Mẫu dò ra TỪ CHỮ/tin shop (khách KHÔNG gửi
     //  ảnh) + chỉ HỎI size/form/chất... -> KHÔNG gửi ảnh (trước đây dựa "đã gửi thì bỏ qua" nhưng sau RESTART mem
@@ -12522,7 +14509,9 @@ async function processOneConversation(conversation) {
     markProcessed(batch);
     return true;
   } catch (err) {
-    console.log("Lỗi processOneConversation:", err.message);
+    // In cả stack: lỗi lập trình (ReferenceError/TypeError) mà chỉ có message thì
+    // không cách nào biết dòng nào hỏng trong 12.7k dòng.
+    console.log("Lỗi processOneConversation:", err.stack || err.message);
     clearProcessing(batch);
     return false;
   }
@@ -12542,6 +14531,49 @@ let _lastFailLog = 0;
 function khachDangCho(c) {
   return !(c && c.last_sent_by && c.last_sent_by.admin_name);
 }
+// ===== CỔNG CHẶN CUỐI — KHÔNG ĐỂ KHÁCH RƠI LẶNG LẼ =====
+// processOneConversation có 268 điểm return. Đo 25/08/2026 trên 46 kịch bản: 4 ca bot
+// KHÔNG nói câu nào, KHÔNG gắn thẻ, KHÔNG cả một dòng log nói vì sao. Khách ngồi chờ,
+// nhân viên không biết có khách đang chờ, về sau không truy được dấu vết. Ví dụ đo được:
+//   "váy này mặc đi ăn cưới có hợp không em"   -> [AI-READ] nhãn=OCCASION_QA rồi ... hết.
+//   "váy này bao nhiêu tiền vậy shop" (bình luận, bài không nêu mẫu)
+//   "giá thiết kế Alisse bao nhiêu ạ" (khách gõ sai tên mẫu)
+// Cả bốn cùng một kiểu: KHÔNG tra ra mẫu -> rơi ra khỏi mọi nhánh.
+//
+// Nguyên tắc 1 nói "mơ hồ thì NHƯỜNG NGƯỜI THẬT". Nhường = gắn thẻ cho người vào xử,
+// KHÔNG phải biến mất. Đây là lưới an toàn, KHÔNG phải bản vá nguyên nhân.
+//
+// Đặt ở TẦNG GỌI chứ không nhét trong processOneConversation: một chỗ bọc trọn 268 đường
+// thoát. Cũng cố ý KHÔNG đặt trong turn_log — bộ ghi sổ không được tự đụng vào Pancake.
+//
+// Công tắc RAI_LANG_MODE (kho kịch bản > .env > mặc định trong mã):
+//   "shadow" (mặc định) CHỈ ghi sổ + in log, KHÔNG gắn thẻ, KHÔNG đổi hành vi.
+//                       Chạy vài ngày lấy số thật rồi mới quyết có bật không.
+//   "on"     gắn thẻ AI-CHỜ XL + đánh dấu chưa đọc để nhân viên thấy.
+//   "off"    tắt hẳn.
+async function canhRoiLang(conversationId) {
+  const mode = String(KB.caiDat("RAI_LANG_MODE", "shadow")).toLowerCase();
+  if (mode === "off") return;
+  const t = turnLog.hienTai();
+  if (!t) return;
+  // Chưa qua mốc "có việc của khách" -> bot im từ sớm là CỐ Ý (thẻ giữ, cụm rỗng, đã xử).
+  if (!t.khachText && !t.coAnh) return;
+  // Đã làm BẤT KỲ việc gì thấy được -> không phải rơi lặng.
+  if (t.daTraLoi || t.guiDi.length || t.theGan.length || t.theGo.length || t.nhuongNguoiThat) return;
+  if (t.loi) return;                    // lượt lỗi đã có đường báo riêng, đừng đếm hai lần
+  t.roiLang = true;
+  console.log(`[RƠI LẶNG ${mode}] ${conversationId} | nhãn=${t.intent || "-"} | khách: `
+    + `"${String(t.khachText || (t.coAnh ? "(ảnh)" : "")).slice(0, 80)}" -> `
+    + (mode === "on" ? "GẮN NGƯỜI THẬT" : "chỉ ghi sổ, không đụng thẻ"));
+  if (mode !== "on") return;
+  try {
+    await tagChoXuLyVaUnread(conversationId);
+    turnLog.handoff("rơi lặng — hết nhánh mà bot không nói gì");
+  } catch (e) {
+    console.log(`[RƠI LẶNG] gắn thẻ hỏng: ${(e && e.message) || e}`);
+  }
+}
+
 async function processOnce() {
   if (isRunning) return;
   if (Date.now() < nextPollAt) return;   // (giữ tương thích; hiện không set nghỉ dài nữa)
@@ -12613,6 +14645,9 @@ async function processOnce() {
         }
       }
     }
+    // [CHẠY THỬ] CHI_XU_LY_KHACH: nhận thêm hội thoại MỚI của đúng khách đang thử
+    // (bình luận bài mới sinh id mới) TRƯỚC khi gạn danh sách trắng bên dưới.
+    _moKhoaTheoKhach(convData.conversations);
     const fresh = (convData.conversations || [])
       // [CHẠY THỬ] Danh sách trắng: khai CHI_XU_LY_IDS thì bot CHỈ đụng vào đúng
       // mấy hội thoại này, mọi hội thoại khác bị bỏ qua hoàn toàn (không đọc, không
@@ -12645,6 +14680,12 @@ async function processOnce() {
         const _inFresh = new Set(fresh.map(c => String(c.id)));
         let _added = 0;
         for (const hid of hookIds) {
+          // [CHẠY THỬ] Danh sách trắng phải áp Ở ĐÂY NỮA.
+          // Bộ lọc CHI_XU_LY_IDS bên trên chỉ gạn `convData.conversations`, còn
+          // khối này `unshift` thẳng vào `fresh` -> trước đây webhook đưa được
+          // hội thoại BẤT KỲ qua mặt hàng rào. Đo thực tế: khai đúng 1 id mà
+          // vẫn có 4210 conv webhook + 1 khách thật lọt vào hàng xử lý.
+          if (CHI_XU_LY_IDS.size && !CHI_XU_LY_IDS.has(String(hid))) continue;
           if (_inFresh.has(hid)) continue;                 // đã nằm trong fresh -> thôi
           const existing = (convData.conversations || []).find(c => String(c.id) === hid);
           if (existing) {                                   // có trong list nhưng bị lọc -> ép xử lại
@@ -12771,9 +14812,18 @@ async function processOnce() {
           kenh: String(conv.type || "").toUpperCase().includes("COMMENT") ? "COMMENT" : "INBOX"
         }, async () => {
           let ok = false, loi = false;
-          try { ok = await processOneConversation(conv); }
+          try {
+            ok = await processOneConversation(conv);
+            // LƯỢT NHIỀU Ý: trả nốt ý còn lại thành TIN RIÊNG. Chỉ chạy khi vòng một
+            // đã trả lời thật (ok) — vòng một nhường người thật thì thôi, đừng chen.
+            // Trần 1 vòng phụ: mỗi lượt tối đa 2 ý, không để đẻ vòng vô hạn.
+            const _yCon = _Y_CON_LAI.get(String(conv.id));
+            _Y_CON_LAI.delete(String(conv.id));
+            if (ok && _yCon) await processOneConversation(conv, _yCon);
+          }
           catch (e) { loi = true; throw e; }
           finally { giamSat.xongMotLuot({ daTraLoi: !!ok, loi }); }
+          await canhRoiLang(String(conv.id));   // cổng chặn cuối: khách không được rơi lặng lẽ
           return ok;
         })
       ), { toiDa: dieuTiet.SONG_SONG, dungSau: MAX_MOI_NHIP });

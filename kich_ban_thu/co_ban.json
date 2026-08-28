@@ -1,0 +1,67 @@
+{
+  "nhom": "Cơ bản — luồng bán hàng thường ngày",
+  "kich_ban": [
+    {
+      "ten": "Khách hỏi giá suông (chưa biết mẫu nào)",
+      "luot": [
+        {
+          "khach": "shop ơi váy này bao nhiêu tiền vậy"
+        },
+        {
+          "khach": "có màu nào nữa không em"
+        },
+        {
+          "khach": "size M mặc được không, chị 55kg"
+        }
+      ]
+    },
+    {
+      "ten": "Chốt đơn trọn vòng: chốt -> size -> địa chỉ -> số điện thoại",
+      "luot": [
+        {
+          "khach": "mẫu này còn hàng không shop"
+        },
+        {
+          "khach": "ok chị lấy 1 cái nhé"
+        },
+        {
+          "khach": "size L màu đen"
+        },
+        {
+          "khach": "Nguyễn Thị Lan, 0912345678"
+        },
+        {
+          "khach": "số 25 đường Lê Lợi, phường Bến Nghé, quận 1, TP HCM"
+        },
+        {
+          "khach": "em gửi gấp giúp chị nhé, mai chị cần rồi"
+        }
+      ]
+    },
+    {
+      "ten": "Ca khó — phải nhường người thật, không được bịa",
+      "luot": [
+        {
+          "khach": "váy này vải gì em, mặc mùa hè có nóng không"
+        },
+        {
+          "khach": "shop cho đổi trả trong bao lâu"
+        },
+        {
+          "khach": "lần trước chị mua bị lỗi đường chỉ, giờ tính sao đây"
+        },
+        {
+          "khach": "bớt cho chị 50k được không"
+        }
+      ]
+    },
+    {
+      "ten": "MỞ MÀN: khách gửi mẫu + hỏi màu -> phải là giá, 3 ảnh, trả lời màu, câu đuôi",
+      "luot": [
+        {
+          "khach": "mẫu CAMELLIA này có màu khác không em"
+        }
+      ]
+    }
+  ]
+}

@@ -8,7 +8,7 @@
 // ============================================================================
 const test = require("node:test");
 const assert = require("node:assert");
-const dt = require("../dieu_tiet");
+const dt = require("../loi/tien_ich/dieu_tiet");
 
 const nghi = ms => new Promise(r => setTimeout(r, ms));
 

@@ -1,0 +1,74 @@
+{
+  "nhom": "Ảnh nhận ra rồi mà mã thiếu dòng Sheet",
+  "_ghi_chu": [
+    "Ảnh MRQN553 là ảnh THẬT trên Drive (19 tấm trong kho CLIP), vision ra 0.9937.",
+    "MRQN553 KHÔNG có dòng trong Sheet -> NOT_FOUND_IN_SHEET.",
+    "Toàn kho: 265/738 mã thiếu dòng = 2.510/15.221 ảnh (16,5%)."
+  ],
+  "kich_ban": [
+    {
+      "ten": "Khách gửi ảnh mã thiếu dòng Sheet — bot phải NÓI, không được im",
+      "luot": [
+        {
+          "khach": "mẫu này bao nhiêu shop",
+          "anh": "https://lh3.googleusercontent.com/d/19oi1ze-0X7lnG0wigmfwSDtpX81zJFUE=w1600"
+        },
+        {
+          "cho": 30
+        }
+      ]
+    },
+    {
+      "ten": "Dựng lại ca Hà Giang: đang dở địa chỉ thì khách gửi ảnh mẫu mới hỏi hợp dịp",
+      "_ghi_chu": [
+        "Ảnh đầu là Zoise (MRKSQ6040) — CÓ dòng Sheet, để bot báo giá và hỏi địa chỉ.",
+        "Địa chỉ cố ý thiếu số nhà -> đúng ba điều kiện của nhánh 'khách gửi ĐỊA CHỈ bằng ẢNH'.",
+        "Cần thấy: bot KHÔNG đòi địa chỉ (vì khách đang hỏi về MẪU), KHÔNG gắn thẻ giữ 183."
+      ],
+      "luot": [
+        {
+          "goThe": 184
+        },
+        {
+          "khach": "mẫu này bao nhiêu tiền shop",
+          "anh": "https://lh3.googleusercontent.com/d/1ImPpqw_Aia34wqXdy6R-vuoMT3w3Y7Xz=w1600"
+        },
+        {
+          "khach": "ok chị lấy 1 cái size M nha"
+        },
+        {
+          "khach": "Thanh Xuân, Hà Nội"
+        },
+        {
+          "khach": "mẫu này mặc đi tiệc ở cty được k shop",
+          "anh": "https://lh3.googleusercontent.com/d/19oi1ze-0X7lnG0wigmfwSDtpX81zJFUE=w1600"
+        },
+        {
+          "cho": 30
+        }
+      ]
+    },
+    {
+      "ten": "Hỏi mẫu NÀY hợp dịp — mẫu CÓ dòng Sheet, bot phải trả lời chứ không im",
+      "_ghi_chu": [
+        "Trước 25/08 nhánh đi biển cố ý loại câu 'mẫu NÀY' ra, không nhánh nào khác nhận -> im.",
+        "Cần thấy: bot nêu chủng loại + chất liệu lấy từ Sheet, và nhắc lại đúng dịp khách nói."
+      ],
+      "luot": [
+        {
+          "goThe": 184
+        },
+        {
+          "khach": "mẫu này bao nhiêu tiền shop",
+          "anh": "https://lh3.googleusercontent.com/d/1ImPpqw_Aia34wqXdy6R-vuoMT3w3Y7Xz=w1600"
+        },
+        {
+          "khach": "mẫu này mặc đi tiệc ở cty được k shop"
+        },
+        {
+          "cho": 30
+        }
+      ]
+    }
+  ]
+}

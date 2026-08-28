@@ -1,5 +1,35 @@
 [
   {
+    "nguon": "log:ln.txt",
+    "conversationId": "1468690110033030_#b1aef7eb",
+    "tinKhach": "MRVX559 gửi c xem video",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[AI-READ] nhãn=IMAGE_REQ | size=- addr=false order=false ",
+      "[images] đã nạp ảnh cho 678 mã sản phẩm",
+      "[Bảo Trâm] [follow-hẹn] stage 1, sau 600s -> \"Dạ mẫu này đang có "
+    ]
+  },
+  {
+    "nguon": "log:ln2.txt",
+    "conversationId": "1468690110033030_#b1aef7eb",
+    "tinKhach": "gửi c xem video mà",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: ",
+      "[AI-READ] nhãn=VIDEO_REQ | size=- addr=false order=false ",
+      "[Bảo Trâm] Khách XIN VIDEO (nhãn=VIDEO_REQ) -> gửi video mẫu "
+    ]
+  },
+  {
     "nguon": "log:log.txt",
     "conversationId": "1405324086167653_#e604ca1a",
     "tinKhach": "Bộ này có những màu nào shop",
@@ -255,36 +285,6 @@
     ]
   },
   {
-    "nguon": "log:ln.txt",
-    "conversationId": "1468690110033030_#b1aef7eb",
-    "tinKhach": "MRVX559 gửi c xem video",
-    "coAnh": false,
-    "mong": {
-      "nhuongNguoiThat": null,
-      "botDaGui": null
-    },
-    "ghiChu": [
-      "[AI-READ] nhãn=IMAGE_REQ | size=- addr=false order=false ",
-      "[images] đã nạp ảnh cho 678 mã sản phẩm",
-      "[Bảo Trâm] [follow-hẹn] stage 1, sau 600s -> \"Dạ mẫu này đang có "
-    ]
-  },
-  {
-    "nguon": "log:ln2.txt",
-    "conversationId": "1468690110033030_#b1aef7eb",
-    "tinKhach": "gửi c xem video mà",
-    "coAnh": false,
-    "mong": {
-      "nhuongNguoiThat": null,
-      "botDaGui": null
-    },
-    "ghiChu": [
-      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: ",
-      "[AI-READ] nhãn=VIDEO_REQ | size=- addr=false order=false ",
-      "[Bảo Trâm] Khách XIN VIDEO (nhãn=VIDEO_REQ) -> gửi video mẫu "
-    ]
-  },
-  {
     "nguon": "log:vid.txt",
     "conversationId": "1468690110033030_#de6f0ce5",
     "tinKhach": "cho c giá | image: [Photo] | text: . | text: có video ko",
@@ -297,6 +297,2061 @@
       "[Photo] | text: . | text: có video ko",
       "[vision] màu (từ tên file): XANH NHẠT | mã MRAD5171 | img ",
       "[AI-READ] nhãn=PRICE_ASK | size=- addr=false order=false "
+    ]
+  },
+  {
+    "nguon": "log:chat_thu.log",
+    "conversationId": "100000000000001_#682fc293",
+    "tinKhach": "shop oi vay nay bao nhieu tien",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[catalog] đã nạp 589 sản phẩm",
+      "[AI-READ] nhãn=PRICE_ASK | size=- addr=false order=false price=true chart=false concern=- | phone=- addrDu=false provConfirm=fals",
+      "[ADS MAP] đã nạp 1118 ad->mẫu (tay: ad_product_map.json + tự học: ad_learned_map.json)"
+    ]
+  },
+  {
+    "nguon": "log:chat_thu.log",
+    "conversationId": "100000000000001_#682fc293",
+    "tinKhach": "alo shop ơi",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[catalog] đã nạp 589 sản phẩm",
+      "[REQ] 32 request Pancake / 10s | nguồn: {\"list-hoithoai\":1,\"doc-tin-nhan\":31}",
+      "[AI-READ] nhãn=GREETING | size=- addr=false order=false price=false chart=false concern=- | phone=- addrDu=false provConfirm=fals"
+    ]
+  },
+  {
+    "nguon": "log:chat_thu.log",
+    "conversationId": "100000000000001_#0e1720a0",
+    "tinKhach": "shop oi vay nay bao nhieu tien | text: co mau nao nua khong em",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[AI-READ] nhãn=PRICE_ASK | size=- addr=false order=false price=true chart=false concern=- | phone=- addrDu=false provConfirm=fals",
+      "[AI-QUYẾT] referent=UNKNOWN(0.9) | mẫu_cũ=[] | địa_chỉ=KHONG_CO(thiếu sdt+dia_chi+size) | hành_động=TU_VAN | 1181ms",
+      "[HÀNG ĐỢI] 1 conv cần xử: Khách thử(seen=false)"
+    ]
+  },
+  {
+    "nguon": "log:chay_that_2408.log",
+    "conversationId": "1468690110033030_#24d3855c",
+    "tinKhach": "mẫu này bn thế",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": true,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[catalog] đã nạp 589 sản phẩm",
+      "[reader] khách vừa gửi ảnh mẫu MỚI (vision trượt) + hỏi \"mẫu này bao nhiêu thế\" -> KHÔNG vớ mẫu shop cũ, nhường người thật.",
+      "[reader] AD 120256396807590550: chưa ra mẫu -> KHÔNG gắn người, QUÉT LẠI (lần 1/3)."
+    ]
+  },
+  {
+    "nguon": "log:chay_that_2408c.log",
+    "conversationId": "1468690110033030_#24d3855c",
+    "tinKhach": "mẫu này bn thế | image: [Photo]",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[Photo]",
+      "[vision] màu (từ tên file): XANH | mã MGKSQ6072 | img 1PQwpmdG95eABheC8HN0KRLzrcCGKNW_N",
+      "[AI-READ] nhãn=PRICE_ASK | size=- addr=false order=false price=true chart=false concern=- | phone=- addrDu=false provConfirm=fals"
+    ]
+  },
+  {
+    "nguon": "log:chay_that_2408c.log",
+    "conversationId": "1468690110033030_#24d3855c",
+    "tinKhach": "e cao m6, nặng 53kg thì size gì ạ",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MGKSQ6072 (Corae).",
+      "[AI-READ] nhãn=SIZE_ADVICE | size=- addr=false order=false price=false chart=false concern=- | phone=- addrDu=false provConfirm=f",
+      "[REQ] 17 request Pancake / 10s | nguồn: {\"list-hoithoai\":11,\"doc-tin-nhan\":4,\"lay-baiviet-ads\":2}"
+    ]
+  },
+  {
+    "nguon": "log:chay_that_2408d.log",
+    "conversationId": "1468690110033030_#24d3855c",
+    "tinKhach": "mẫu này còn màu khác k shop | image: [Photo]",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[Photo]",
+      "[catalog] đã nạp 589 sản phẩm",
+      "[vision] màu (từ tên file): ĐỎ | mã MMVX5282 | img 1AFp-zVaVFeHw2pvoDh0X9zBKzcW4qcz2"
+    ]
+  },
+  {
+    "nguon": "log:chay_that_2408d.log",
+    "conversationId": "1468690110033030_#24d3855c",
+    "tinKhach": "e cao m6 nặng 53kg thì mặc size gì nhỉ",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MMVX5282 (Grandeur).",
+      "[REQ] 15 request Pancake / 10s | nguồn: {\"list-hoithoai\":10,\"doc-tin-nhan\":3,\"lay-baiviet-ads\":2}",
+      "[AI-READ] nhãn=SIZE_ADVICE | size=- addr=false order=false price=false chart=false concern=- | phone=- addrDu=false provConfirm=f"
+    ]
+  },
+  {
+    "nguon": "log:chay_that_2408f.log",
+    "conversationId": "1468690110033030_#24d3855c",
+    "tinKhach": "mình xin giá mẫu này với ạ",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MGKVX6010 (Meridian).",
+      "[AI-READ] nhãn=PRICE_ASK | size=- addr=false order=false price=true chart=false concern=- | phone=- addrDu=false provConfirm=fals",
+      "[AI-QUYẾT] referent=MGKVX6010(0.9) | mẫu_cũ=[MRKVX6382] | địa_chỉ=THIEU(thiếu sdt+dia_chi) | hành_động=XIN_SDT | 2302ms"
+    ]
+  },
+  {
+    "nguon": "log:chay_that_2408f.log",
+    "conversationId": "1468690110033030_#24d3855c",
+    "tinKhach": "còn màu khác k shop",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MGKVX6010 (Meridian).",
+      "[REQ] 20 request Pancake / 10s | nguồn: {\"list-hoithoai\":14,\"doc-tin-nhan\":4,\"lay-baiviet-ads\":2}",
+      "[AI-READ] nhãn=COLOR_ASK | size=- addr=false order=false price=false chart=false concern=- | phone=- addrDu=false provConfirm=fal"
+    ]
+  },
+  {
+    "nguon": "log:chay_that_2408f.log",
+    "conversationId": "1468690110033030_#24d3855c",
+    "tinKhach": "e mặc size gì hợp nhỉ",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": true
+    },
+    "ghiChu": [
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MGKVX6010 (Meridian).",
+      "[AI-READ] nhãn=SIZE_ADVICE | size=- addr=false order=false price=false chart=false concern=- | phone=- addrDu=false provConfirm=f",
+      "[AI-QUYẾT] referent=MGKVX6010(0.9) | mẫu_cũ=[MRKVX6382] | địa_chỉ=KHONG_CO(thiếu sdt+dia_chi) | hành_động=XIN_SDT | 2400ms"
+    ]
+  },
+  {
+    "nguon": "log:chay_that_2408f.log",
+    "conversationId": "1468690110033030_#24d3855c",
+    "tinKhach": "e mặc size gì hợp nhỉ | text: ship về nghệ an hết bn ạ",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MGKVX6010 (Meridian).",
+      "[AI-READ] nhãn=SIZE_ADVICE | size=- addr=false order=false price=true chart=false concern=- | phone=- addrDu=false provConfirm=fa",
+      "[REQ] 12 request Pancake / 10s | nguồn: {\"list-hoithoai\":5,\"doc-tin-nhan\":5,\"lay-baiviet-ads\":2}"
+    ]
+  },
+  {
+    "nguon": "log:chay_that_2408f.log",
+    "conversationId": "1468690110033030_#24d3855c",
+    "tinKhach": "đặt 2c này miễn ship cả 2 đúng k ạ | image: [Photo] | image: [Photo]",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[Photo] | image: [Photo]",
+      "[REQ] 6 request Pancake / 10s | nguồn: {\"list-hoithoai\":2,\"doc-tin-nhan\":2,\"lay-baiviet-ads\":2}",
+      "[catalog] đã nạp 589 sản phẩm"
+    ]
+  },
+  {
+    "nguon": "log:chay_that_2408g.log",
+    "conversationId": "1468690110033030_#24d3855c",
+    "tinKhach": "shop có cho kiểm hàng k ạ",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[catalog] đã nạp 589 sản phẩm",
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MGKVX6010 (Meridian).",
+      "[AI-READ] nhãn=DELIVERY_QA | size=- addr=false order=false price=false chart=false concern=- | phone=- addrDu=false provConfirm=f"
+    ]
+  },
+  {
+    "nguon": "log:chay_that_2408h.log",
+    "conversationId": "1468690110033030_#24d3855c",
+    "tinKhach": "bên mình có cho kiểm tra hàng trước không ạ, k vừa thì có được hỗ trợ đổi trả k ạ",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MRVX559 (Ryleigh).",
+      "[AI-READ] nhãn=DELIVERY_QA | size=- addr=false order=false price=false chart=false concern=- | phone=- addrDu=false provConfirm=f",
+      "[AI-QUYẾT] referent=MRVX559(1) | mẫu_cũ=[MRKVX6382] | địa_chỉ=KHONG_CO(thiếu sdt+dia_chi) | hành_động=XIN_SDT | 2900ms"
+    ]
+  },
+  {
+    "nguon": "log:chay_that_2408h.log",
+    "conversationId": "1468690110033030_#24d3855c",
+    "tinKhach": "e cao m6 nặng 53kg mặc size gì ạ",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MRVX559 (Ryleigh).",
+      "[AI-READ] nhãn=SIZE_ADVICE | size=- addr=false order=false price=false chart=false concern=- | phone=- addrDu=false provConfirm=f",
+      "[AI-QUYẾT] referent=MRVX559(1) | mẫu_cũ=[MRKVX6382] | địa_chỉ=KHONG_CO(thiếu sdt+dia_chi_chuan) | hành_động=TU_VAN | 1821ms"
+    ]
+  },
+  {
+    "nguon": "log:chay_that_2408h.log",
+    "conversationId": "1468690110033030_#24d3855c",
+    "tinKhach": "0900000000 Thanh Xuân, Hà Nội",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MRVX559 (Ryleigh).",
+      "[AI-READ] nhãn=ADDRESS | size=- addr=true order=true price=false chart=false concern=- | phone=0385539117 addrDu=false provConfir",
+      "[AI-QUYẾT] referent=MRVX559(1) | mẫu_cũ=[] | địa_chỉ=DU | địa_chỉ_chuẩn=\"Thanh Xuân, Hà Nội\" | hành_động=CHOT_DON | 2662ms"
+    ]
+  },
+  {
+    "nguon": "log:chay_that_2408h.log",
+    "conversationId": "1468690110033030_#24d3855c",
+    "tinKhach": "gửi sớm cho em nhé shop, e cần gấp",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": true,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[catalog] đã nạp 589 sản phẩm",
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MRVX559 (Ryleigh).",
+      "[REQ] 15 request Pancake / 10s | nguồn: {\"list-hoithoai\":10,\"doc-tin-nhan\":3,\"lay-baiviet-ads\":2}"
+    ]
+  },
+  {
+    "nguon": "log:chay_that_2408h.log",
+    "conversationId": "1468690110033030_#24d3855c",
+    "tinKhach": "tư vấn e set này nữa | image: [Photo]",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[Photo]",
+      "[catalog] đã nạp 589 sản phẩm",
+      "[vision] màu (từ tên file): KEM | mã PMSQ5202 | img 1ptRHaXjHFsb23cx85r83Cfvrir-Iz4w4"
+    ]
+  },
+  {
+    "nguon": "log:chay_that_2508.log",
+    "conversationId": "1468690110033030_#24d3855c",
+    "tinKhach": "tư vấn em mẫu này với | image: [Photo]",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[Photo]",
+      "[vision] dang cho worker nap model, vui long doi...",
+      "[REQ] 14 request Pancake / 10s | nguồn: {\"list-hoithoai\":7,\"doc-tin-nhan\":5,\"lay-baiviet-ads\":2}"
+    ]
+  },
+  {
+    "nguon": "log:chay_that_2508d.log",
+    "conversationId": "1468690110033030_#24d3855c",
+    "tinKhach": "thế gửi gấp cho e set này nha",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": true,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[AI-READ] nhãn=ORDER_CLOSE | size=- addr=false order=true price=false chart=false concern=- | phone=- addrDu=false provConfirm=fa",
+      "[ADS MAP] đã nạp 1118 ad->mẫu (tay: ad_product_map.json + tự học: ad_learned_map.json)",
+      "[AI-QUYẾT] referent=UNKNOWN(0) | mẫu_cũ=[PMSQ5202] | địa_chỉ=THIEU(thiếu địa chỉ) | hành_động=XIN_DIA_CHI | 3164ms"
+    ]
+  },
+  {
+    "nguon": "log:chay_that_2508e.log",
+    "conversationId": "1468690110033030_#24d3855c",
+    "tinKhach": "thế gửi gấp cho e set này nha | image: [Photo] | text: xin giá với shop",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": true,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[Photo] | text: xin giá với shop",
+      "[REQ] 6 request Pancake / 10s | nguồn: {\"list-hoithoai\":2,\"doc-tin-nhan\":4}",
+      "[catalog] đã nạp 589 sản phẩm"
+    ]
+  },
+  {
+    "nguon": "log:chay_that_2508e.log",
+    "conversationId": "1468690110033030_#24d3855c",
+    "tinKhach": "thế gửi gấp cho e set này nha | image: [Photo] | text: xin giá với shop | text: tư vấn cho mình những mẫu này với | image: [Photo] | image: [Photo] | image: [Photo]",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[Photo] | text: xin giá với shop | text: tư vấn cho mình những mẫu này với | image: [Photo] | image: [Photo] | image: [Photo]",
+      "[catalog] đã nạp 589 sản phẩm",
+      "[vision] màu (từ tên file): XANH | mã NRSQ626 | img 1zLQOQckCH0XDcNZR0_yzCqGf0ZpuH9zg"
+    ]
+  },
+  {
+    "nguon": "log:chay_that_2508g.log",
+    "conversationId": "1468690110033030_#24d3855c",
+    "tinKhach": "tư vấn cho mình những mẫu này với | image: [Photo] | image: [Photo]",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[Photo] | image: [Photo]",
+      "[catalog] đã nạp 589 sản phẩm",
+      "[vision] màu (từ tên file): NÂU NUDE | mã MRKSQ6040 | img 1ZC4Cd_p9JWOvPcR6XiSR9Ckklesiufd0"
+    ]
+  },
+  {
+    "nguon": "log:chay_that_2508m.log",
+    "conversationId": "1468690110033030_#24d3855c",
+    "tinKhach": "mẫu này thì sao ạ | image: [Photo]",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[Photo]",
+      "[catalog] đã nạp 589 sản phẩm",
+      "[OCR] đã bật tesseract.js (đọc tên SP trong ảnh chụp màn hình)."
+    ]
+  },
+  {
+    "nguon": "log:chay_that_2508m.log",
+    "conversationId": "1468690110033030_#24d3855c",
+    "tinKhach": "mẫu này thì sao ạ | image: [Photo] | text: mẫu này mặc đi tiệc ở cty được k shop | image: [Photo]",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": true,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[Photo] | text: mẫu này mặc đi tiệc ở cty được k shop | image: [Photo]",
+      "[REQ] 7 request Pancake / 10s | nguồn: {\"list-hoithoai\":5,\"doc-tin-nhan\":2}",
+      "[AI-READ] nhãn=OCCASION_QA | size=- addr=false order=false price=false chart=false concern=- | phone=- addrDu=false provConfirm=f"
+    ]
+  },
+  {
+    "nguon": "log:chay_that_2508r.log",
+    "conversationId": "1468690110033030_#24d3855c",
+    "tinKhach": "mẫu này có size không ạ | image: [Photo] | image: [Photo] | text: mẫu này có size không ạ",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[Photo] | image: [Photo] | text: mẫu này có size không ạ",
+      "[catalog] đã nạp 590 sản phẩm",
+      "[vision] màu (từ tên file): HỒNG | mã MRKVX6411 | img 1M0qHjh1VEiwM_sN1M8SvSrIb-_u-Np2G"
+    ]
+  },
+  {
+    "nguon": "log:chay_that_2508r.log",
+    "conversationId": "1468690110033030_#24d3855c",
+    "tinKhach": "chắc lấy cái dưới thôi",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MRKVX6411 (Zoanne).",
+      "[AI-READ] nhãn=ORDER_CLOSE | size=- addr=false order=true price=false chart=false concern=- | phone=- addrDu=false provConfirm=fa",
+      "[REQ] 11 request Pancake / 10s | nguồn: {\"list-hoithoai\":8,\"doc-tin-nhan\":3}"
+    ]
+  },
+  {
+    "nguon": "log:chay_that_2508r.log",
+    "conversationId": "1468690110033030_#24d3855c",
+    "tinKhach": "số nhà 67 nhé",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[catalog] đã nạp 590 sản phẩm",
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: NRSQ626 (Arlisse).",
+      "[AI-READ] nhãn=ADDRESS | size=- addr=true order=true price=false chart=false concern=- | phone=- addrDu=true provConfirm=false re"
+    ]
+  },
+  {
+    "nguon": "log:chay_that_2608b.log",
+    "conversationId": "1468690110033030_#24d3855c",
+    "tinKhach": "tư vấn e mẫu này với ạ | image: [Photo]",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[Photo]",
+      "[vision] màu (từ tên file): XANH | mã MGKSQ6072 | img 1PQwpmdG95eABheC8HN0KRLzrcCGKNW_N",
+      "[REQ] 8 request Pancake / 10s | nguồn: {\"list-hoithoai\":4,\"doc-tin-nhan\":2,\"lay-baiviet-ads\":2}"
+    ]
+  },
+  {
+    "nguon": "log:chay_that_2608b.log",
+    "conversationId": "1468690110033030_#24d3855c",
+    "tinKhach": "e cao m6 nặng tầm 53kg",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MGKSQ6072 (Corae).",
+      "[AI-READ] nhãn=WEIGHT_HEIGHT | size=- addr=false order=false price=false chart=false concern=- | phone=- addrDu=false provConfirm",
+      "[REQ] 12 request Pancake / 10s | nguồn: {\"list-hoithoai\":9,\"doc-tin-nhan\":3}"
+    ]
+  },
+  {
+    "nguon": "log:chay_that_2608b.log",
+    "conversationId": "1468690110033030_#24d3855c",
+    "tinKhach": "để e tham khảo thêm vài mẫu khác nữa",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MGKSQ6072 (Corae).",
+      "[AI-READ] nhãn=DEFER_DECISION | size=- addr=false order=false price=false chart=false concern=- | phone=- addrDu=false provConfir",
+      "[AI-QUYẾT] referent=MGKSQ6072(1) | mẫu_cũ=[] | địa_chỉ=KHONG_CO(thiếu sdt+dia_chi) | hành_động=TU_VAN | 2045ms"
+    ]
+  },
+  {
+    "nguon": "log:chay_that_2608b.log",
+    "conversationId": "1468690110033030_#24d3855c",
+    "tinKhach": "set này có màu khác không ạ | image: [Photo]",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[Photo]",
+      "[vision] màu (từ tên file): ĐỎ | mã MMVX5282 | img 1ANkg_3sE7Xaljq9u3ZK7O4n9smsy_ekz",
+      "[AI-READ] nhãn=COLOR_ASK | size=- addr=false order=false price=false chart=false concern=- | phone=- addrDu=false provConfirm=fal"
+    ]
+  },
+  {
+    "nguon": "log:chay_that_2608b.log",
+    "conversationId": "1468690110033030_#24d3855c",
+    "tinKhach": "cho e xem ảnh với",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MMVX5282 (Grandeur).",
+      "[AI-READ] nhãn=IMAGE_REQ | size=- addr=false order=false price=false chart=false concern=- | phone=- addrDu=false provConfirm=fal",
+      "[AI-QUYẾT] referent=MGKSQ6072(1) | mẫu_cũ=[MGKSQ6072] | địa_chỉ=KHONG_CO(thiếu sdt+dia_chi) | hành_động=TU_VAN | 1744ms"
+    ]
+  },
+  {
+    "nguon": "log:chay_that_2608b.log",
+    "conversationId": "1468690110033030_#24d3855c",
+    "tinKhach": "em muốn xem cả 2",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MMVX5282 (Grandeur).",
+      "[AI-READ] nhãn=IMAGE_REQ | size=- addr=false order=false price=false chart=false concern=- | phone=- addrDu=false provConfirm=fal",
+      "[AI-QUYẾT] referent=MGKSQ6072(1) | mẫu_cũ=[MGKSQ6072] | địa_chỉ=KHONG_CO(thiếu sdt+dia_chi) | hành_động=XIN_SDT | 2290ms"
+    ]
+  },
+  {
+    "nguon": "log:chay_that_2608b.log",
+    "conversationId": "1468690110033030_#24d3855c",
+    "tinKhach": "e hỏi mẫu này cơ mà | image: [Photo reply]",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[Photo reply]",
+      "[REQ] 11 request Pancake / 10s | nguồn: {\"list-hoithoai\":5,\"doc-tin-nhan\":6}",
+      "[catalog] đã nạp 592 sản phẩm"
+    ]
+  },
+  {
+    "nguon": "log:chay_that_2608b.log",
+    "conversationId": "1468690110033030_#24d3855c",
+    "tinKhach": "còn màu khác không",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MMVX5282 (Grandeur).",
+      "[AI-READ] nhãn=COLOR_ASK | size=- addr=false order=false price=false chart=false concern=- | phone=- addrDu=false provConfirm=fal",
+      "[AI-QUYẾT] referent=MMVX5282(1) | mẫu_cũ=[MRKVX6382] | địa_chỉ=KHONG_CO(thiếu sdt+dia_chi) | hành_động=TU_VAN | 2219ms"
+    ]
+  },
+  {
+    "nguon": "log:chay_that_2608b.log",
+    "conversationId": "1468690110033030_#24d3855c",
+    "tinKhach": "còn size của e k shop",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MMVX5282 (Grandeur).",
+      "[AI-READ] nhãn=SIZE_ADVICE | size=- addr=false order=false price=false chart=false concern=- | phone=- addrDu=false provConfirm=f",
+      "[AI-QUYẾT] referent=MMVX5282(1) | mẫu_cũ=[MRKVX6382] | địa_chỉ=KHONG_CO(thiếu sdt+dia_chi) | hành_động=TU_VAN | 1936ms"
+    ]
+  },
+  {
+    "nguon": "log:chay_that_2608c.log",
+    "conversationId": "1468690110033030_#24d3855c",
+    "tinKhach": "vậy lấy e cái màu hồng size M nhé",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[vision] worker sẵn sàng, số mẫu: 15221",
+      "[vision] [vision] worker san sang sau 6s, so mau: 15221",
+      "[catalog] đã nạp 592 sản phẩm"
+    ]
+  },
+  {
+    "nguon": "log:chay_that_2608c.log",
+    "conversationId": "1468690110033030_#24d3855c",
+    "tinKhach": "0900000000",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MMVX5282 (Grandeur).",
+      "[REQ] 6 request Pancake / 10s | nguồn: {\"list-hoithoai\":4,\"doc-tin-nhan\":2}",
+      "[AI-READ] nhãn=PHONE | size=- addr=false order=false price=false chart=false concern=- | phone=0385539118 addrDu=false provConfir"
+    ]
+  },
+  {
+    "nguon": "log:chay_that_2608c.log",
+    "conversationId": "1468690110033030_#24d3855c",
+    "tinKhach": "số nhà 118, Khương Thượng, Đống Đa, Hà Nội",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MMVX5282 (Grandeur).",
+      "[AI-READ] nhãn=ORDER_CLOSE | size=- addr=true order=true price=false chart=false concern=- | phone=0385539118 addrDu=true provCon",
+      "[REQ] 15 request Pancake / 10s | nguồn: {\"list-hoithoai\":8,\"doc-tin-nhan\":7}"
+    ]
+  },
+  {
+    "nguon": "log:chay_that_2608c.log",
+    "conversationId": "1468690110033030_#24d3855c",
+    "tinKhach": "tầm bao giờ ship về đấy ạ",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MMVX5282 (Grandeur).",
+      "[AI-READ] nhãn=ORDER_STATUS | size=M addr=true order=true price=false chart=false concern=- | phone=0385539118 addrDu=true provCo",
+      "[AI-READ] -> coi là ĐỊA CHỈ giao / đang chốt (code đã trượt)."
+    ]
+  },
+  {
+    "nguon": "log:chay_thu_anh.log",
+    "conversationId": "1468690110033030_#24d3855c",
+    "tinKhach": "test bot | image: [Photo]",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[Photo]",
+      "[vision] dang cho worker nap model, vui long doi...",
+      "[vision] worker sẵn sàng, số mẫu: 14948"
+    ]
+  },
+  {
+    "nguon": "log:chay_thu_phien.log",
+    "conversationId": "1468690110033030_#24d3855c",
+    "tinKhach": "test bot",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[HÀNG ĐỢI] 1 conv cần xử: Hà Giang(seen=true)",
+      "[LỌC RỚT] Phạm Hiền | type=INBOX | seen=true | last_sent_by=Đỗ Thị Trà Giang | updated=2026-08-24T07:30:38.137000 | -> seen=true ",
+      "[LỌC RỚT] Diep Tran | type=INBOX | seen=true | last_sent_by=Đỗ Thị Trà Giang | updated=2026-08-24T07:28:08.223000 | -> seen=true "
+    ]
+  },
+  {
+    "nguon": "log:chay_thu_phom_2608_truoc_va.log",
+    "conversationId": "615738195133683_#8af17859",
+    "tinKhach": "118 Khương Thượng, Đống Đa, Hà Nội nhé shop",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MMAC566 (Londyn).",
+      "[REQ] 15 request Pancake / 10s | nguồn: {\"list-hoithoai\":8,\"doc-tin-nhan\":7}",
+      "[AI-READ] nhãn=ORDER_CLOSE | size=- addr=true order=true price=false chart=false concern=- | phone=0385539117 addrDu=true provCon"
+    ]
+  },
+  {
+    "nguon": "log:chay_thu_phom_2608_truoc_va.log",
+    "conversationId": "615738195133683_#8af17859",
+    "tinKhach": "có mấy màu ạ",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[REQ] 12 request Pancake / 10s | nguồn: {\"list-hoithoai\":6,\"doc-tin-nhan\":6}",
+      "[catalog] đã nạp 592 sản phẩm",
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MMAC566 (Londyn)."
+    ]
+  },
+  {
+    "nguon": "log:chay_thu_phom_2608_truoc_va.log",
+    "conversationId": "615738195133683_#8af17859",
+    "tinKhach": "có ảnh khách thật mặc không shop",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MMAC566 (Londyn).",
+      "[AI-READ] nhãn=IMAGE_REQ | size=- addr=true order=false price=false chart=false concern=- | phone=- addrDu=true provConfirm=false",
+      "[AI-READ] -> BỎ cờ địa-chỉ vì là câu HỎI (nhãn IMAGE_REQ) -> không chốt nhầm."
+    ]
+  },
+  {
+    "nguon": "log:chay_thu_phom_2608_truoc_va.log",
+    "conversationId": "615738195133683_#8af17859",
+    "tinKhach": "em xin thêm ảnh của màu khác với",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[catalog] đã nạp 592 sản phẩm",
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MMAC566 (Londyn).",
+      "[REQ] 14 request Pancake / 10s | nguồn: {\"list-hoithoai\":7,\"doc-tin-nhan\":7}"
+    ]
+  },
+  {
+    "nguon": "log:chay_thu_phom_2608_truoc_va.log",
+    "conversationId": "615738195133683_#8af17859",
+    "tinKhach": "còn màu khác cho mẫu này k shop",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[catalog] đã nạp 593 sản phẩm",
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MMAC566 (Londyn).",
+      "[AI-READ] nhãn=COLOR_ASK | size=- addr=false order=false price=false chart=false concern=- | phone=- addrDu=false provConfirm=fal"
+    ]
+  },
+  {
+    "nguon": "log:chay_thu_phom_2608_truoc_va.log",
+    "conversationId": "615738195133683_#8af17859",
+    "tinKhach": "là giờ chỉ còn đỏ thôi ạ?",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MMAC566 (Londyn).",
+      "[AI-READ] nhãn=COLOR_ASK | size=- addr=false order=false price=false chart=false concern=- | phone=- addrDu=false provConfirm=fal",
+      "[AI-QUYẾT] referent=MMAC566(1) | mẫu_cũ=[] | địa_chỉ=DU | địa_chỉ_chuẩn=\"118 Khương Thượng, Đống Đa, Hà Nội\" | hành_động=TU_VAN | "
+    ]
+  },
+  {
+    "nguon": "log:chay_thu_phom_davá.log",
+    "conversationId": "615738195133683_#8af17859",
+    "tinKhach": "có màu khác k ạ",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": true,
+      "botDaGui": true
+    },
+    "ghiChu": [
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MW4GAK1024 (Emma).",
+      "[AI-READ] nhãn=COLOR_ASK | size=- addr=false order=false price=false chart=false concern=- | phone=- addrDu=false provConfirm=fal",
+      "[AI-QUYẾT] referent=MW4GAK1024(1) | mẫu_cũ=[MW4GAK1024] | địa_chỉ=DU | địa_chỉ_chuẩn=\"118 Khương Thượng, Đống Đa, Hà Nội\" | hành_đ"
+    ]
+  },
+  {
+    "nguon": "log:chay_thu_phom_davá.log",
+    "conversationId": "615738195133683_#8af17859",
+    "tinKhach": "chỉ có màu đó thôi à | text: vậy lấy mình nha",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[catalog] đã nạp 592 sản phẩm",
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MW4GAK1024 (Emma).",
+      "[AI-READ] nhãn=ORDER_CLOSE | size=- addr=true order=true price=false chart=false concern=- | phone=- addrDu=true provConfirm=fals"
+    ]
+  },
+  {
+    "nguon": "log:chay_thu_phom_gia.log",
+    "conversationId": "615738195133683_#8af17859",
+    "tinKhach": "mặc sợ bị béo k nhỉ",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[vision] Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and",
+      "[catalog] đã nạp 592 sản phẩm",
+      "[vision] worker sẵn sàng, số mẫu: 15221"
+    ]
+  },
+  {
+    "nguon": "log:chay_thu_phom_gia.log",
+    "conversationId": "615738195133683_#8af17859",
+    "tinKhach": "mẫu này có màu khác k ạ",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MGVX5197 (Aurelia).",
+      "[REQ] 9 request Pancake / 10s | nguồn: {\"tag-recheck\":2,\"list-hoithoai\":5,\"doc-tin-nhan\":2}",
+      "[AI-READ] nhãn=COLOR_ASK | size=- addr=false order=false price=false chart=false concern=- | phone=- addrDu=false provConfirm=fal"
+    ]
+  },
+  {
+    "nguon": "log:chay_thu_phom_gia.log",
+    "conversationId": "615738195133683_#8af17859",
+    "tinKhach": "thế lấy e cái đó nha",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MGVX5197 (Aurelia).",
+      "[AI-READ] nhãn=ORDER_CLOSE | size=- addr=true order=true price=false chart=false concern=- | phone=- addrDu=true provConfirm=fals",
+      "[AI-READ] -> coi là ĐỊA CHỈ giao / đang chốt (code đã trượt)."
+    ]
+  },
+  {
+    "nguon": "log:chay_thu_phom_gia.log",
+    "conversationId": "615738195133683_#8af17859",
+    "tinKhach": "tất cả những mẫu e đặt hnay gom về 1 đơn gửi 1 lần luôn cho em nhé shop",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": true
+    },
+    "ghiChu": [
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MGVX5197 (Aurelia).",
+      "[AI-READ] nhãn=POST_ORDER_REQUEST | size=- addr=true order=true price=false chart=false concern=- | phone=0385539117 addrDu=true ",
+      "[AI-READ] -> BỎ cờ địa-chỉ vì là câu HỎI (nhãn POST_ORDER_REQUEST) -> không chốt nhầm."
+    ]
+  },
+  {
+    "nguon": "log:chay_thu_phom_gia.log",
+    "conversationId": "615738195133683_#8af17859",
+    "tinKhach": "tầm mấy ngày có hàng vậy ạ",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[catalog] đã nạp 592 sản phẩm",
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MGVX5197 (Aurelia).",
+      "[REQ] 12 request Pancake / 10s | nguồn: {\"list-hoithoai\":6,\"doc-tin-nhan\":6}"
+    ]
+  },
+  {
+    "nguon": "log:chay_thu_phom_gia.log",
+    "conversationId": "615738195133683_#8af17859",
+    "tinKhach": "ok em cảm ơn",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": true,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[catalog] đã nạp 592 sản phẩm",
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MGVX5197 (Aurelia).",
+      "[AI-READ] nhãn=POST_ORDER_CHITCHAT | size=- addr=false order=false price=false chart=false concern=- | phone=- addrDu=true provCo"
+    ]
+  },
+  {
+    "nguon": "log:chay_thu_phom_tach.log",
+    "conversationId": "615738195133683_#8af17859",
+    "tinKhach": "còn màu khác không ạ",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MRAK5380 (Minette).",
+      "[AI-READ] nhãn=COLOR_ASK | size=- addr=false order=false price=false chart=false concern=- | phone=- addrDu=false provConfirm=fal",
+      "[REQ] 14 request Pancake / 10s | nguồn: {\"list-hoithoai\":11,\"doc-tin-nhan\":3}"
+    ]
+  },
+  {
+    "nguon": "log:chay_thu_phom_tach.log",
+    "conversationId": "615738195133683_#8af17859",
+    "tinKhach": "tư vấn e mẫu này",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MRVX5422 (Tatiana).",
+      "[AI-READ] nhãn=PRICE_ASK | size=- addr=false order=false price=true chart=false concern=- | phone=- addrDu=true provConfirm=false",
+      "[AI-QUYẾT] referent=MRVX5422(1) | mẫu_cũ=[SET MINETTE] | địa_chỉ=DU | địa_chỉ_chuẩn=\"118 Khương Thượng, Đống Đa, Hà Nội\" | hành_độ"
+    ]
+  },
+  {
+    "nguon": "log:chay_thu_phom_tach.log",
+    "conversationId": "615738195133683_#8af17859",
+    "tinKhach": "nhìn vải hơi mỏng nhỉ, mặc lên có sợ bị lộ khuyết điểm k shop",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MRVX5422 (Tatiana).",
+      "[AI-READ] nhãn=MATERIAL_QA | size=- addr=true order=false price=false chart=false concern=mong | phone=- addrDu=true provConfirm=",
+      "[AI-READ] -> coi là ĐỊA CHỈ giao / đang chốt (code đã trượt)."
+    ]
+  },
+  {
+    "nguon": "log:chay_thu_phom_va4.log",
+    "conversationId": "615738195133683_#8af17859",
+    "tinKhach": "nhìn vải hơi mỏng nhỉ, mặc lên có sợ bị lộ khuyết điểm k shop | image: [Photo] | text: tư vấn e mẫu này",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[Photo] | text: tư vấn e mẫu này",
+      "[vision] màu (từ tên file): HỒNG | mã MRKVX6383 | img 1xBd8D9NkItDyG5TPLIUace9vkxDkTalT",
+      "[AI-READ] nhãn=MATERIAL_QA | size=M addr=true order=false price=false chart=false concern=mong | phone=0385539117 addrDu=true pro"
+    ]
+  },
+  {
+    "nguon": "log:chay_thu_phom_va4.log",
+    "conversationId": "615738195133683_#8af17859",
+    "tinKhach": "mẫu đó có màu khác không ạ",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MRKVX6383 (Zorinae).",
+      "[AI-READ] nhãn=COLOR_ASK | size=- addr=false order=false price=false chart=false concern=- | phone=- addrDu=false provConfirm=fal",
+      "[AI-QUYẾT] referent=MRKVX6383(1) | mẫu_cũ=[VÁY TATIANA] | địa_chỉ=DU | địa_chỉ_chuẩn=\"118 Khương Thượng, Đống Đa, Hà Nội\" | hành_đ"
+    ]
+  },
+  {
+    "nguon": "log:chay_thu_phom_va4.log",
+    "conversationId": "615738195133683_#8af17859",
+    "tinKhach": "thế thôi em chốt trước mẫu Zorinae này nha",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[REQ] 14 request Pancake / 10s | nguồn: {\"list-hoithoai\":11,\"doc-tin-nhan\":3}",
+      "[AI-READ] nhãn=ORDER_CLOSE | size=- addr=true order=true price=false chart=false concern=- | phone=- addrDu=true provConfirm=fals",
+      "[AI-READ] -> coi là ĐỊA CHỈ giao / đang chốt (code đã trượt)."
+    ]
+  },
+  {
+    "nguon": "log:chay_thu_phom_va4.log",
+    "conversationId": "615738195133683_#8af17859",
+    "tinKhach": "vải có nóng k ạ, với cả còn màu nào khác k ạ",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MRKSV6492 (Agathah).",
+      "[REQ] 17 request Pancake / 10s | nguồn: {\"list-hoithoai\":10,\"doc-tin-nhan\":7}",
+      "[AI-READ] nhãn=MATERIAL_QA | size=- addr=true order=false price=false chart=false concern=chat | phone=- addrDu=true provConfirm="
+    ]
+  },
+  {
+    "nguon": "log:chay_thu_phom_va4.log",
+    "conversationId": "615738195133683_#8af17859",
+    "tinKhach": "thế gộp đơn này với đơn trước luôn thành 1 đơn cho em luôn nha",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": true,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[catalog] đã nạp 592 sản phẩm",
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MRKSV6492 (Agathah).",
+      "[REQ] 12 request Pancake / 10s | nguồn: {\"list-hoithoai\":6,\"doc-tin-nhan\":6}"
+    ]
+  },
+  {
+    "nguon": "log:chay_thu_phom_va5.log",
+    "conversationId": "615738195133683_#8af17859",
+    "tinKhach": "thế gộp đơn này với đơn trước luôn thành 1 đơn cho em luôn nha | text: để trả phí ship luôn 1 lần",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": true,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MRKSV6492 (Agathah).",
+      "[REQ] 8 request Pancake / 10s | nguồn: {\"list-hoithoai\":6,\"doc-tin-nhan\":2}",
+      "[AI-READ] nhãn=ORDER_CLOSE | size=- addr=true order=true price=false chart=false concern=- | phone=- addrDu=true provConfirm=fals"
+    ]
+  },
+  {
+    "nguon": "log:chay_thu_phom_va6.log",
+    "conversationId": "615738195133683_#8af17859",
+    "tinKhach": "thế gộp đơn này với đơn trước luôn thành 1 đơn cho em luôn nha | text: để trả phí ship luôn 1 lần | text: thế gộp đơn này với đơn trước luôn thành 1 đơn cho em luôn nha",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": true,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MRKSV6492 (Agathah).",
+      "[AI-READ] nhãn=ORDER_CLOSE | size=- addr=true order=true price=false chart=false concern=- | phone=- addrDu=true provConfirm=fals",
+      "[AI-READ] -> coi là ĐỊA CHỈ giao / đang chốt (code đã trượt)."
+    ]
+  },
+  {
+    "nguon": "log:chay_thu_phom_va6.log",
+    "conversationId": "615738195133683_#8af17859",
+    "tinKhach": "ok shop",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": true,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MRKSV6492 (Agathah).",
+      "[REQ] 6 request Pancake / 10s | nguồn: {\"list-hoithoai\":4,\"doc-tin-nhan\":2}",
+      "[AI-READ] nhãn=POST_ORDER_CHITCHAT | size=- addr=true order=false price=false chart=false concern=- | phone=- addrDu=true provCon"
+    ]
+  },
+  {
+    "nguon": "log:chay_thu_phom_va6.log",
+    "conversationId": "615738195133683_#8af17859",
+    "tinKhach": "ok shop | image: [Photo] | text: shop tư vấn em mẫu này với",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[Photo] | text: shop tư vấn em mẫu này với",
+      "[vision] màu (từ tên file): NAU | mã MR0VS6442 | img 1VyoBRioZt9w-caQpJs8qCbZrzm45dlkL",
+      "[REQ] 7 request Pancake / 10s | nguồn: {\"list-hoithoai\":1,\"doc-tin-nhan\":6}"
+    ]
+  },
+  {
+    "nguon": "log:chay_thu_phom_va6.log",
+    "conversationId": "615738195133683_#8af17859",
+    "tinKhach": "bên mình có cửa hàng k nhỉ, e muốn qua thử",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MR0VS6442 (Zoellel).",
+      "[AI-READ] nhãn=STORE_VISIT | size=- addr=false order=false price=false chart=false concern=- | phone=- addrDu=false provConfirm=f",
+      "[AI-QUYẾT] referent=MR0VS6442(1) | mẫu_cũ=[SET AGATHAH] | địa_chỉ=DU | địa_chỉ_chuẩn=\"118 Khương Thượng, Đống Đa, Hà Nội\" | hành_đ"
+    ]
+  },
+  {
+    "nguon": "log:chay_thu_phom_va6.log",
+    "conversationId": "615738195133683_#8af17859",
+    "tinKhach": "mẫu đó còn màu khác k shop",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MR0VS6442 (Zoellel).",
+      "[REQ] 15 request Pancake / 10s | nguồn: {\"doc-tin-nhan\":4,\"list-hoithoai\":11}",
+      "[AI-READ] nhãn=COLOR_ASK | size=- addr=false order=false price=false chart=false concern=- | phone=- addrDu=false provConfirm=fal"
+    ]
+  },
+  {
+    "nguon": "log:chay_thu_phom_va7.log",
+    "conversationId": "615738195133683_#8af17859",
+    "tinKhach": "em mua nhiều có được giảm giá không shop",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[catalog] đã nạp 592 sản phẩm",
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MR0VS6442 (Zoellel).",
+      "[vision] worker sẵn sàng, số mẫu: 15221"
+    ]
+  },
+  {
+    "nguon": "log:chay_thu_phom_va7.log",
+    "conversationId": "615738195133683_#8af17859",
+    "tinKhach": "thế để e tham khảo thêm đã",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MR0VS6442 (Zoellel).",
+      "[AI-READ] nhãn=DEFER_DECISION | size=- addr=false order=false price=false chart=false concern=- | phone=- addrDu=true provConfirm",
+      "[REQ] 11 request Pancake / 10s | nguồn: {\"list-hoithoai\":5,\"doc-tin-nhan\":6}"
+    ]
+  },
+  {
+    "nguon": "log:chay_thu_phom_va7.log",
+    "conversationId": "615738195133683_#8af17859",
+    "tinKhach": "ok shop, về địa chỉ cũ nhé",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MRAD5446 (Ginevra).",
+      "[AI-READ] nhãn=ORDER_CLOSE | size=M addr=true order=true price=false chart=false concern=- | phone=- addrDu=true provConfirm=fals",
+      "[AI-QUYẾT] referent=MRAD5446(1) | mẫu_cũ=[] | địa_chỉ=DU | địa_chỉ_chuẩn=\"118 Khương Thượng, Đống Đa, Hà Nội\" | hành_động=CHOT_DON"
+    ]
+  },
+  {
+    "nguon": "log:dien_kich_ban.log",
+    "conversationId": "100000000000001_#fc75b2fe",
+    "tinKhach": "mẫu này bao nhiêu shop | image: [Photo]",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[Photo]",
+      "[OCR] đã bật tesseract.js (đọc tên SP trong ảnh chụp màn hình).",
+      "[REQ] 6 request Pancake / 10s | nguồn: {\"list-hoithoai\":2,\"doc-tin-nhan\":4}"
+    ]
+  },
+  {
+    "nguon": "log:dien_kich_ban.log",
+    "conversationId": "100000000000001_#72a8fa68",
+    "tinKhach": "mẫu này bao nhiêu tiền shop | image: [Photo]",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[Photo]",
+      "[THEO DÕI] tên \"khong-theo-doi-ai\": KHÔNG có trong 0 hội thoại lấy về.",
+      "[THEO DÕI] id=khong-theo-doi-ai: KHÔNG có trong 0 hội thoại lấy về (đọc tin trực tiếp bên dưới)."
+    ]
+  },
+  {
+    "nguon": "log:dien_kich_ban.log",
+    "conversationId": "100000000000001_#72a8fa68",
+    "tinKhach": "ok chị lấy 1 cái size M nha",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MRKSQ6040 (Zoise).",
+      "[AI-QUYẾT] referent=UNKNOWN(0) | mẫu_cũ=[] | địa_chỉ=KHONG_CO(thiếu sdt+dia_chi) | hành_động=TU_VAN | 1689ms",
+      "[Bảo Trâm] [follow-skip] KHÔNG có product | conv=100000000000001_200000000000004 | reply=\"Dạ mẫu này chị cho em xin ít phút để em "
+    ]
+  },
+  {
+    "nguon": "log:dien_kich_ban.log",
+    "conversationId": "100000000000001_#72a8fa68",
+    "tinKhach": "Thanh Xuân, Hà Nội",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MRKSQ6040 (Zoise).",
+      "[REQ] 7 request Pancake / 10s | nguồn: {\"list-hoithoai\":3,\"doc-tin-nhan\":4}",
+      "[LỌC RỚT] Khách thử | type=INBOX | seen=true | last_sent_by=Bot | updated=2026-08-25T09:53:38.558Z | -> seen=true & SHOP/bot nhắn"
+    ]
+  },
+  {
+    "nguon": "log:dien_kich_ban.log",
+    "conversationId": "100000000000001_#72a8fa68",
+    "tinKhach": "mẫu này mặc đi tiệc ở cty được k shop | image: [Photo]",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[Photo]",
+      "[THEO DÕI] tên \"khong-theo-doi-ai\": KHÔNG có trong 0 hội thoại lấy về.",
+      "[THEO DÕI] id=khong-theo-doi-ai: KHÔNG có trong 0 hội thoại lấy về (đọc tin trực tiếp bên dưới)."
+    ]
+  },
+  {
+    "nguon": "log:dien_kich_ban.log",
+    "conversationId": "100000000000001_#9894a2c3",
+    "tinKhach": "váy này vải gì em, mặc mùa hè có nóng không",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[REQ] 5 request Pancake / 10s | nguồn: {\"list-hoithoai\":1,\"doc-tin-nhan\":2,\"tag-recheck\":2}",
+      "[LỌC RỚT] Khách thử | type=INBOX | seen=true | last_sent_by=Bot | updated=2026-08-25T09:55:00.824Z | -> seen=true & SHOP/bot nhắn",
+      "[THEO DÕI] tên \"khong-theo-doi-ai\": KHÔNG có trong 1 hội thoại lấy về."
+    ]
+  },
+  {
+    "nguon": "log:dien_kich_ban.log",
+    "conversationId": "100000000000001_#5ccca13a",
+    "tinKhach": "chị cao 1m58 nặng 55kg thì mặc size nào em",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": true,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[LỌC RỚT] Khách thử | type=INBOX | seen=true | last_sent_by=Bot | updated=2026-08-25T09:55:23.339Z | -> seen=true & SHOP/bot nhắn",
+      "[THEO DÕI] tên \"khong-theo-doi-ai\": KHÔNG có trong 1 hội thoại lấy về.",
+      "[THEO DÕI] id=khong-theo-doi-ai: KHÔNG có trong 1 hội thoại lấy về (đọc tin trực tiếp bên dưới)."
+    ]
+  },
+  {
+    "nguon": "log:dien_kich_ban.log",
+    "conversationId": "100000000000001_#55194637",
+    "tinKhach": "shop cho đổi trả trong bao lâu ạ",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[LỌC RỚT] Khách thử | type=INBOX | seen=true | last_sent_by=Bot | updated=2026-08-25T09:55:23.339Z | -> seen=true & SHOP/bot nhắn",
+      "[THEO DÕI] tên \"khong-theo-doi-ai\": KHÔNG có trong 1 hội thoại lấy về.",
+      "[THEO DÕI] id=khong-theo-doi-ai: KHÔNG có trong 1 hội thoại lấy về (đọc tin trực tiếp bên dưới)."
+    ]
+  },
+  {
+    "nguon": "log:dien_kich_ban.log",
+    "conversationId": "100000000000001_#87771b2b",
+    "tinKhach": "ship về Đà Nẵng mấy ngày tới em, phí bao nhiêu",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[REQ] 8 request Pancake / 10s | nguồn: {\"list-hoithoai\":3,\"doc-tin-nhan\":5}",
+      "[Bảo Trâm] [follow-sweep] đang chờ 1 hội thoại, đến hạn 0.",
+      "[LỌC RỚT] Khách thử | type=INBOX | seen=true | last_sent_by=Bot | updated=2026-08-25T09:56:11.306Z | -> seen=true & SHOP/bot nhắn"
+    ]
+  },
+  {
+    "nguon": "log:dien_kich_ban.log",
+    "conversationId": "100000000000001_#9894a2c3",
+    "tinKhach": "mẫu này mặc đi tiệc ở cty được k shop",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MRKSQ6040 (Zoise).",
+      "[REQ] 4 request Pancake / 10s | nguồn: {\"tag-recheck\":2,\"list-hoithoai\":1,\"doc-tin-nhan\":1}",
+      "[AI-READ] nhãn=OCCASION_QA | size=- addr=false order=false price=false chart=false concern=- | phone=- addrDu=false provConfirm=f"
+    ]
+  },
+  {
+    "nguon": "log:dien_kich_ban.log",
+    "conversationId": "100000000000001_#1edaaf34",
+    "tinKhach": "shop có cửa hàng ở đâu để chị qua thử không",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[HÀNG ĐỢI] 1 conv cần xử: Khách thử(seen=false)",
+      "[THEO DÕI] tên \"khong-theo-doi-ai\": KHÔNG có trong 1 hội thoại lấy về.",
+      "[THEO DÕI] id=khong-theo-doi-ai: KHÔNG có trong 1 hội thoại lấy về (đọc tin trực tiếp bên dưới)."
+    ]
+  },
+  {
+    "nguon": "log:dien_kich_ban.log",
+    "conversationId": "100000000000001_#a16d303a",
+    "tinKhach": "bên em cho ship cod hay phải chuyển khoản trước",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[HÀNG ĐỢI] 1 conv cần xử: Khách thử(seen=false)",
+      "[THEO DÕI] tên \"khong-theo-doi-ai\": KHÔNG có trong 1 hội thoại lấy về.",
+      "[THEO DÕI] id=khong-theo-doi-ai: KHÔNG có trong 1 hội thoại lấy về (đọc tin trực tiếp bên dưới)."
+    ]
+  },
+  {
+    "nguon": "log:dien_kich_ban.log",
+    "conversationId": "100000000000001_#f453f254",
+    "tinKhach": "mẫu này còn size L không em",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": true,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[AI-READ] nhãn=STOCK | size=L addr=false order=false price=false chart=false concern=- | phone=- addrDu=false provConfirm=false r",
+      "[AI-QUYẾT] referent=UNKNOWN(0) | mẫu_cũ=[] | địa_chỉ=KHONG_CO(thiếu sdt+dia_chi) | hành_động=TU_VAN | 1627ms",
+      "[Bảo Trâm] Câu CHƯA CÓ KỊCH BẢN DẠY (AI định tự trả lời) -> ĐẨY NGƯỜI THẬT, không tự ý chế."
+    ]
+  },
+  {
+    "nguon": "log:dien_kich_ban.log",
+    "conversationId": "100000000000001_#143c4b81",
+    "tinKhach": "shop có bán sỉ không, lấy 10 cái giá thế nào",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": true,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[AI-READ] nhãn=WHOLESALE | size=- addr=false order=false price=true chart=false concern=- | phone=- addrDu=false provConfirm=fals",
+      "[REQ] 5 request Pancake / 10s | nguồn: {\"list-hoithoai\":2,\"doc-tin-nhan\":3}",
+      "[AI-QUYẾT] BỎ QUA (timeout>7000ms) -> chạy luật cũ."
+    ]
+  },
+  {
+    "nguon": "log:dien_kich_ban.log",
+    "conversationId": "100000000000001_#ed2ee2e6",
+    "tinKhach": "váy này mặc đi ăn cưới có hợp không em",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[AI-READ] nhãn=OCCASION_QA | size=- addr=false order=false price=false chart=false concern=- | phone=- addrDu=false provConfirm=f",
+      "[AI-QUYẾT] referent=UNKNOWN(0) | mẫu_cũ=[] | địa_chỉ=KHONG_CO(thiếu sdt+dia_chi) | hành_động=TU_VAN | 1571ms",
+      "[RƠI LẶNG shadow] 100000000000001_200000000000014 | nhãn=- | khách: \"váy này mặc đi ăn cưới có hợp không em\" -> chỉ ghi sổ, không đụng th"
+    ]
+  },
+  {
+    "nguon": "log:dien_kich_ban.log",
+    "conversationId": "100000000000001_#c6cb0bf7",
+    "tinKhach": "váy này giặt máy được không hay phải giặt tay",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[AI-READ] nhãn=WASH_CARE | size=- addr=false order=false price=false chart=false concern=- | phone=- addrDu=false provConfirm=fal",
+      "[AI-QUYẾT] referent=UNKNOWN(0) | mẫu_cũ=[] | địa_chỉ=KHONG_CO(thiếu sdt+dia_chi) | hành_động=TU_VAN | 1665ms",
+      "[Bảo Trâm] [follow-skip] KHÔNG có product | conv=100000000000001_200000000000015 | reply=\"Dạ chất này giặt máy bình thường được nh"
+    ]
+  },
+  {
+    "nguon": "log:dien_kich_ban.log",
+    "conversationId": "100000000000001_#eaab1924",
+    "tinKhach": "mẫu CAMELLIA này vải gì em, mặc mùa hè có nóng không",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[AI-READ] nhãn=MATERIAL_QA | size=- addr=false order=false price=false chart=false concern=chat | phone=- addrDu=false provConfir",
+      "[REQ] 6 request Pancake / 10s | nguồn: {\"list-hoithoai\":2,\"doc-tin-nhan\":4}",
+      "[AI-QUYẾT] referent=MRAD5171(1) | mẫu_cũ=[] | địa_chỉ=KHONG_CO(thiếu sdt+dia_chi+size) | hành_động=TU_VAN | 2171ms"
+    ]
+  },
+  {
+    "nguon": "log:dien_kich_ban.log",
+    "conversationId": "100000000000001_#def9ac63",
+    "tinKhach": "cho chị kiểm tra hàng trước khi thanh toán nhé",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[AI-READ] nhãn=DELIVERY_QA | size=- addr=false order=false price=false chart=false concern=- | phone=- addrDu=false provConfirm=f",
+      "[AI-QUYẾT] referent=UNKNOWN(0) | mẫu_cũ=[] | địa_chỉ=KHONG_CO(thiếu sdt+dia_chi) | hành_động=IM_NHUONG_NGUOI | 1819ms",
+      "[Bảo Trâm] [follow-skip] KHÔNG có product | conv=100000000000001_200000000000017 | reply=\"Dạ khi nhận hàng chị có thể kiểm tra sản"
+    ]
+  },
+  {
+    "nguon": "log:dien_kich_ban.log",
+    "conversationId": "100000000000001_#1ffd6092",
+    "tinKhach": "mẫu CAMELLIA còn size L không em",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[AI-READ] nhãn=STOCK | size=L addr=false order=false price=false chart=false concern=- | phone=- addrDu=false provConfirm=false r",
+      "[AI-QUYẾT] referent=MRAD5171(1) | mẫu_cũ=[] | địa_chỉ=KHONG_CO(thiếu sdt+dia_chi) | hành_động=TU_VAN | 2058ms",
+      "[Bảo Trâm] [follow-hẹn] stage 1, sau 600s -> \"Dạ Chị ưng sản phẩm gửi em xin số điện t\" | conv=100000000000001_200000000000018"
+    ]
+  },
+  {
+    "nguon": "log:dien_kich_ban.log",
+    "conversationId": "100000000000001_#b33ced9e",
+    "tinKhach": "mẫu CAMELLIA này ship về Đà Nẵng bao lâu em",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[AI-READ] nhãn=DELIVERY_QA | size=- addr=false order=false price=false chart=false concern=- | phone=- addrDu=false provConfirm=f",
+      "[AI-QUYẾT] referent=MRAD5171(1) | mẫu_cũ=[] | địa_chỉ=THIEU(thiếu sdt+dia_chi) | hành_động=TU_VAN | 2045ms",
+      "[Bảo Trâm] [follow-hẹn] stage 1, sau 600s -> \"Dạ chị thường mặc size bao nhiêu ạ? để e\" | conv=100000000000001_200000000000019"
+    ]
+  },
+  {
+    "nguon": "log:dien_kich_ban.log",
+    "conversationId": "100000000000001_#dd144917",
+    "tinKhach": "chị bụng hơi to mặc mẫu này có che được không",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": true,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[AI-READ] nhãn=FIT_SUITABILITY | size=- addr=false order=false price=false chart=false concern=- | phone=- addrDu=false provConfi",
+      "[AI-QUYẾT] referent=UNKNOWN(0) | mẫu_cũ=[] | địa_chỉ=KHONG_CO(thiếu sdt+dia_chi) | hành_động=TU_VAN | 1704ms",
+      "[Bảo Trâm] Câu CHƯA CÓ KỊCH BẢN DẠY (AI định tự trả lời) -> ĐẨY NGƯỜI THẬT, không tự ý chế."
+    ]
+  },
+  {
+    "nguon": "log:dien_kich_ban.log",
+    "conversationId": "100000000000001_#eb6d7a7c",
+    "tinKhach": "lần trước chị mua bị lỗi đường chỉ, giờ tính sao đây",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": true,
+      "botDaGui": true
+    },
+    "ghiChu": [
+      "[địa chỉ] BỎ \"lần trước chị mua bị lỗi đường chỉ, giờ tính \" — gọt xong không còn dấu hiệu địa chỉ nào (không số, không địa danh)",
+      "[REQ] 8 request Pancake / 10s | nguồn: {\"list-hoithoai\":3,\"doc-tin-nhan\":5}",
+      "[AI-READ] nhãn=DEFECT_REPORT | size=- addr=false order=false price=false chart=false concern=- | phone=- addrDu=false provConfirm"
+    ]
+  },
+  {
+    "nguon": "log:dien_kich_ban.log",
+    "conversationId": "100000000000001_#50283280",
+    "tinKhach": "bớt cho chị 50k được không em",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": true,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[AI-READ] nhãn=DISCOUNT | size=- addr=false order=false price=false chart=false concern=- | phone=- addrDu=false provConfirm=fals",
+      "[AI-QUYẾT] referent=UNKNOWN(0) | mẫu_cũ=[] | địa_chỉ=KHONG_CO(thiếu sdt+dia_chi) | hành_động=TU_VAN | 1956ms",
+      "[Bảo Trâm] Câu CHƯA CÓ KỊCH BẢN DẠY (AI định tự trả lời) -> ĐẨY NGƯỜI THẬT, không tự ý chế."
+    ]
+  },
+  {
+    "nguon": "log:dien_kich_ban.log",
+    "conversationId": "100000000000001_#42066968",
+    "tinKhach": "shop ơi váy này bao nhiêu tiền vậy",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[AI-READ] nhãn=PRICE_ASK | size=- addr=false order=false price=true chart=false concern=- | phone=- addrDu=false provConfirm=fals",
+      "[REQ] 6 request Pancake / 10s | nguồn: {\"list-hoithoai\":2,\"doc-tin-nhan\":4}",
+      "[AI-QUYẾT] referent=UNKNOWN(0) | mẫu_cũ=[] | địa_chỉ=KHONG_CO(thiếu sdt+dia_chi) | hành_động=TU_VAN | 1795ms"
+    ]
+  },
+  {
+    "nguon": "log:dien_kich_ban.log",
+    "conversationId": "100000000000001_#42066968",
+    "tinKhach": "size M mặc được không, chị 55kg",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": true,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[AI-READ] nhãn=SIZE_ADVICE | size=M addr=false order=false price=false chart=false concern=- | phone=- addrDu=false provConfirm=f",
+      "[AI-READ] -> set size khách = M (code đã trượt).",
+      "[AI-QUYẾT] referent=UNKNOWN(0) | mẫu_cũ=[] | địa_chỉ=KHONG_CO(thiếu sdt+dia_chi) | hành_động=TU_VAN | 1628ms"
+    ]
+  },
+  {
+    "nguon": "log:dien_kich_ban.log",
+    "conversationId": "100000000000001_#8a6d3c07",
+    "tinKhach": "mẫu này còn hàng không shop",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[REQ] 7 request Pancake / 10s | nguồn: {\"list-hoithoai\":3,\"doc-tin-nhan\":4}",
+      "[AI-READ] nhãn=STOCK | size=- addr=false order=false price=false chart=false concern=- | phone=- addrDu=false provConfirm=false r",
+      "[AI-QUYẾT] referent=UNKNOWN(0) | mẫu_cũ=[] | địa_chỉ=KHONG_CO(thiếu sdt+dia_chi) | hành_động=TU_VAN | 3394ms"
+    ]
+  },
+  {
+    "nguon": "log:dien_kich_ban.log",
+    "conversationId": "100000000000001_#8a6d3c07",
+    "tinKhach": "mẫu này còn hàng không shop | text: ok chị lấy 1 cái nhé",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": true,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[AI-READ] nhãn=ORDER_CLOSE | size=- addr=false order=true price=false chart=false concern=- | phone=- addrDu=false provConfirm=fa",
+      "[AI-QUYẾT] referent=UNKNOWN(0) | mẫu_cũ=[] | địa_chỉ=KHONG_CO(thiếu sdt+dia_chi) | hành_động=XIN_SDT | 2210ms",
+      "[Bảo Trâm] Câu CHƯA CÓ KỊCH BẢN DẠY (AI định tự trả lời) -> ĐẨY NGƯỜI THẬT, không tự ý chế."
+    ]
+  },
+  {
+    "nguon": "log:dien_kich_ban.log",
+    "conversationId": "100000000000001_#8c0dc39c",
+    "tinKhach": "mẫu CAMELLIA này có màu khác không em",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[images] đã nạp ảnh cho 738 mã sản phẩm",
+      "[Bảo Trâm] Mở đầu trống/hỏi giá chung -> HOÃN gallery 22s đợi ad_ids (khách bấm ad thì BÁO GIÁ mẫu, không dội 10 mẫu). Conv: 10000",
+      "[RƠI LẶNG shadow] 100000000000001_200000000000002 | nhãn=- | khách: \"alo shop ơi\" -> chỉ ghi sổ, không đụng thẻ"
+    ]
+  },
+  {
+    "nguon": "log:dien_kich_ban.log",
+    "conversationId": "100000000000001_#fc75b2fe",
+    "tinKhach": "mua về mà k giống được thế thì sao shop",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MGKSQ6072 (Corae).",
+      "[REQ] 8 request Pancake / 10s | nguồn: {\"list-hoithoai\":3,\"doc-tin-nhan\":5}",
+      "[AI-READ] nhãn=SIZE_ADVICE | size=- addr=false order=false price=false chart=false concern=- | phone=- addrDu=false provConfirm=f"
+    ]
+  },
+  {
+    "nguon": "log:dien_kich_ban.log",
+    "conversationId": "100000000000001_#fc75b2fe",
+    "tinKhach": "set này bao nhiêu tiền thế shop",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[AI-READ] nhãn=PRICE_ASK | size=- addr=false order=false price=true chart=false concern=- | phone=- addrDu=false provConfirm=fals",
+      "[AI-QUYẾT] referent=UNKNOWN(0) | mẫu_cũ=[] | địa_chỉ=KHONG_CO(thiếu sdt+dia_chi) | hành_động=TU_VAN | 1417ms",
+      "[REQ] 6 request Pancake / 10s | nguồn: {\"list-hoithoai\":2,\"doc-tin-nhan\":4}"
+    ]
+  },
+  {
+    "nguon": "log:dien_kich_ban.log",
+    "conversationId": "100000000000001_#fc75b2fe",
+    "tinKhach": "set Mireva bao nhiêu tiền ạ",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[AI-READ] nhãn=PRICE_ASK | size=- addr=false order=false price=true chart=false concern=- | phone=- addrDu=false provConfirm=fals",
+      "[AI-QUYẾT] referent=MRKSQ6017(1) | mẫu_cũ=[] | địa_chỉ=KHONG_CO(thiếu sdt+dia_chi) | hành_động=TU_VAN | 1649ms",
+      "[Bảo Trâm] [follow-hẹn] stage 1, sau 600s -> \"Dạ chị thường mặc size bao nhiêu ạ? để e\" | conv=100000000000001_200000000000004"
+    ]
+  },
+  {
+    "nguon": "log:dien_kich_ban.log",
+    "conversationId": "100000000000001_#fc75b2fe",
+    "tinKhach": "dạo này em tăng lên 57kg rồi shop, có size lớn hơn cho e k ạ",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MRKSQ6017 (Mireva).",
+      "[REQ] 8 request Pancake / 10s | nguồn: {\"list-hoithoai\":3,\"doc-tin-nhan\":5}",
+      "[AI-READ] nhãn=SIZE_ADVICE | size=- addr=false order=false price=false chart=false concern=- | phone=- addrDu=false provConfirm=f"
+    ]
+  },
+  {
+    "nguon": "log:dien_kich_ban.log",
+    "conversationId": "100000000000001_#fc75b2fe",
+    "tinKhach": "mua về thử k ưng shop cho đổi trả miễn phí k shop",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MRKSQ6017 (Mireva).",
+      "[REQ] 8 request Pancake / 10s | nguồn: {\"list-hoithoai\":3,\"doc-tin-nhan\":5}",
+      "[AI-READ] nhãn=RETURN_POLICY | size=- addr=false order=false price=false chart=false concern=- | phone=- addrDu=false provConfirm"
+    ]
+  },
+  {
+    "nguon": "log:dien_kich_ban.log",
+    "conversationId": "100000000000001_#fc75b2fe",
+    "tinKhach": "mua về thử k ưng shop cho đổi trả miễn phí k shop | text: dạo này em tăng lên 57kg rồi shop, có size lớn hơn cho e k ạ",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[nhiều ý] lượt có 2 ý khác chủ đề -> trả ý 1 trước, ý 2 gửi TIN RIÊNG: \"dạo này em tăng lên 57kg rồi shop, có size lớn hơn cho e ",
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MRKSQ6017 (Mireva).",
+      "[REQ] 8 request Pancake / 10s | nguồn: {\"list-hoithoai\":3,\"doc-tin-nhan\":5}"
+    ]
+  },
+  {
+    "nguon": "log:dien_kich_ban.log",
+    "conversationId": "100000000000001_#72a8fa68",
+    "tinKhach": "có size to hơn không shop",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MRKSQ6017 (Mireva).",
+      "[AI-READ] nhãn=SIZE | size=- addr=false order=false price=false chart=false concern=- | phone=- addrDu=false provConfirm=false re",
+      "[REQ] 6 request Pancake / 10s | nguồn: {\"list-hoithoai\":2,\"doc-tin-nhan\":4}"
+    ]
+  },
+  {
+    "nguon": "log:dien_kich_ban.log",
+    "conversationId": "100000000000001_#9894a2c3",
+    "tinKhach": "em 63kg có size rộng hơn k ạ",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MRKSQ6017 (Mireva).",
+      "[AI-READ] nhãn=SIZE_ADVICE | size=- addr=false order=false price=false chart=false concern=- | phone=- addrDu=false provConfirm=f",
+      "[AI-QUYẾT] referent=MRKSQ6017(1) | mẫu_cũ=[] | địa_chỉ=KHONG_CO(thiếu sdt+dia_chi) | hành_động=TU_VAN | 2347ms"
+    ]
+  },
+  {
+    "nguon": "log:dien_kich_ban.log",
+    "conversationId": "100000000000001_#fc75b2fe",
+    "tinKhach": "set Ginevra bao nhiêu tiền ạ",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[AI-READ] nhãn=PRICE_ASK | size=- addr=false order=false price=true chart=false concern=- | phone=- addrDu=false provConfirm=fals",
+      "[AI-QUYẾT] referent=MRAD5446(1) | mẫu_cũ=[] | địa_chỉ=KHONG_CO(thiếu sdt+dia_chi) | hành_động=TU_VAN | 2502ms",
+      "[Bảo Trâm] [follow-hẹn] stage 1, sau 600s -> \"Dạ chị thường mặc size bao nhiêu ạ? để e\" | conv=100000000000001_200000000000004"
+    ]
+  },
+  {
+    "nguon": "log:dien_kich_ban.log",
+    "conversationId": "100000000000001_#fc75b2fe",
+    "tinKhach": "váy Giannal giá bao nhiêu shop",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[AI-READ] nhãn=PRICE_ASK | size=- addr=false order=false price=true chart=false concern=- | phone=- addrDu=false provConfirm=fals",
+      "[AI-QUYẾT] referent=MGKVX6310(1) | mẫu_cũ=[MRAD5446] | địa_chỉ=KHONG_CO(thiếu sdt+dia_chi+size) | hành_động=TU_VAN | 1918ms",
+      "[Bảo Trâm] [follow-hẹn] stage 1, sau 600s -> \"Dạ không biết chị còn phân vân điểm nào \" | conv=100000000000001_200000000000004"
+    ]
+  },
+  {
+    "nguon": "log:dien_kich_ban.log",
+    "conversationId": "100000000000001_#fc75b2fe",
+    "tinKhach": "tư vấn e mẫu Ginevra đi",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": true
+    },
+    "ghiChu": [
+      "[AI-READ] nhãn=PRICE_ASK | size=- addr=false order=false price=true chart=false concern=- | phone=- addrDu=false provConfirm=fals",
+      "[AI-QUYẾT] referent=MRAD5446(1) | mẫu_cũ=[MGKVX6310] | địa_chỉ=KHONG_CO(thiếu sdt+dia_chi+size) | hành_động=XIN_SDT | 2366ms",
+      "[Bảo Trâm] [MỞ MÀN] MRAD5446: đã báo giá 1 phút trước NHƯNG khách xin tư vấn lại mẫu này -> mở màn lại (giá + ảnh)."
+    ]
+  },
+  {
+    "nguon": "log:dien_kich_ban.log",
+    "conversationId": "100000000000001_#fc75b2fe",
+    "tinKhach": "tư vấn e mẫu này đi",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MRAD5446 (Ginevra).",
+      "[REQ] 8 request Pancake / 10s | nguồn: {\"list-hoithoai\":3,\"doc-tin-nhan\":5}",
+      "[AI-READ] nhãn=SIZE_ADVICE | size=- addr=false order=false price=false chart=false concern=- | phone=- addrDu=false provConfirm=f"
+    ]
+  },
+  {
+    "nguon": "log:dien_kich_ban.log",
+    "conversationId": "100000000000001_#fc75b2fe",
+    "tinKhach": "e 53kg, sđt 0900000000, địa chỉ 118 Khương Thượng, Đống Đa, Hà Nội",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MRAD5446 (Ginevra).",
+      "[REQ] 7 request Pancake / 10s | nguồn: {\"list-hoithoai\":3,\"doc-tin-nhan\":4}",
+      "[AI-READ] nhãn=WEIGHT_HEIGHT | size=- addr=true order=false price=false chart=false concern=- | phone=0385539117 addrDu=true prov"
+    ]
+  },
+  {
+    "nguon": "log:dien_kich_ban.log",
+    "conversationId": "100000000000001_#fc75b2fe",
+    "tinKhach": "e lấy 1c trắng ship về địa chỉ cũ, và 1c đen ship về địa chỉ 67 Nguyễn Xiển, Thanh Xuân, Hà nội nhé",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MRAD5446 (Ginevra).",
+      "[AI-READ] nhãn=ORDER_CLOSE | size=- addr=true order=true price=false chart=false concern=- | phone=0385539117 addrDu=true provCon",
+      "[AI-QUYẾT] referent=MRAD5446(1) | mẫu_cũ=[MRAD5446] | địa_chỉ=DU | địa_chỉ_chuẩn=\"118 Khương Thượng, Đống Đa, Hà Nội\" | hành_động="
+    ]
+  },
+  {
+    "nguon": "log:dien_kich_ban.log",
+    "conversationId": "100000000000001_#fc75b2fe",
+    "tinKhach": "đen với kem nhé",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MRAD5446 (Ginevra).",
+      "[AI-READ] nhãn=ORDER_CLOSE | size=M addr=true order=true price=false chart=false concern=- | phone=0385539117 addrDu=true provCon",
+      "[AI-READ] -> coi là ĐỊA CHỈ giao / đang chốt (code đã trượt)."
+    ]
+  },
+  {
+    "nguon": "log:dien_kich_ban.log",
+    "conversationId": "100000000000001_#fc75b2fe",
+    "tinKhach": "đúng rồi em",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MRAD5446 (Ginevra).",
+      "[AI-READ] nhãn=POST_ORDER_CHITCHAT | size=- addr=true order=false price=false chart=false concern=- | phone=0385539117 addrDu=tru",
+      "[AI-READ] -> BỎ cờ địa-chỉ vì là câu HỎI (nhãn POST_ORDER_CHITCHAT) -> không chốt nhầm."
+    ]
+  },
+  {
+    "nguon": "log:dien_kich_ban.log",
+    "conversationId": "100000000000001_#fc75b2fe",
+    "tinKhach": "e 53kg, sđt 0900000000. e lấy 1c kem ship về 118 Khương Thượng, Đống Đa, Hà Nội, và 1c đen ship về 67 Nguyễn Xiển, Thanh Xuân, Hà Nội nhé",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MRAD5446 (Ginevra).",
+      "[REQ] 7 request Pancake / 10s | nguồn: {\"list-hoithoai\":3,\"doc-tin-nhan\":4}",
+      "[AI-READ] nhãn=ORDER_CLOSE | size=- addr=true order=true price=false chart=false concern=- | phone=0385539117 addrDu=true provCon"
+    ]
+  },
+  {
+    "nguon": "log:dien_kich_ban.log",
+    "conversationId": "100000000000001_#fc75b2fe",
+    "tinKhach": "sđt 0900000000. e lấy 1c kem size M ship về 118 Khương Thượng, Đống Đa, Hà Nội, và 1c đen size M ship về 67 Nguyễn Xiển, Thanh Xuân, Hà Nội nhé",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MRAD5446 (Ginevra).",
+      "[REQ] 7 request Pancake / 10s | nguồn: {\"list-hoithoai\":3,\"doc-tin-nhan\":4}",
+      "[AI-READ] nhãn=ORDER_CLOSE | size=M addr=true order=true price=false chart=false concern=- | phone=0385539117 addrDu=true provCon"
+    ]
+  },
+  {
+    "nguon": "log:dien_kich_ban.log",
+    "conversationId": "100000000000001_#fc75b2fe",
+    "tinKhach": "e lấy màu kem size M, sđt 0900000000, địa chỉ 118 Khương Thượng, Đống Đa, Hà Nội",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MRAD5446 (Ginevra).",
+      "[AI-READ] nhãn=ORDER_CLOSE | size=M addr=true order=true price=false chart=false concern=- | phone=0385539117 addrDu=true provCon",
+      "[AI-QUYẾT] referent=MRAD5446(1) | mẫu_cũ=[] | địa_chỉ=DU | địa_chỉ_chuẩn=\"118 Khương Thượng, Đống Đa, Hà Nội\" | hành_động=CHOT_DON"
+    ]
+  },
+  {
+    "nguon": "log:dien_kich_ban.log",
+    "conversationId": "100000000000001_#fc75b2fe",
+    "tinKhach": "ok đúng rồi",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[ảnh] CHỮ+ALBUM 1 tấm bằng content_id.",
+      "[Bảo Trâm] [follow-skip] KHÔNG có product | conv=100000000000001_200000000000004 | reply=\"Cảm ơn chị đã đặt hàng",
+      "[Bảo Trâm] Khách XÁC NHẬN bản đọc lại -> LÊN 1 ĐƠN: #1 1 món -> 118 Khương Thượng, Đống Đa, Hà Nội"
+    ]
+  },
+  {
+    "nguon": "log:dien_kich_ban.log",
+    "conversationId": "100000000000001_#fc75b2fe",
+    "tinKhach": "tư vấn e thêm mẫu Mironne",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[AI-READ] nhãn=PRICE_ASK | size=- addr=false order=false price=true chart=false concern=- | phone=- addrDu=false provConfirm=fals",
+      "[AI-QUYẾT] referent=MG0SQ6026(1) | mẫu_cũ=[MRAD5446] | địa_chỉ=DU | địa_chỉ_chuẩn=\"118 Khương Thượng, Đống Đa, Hà Nội\" | hành_động",
+      "[Bảo Trâm] [GĐ4] Câu có chữ \"thêm mẫu\" NHƯNG AI nói TU_VAN -> KHÔNG nhét vào đơn cũ, để luồng dưới báo giá mẫu mới."
+    ]
+  },
+  {
+    "nguon": "log:dien_kich_ban.log",
+    "conversationId": "100000000000001_#fc75b2fe",
+    "tinKhach": "e lấy màu kem size M, sđt 0900000000, địa chỉ 67 Nguyễn Xiển, Thanh Xuân, Hà Nội",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MRAD5446 (Ginevra).",
+      "[REQ] 7 request Pancake / 10s | nguồn: {\"list-hoithoai\":3,\"doc-tin-nhan\":4}",
+      "[AI-READ] nhãn=ORDER_CLOSE | size=M addr=true order=true price=false chart=false concern=- | phone=0385539117 addrDu=true provCon"
+    ]
+  },
+  {
+    "nguon": "log:dien_kich_ban.log",
+    "conversationId": "100000000000001_#fc75b2fe",
+    "tinKhach": "đổi địa chỉ về 188 Khương Thượng, Đống Đa, Hà Nội nhé",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": true,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[Bảo Trâm] Khách KHÔNG gật bản đọc lại (\"đổi địa chỉ về 188 khương thượng, đống đ\") -> bỏ nháp, đọc lại từ đầu.",
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MRAD5446 (Ginevra).",
+      "[AI-READ] nhãn=EDIT_ORDER | size=M addr=true order=true price=false chart=false concern=- | phone=0385539117 addrDu=true provConf"
+    ]
+  },
+  {
+    "nguon": "log:dien_kich_ban.log",
+    "conversationId": "100000000000001_#fc75b2fe",
+    "tinKhach": "e lấy thêm 1 cái Mironne màu hồng size M nữa nhé",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[REQ] 8 request Pancake / 10s | nguồn: {\"list-hoithoai\":3,\"doc-tin-nhan\":5}",
+      "[AI-READ] nhãn=ADD_TO_ORDER | size=M addr=false order=true price=false chart=false concern=- | phone=- addrDu=false provConfirm=f",
+      "[AI-QUYẾT] referent=MG0SQ6026(1) | mẫu_cũ=[MRAD5446] | địa_chỉ=THIEU(thiếu dia_chi) | hành_động=XIN_DIA_CHI | 2737ms"
+    ]
+  },
+  {
+    "nguon": "log:dien_kich_ban.log.duongvao1",
+    "conversationId": "100000000000001_#5ccca13a",
+    "tinKhach": "váy này bao nhiêu tiền em",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[AI-READ] nhãn=PRICE_ASK | size=- addr=false order=false price=true chart=false concern=- | phone=- addrDu=false provConfirm=fals",
+      "[AI-QUYẾT] referent=UNKNOWN(0) | mẫu_cũ=[] | địa_chỉ=KHONG_CO(thiếu sdt+dia_chi) | hành_động=TU_VAN | 1599ms",
+      "[Bảo Trâm] \"váy này bao nhiêu tiền em\" hỏi giá 1 mẫu + chưa ra mẫu + ad_ids chưa tải (webhook) -> HOÃN 1 nhịp đợi ad_ids để VISION"
+    ]
+  },
+  {
+    "nguon": "log:dien_kich_ban.log.lan1-id-trung",
+    "conversationId": "100000000000001_#eb6d7a7c",
+    "tinKhach": "shop ơi váy này bao nhiêu tiền vậy | text: có màu nào nữa không em",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[AI-READ] nhãn=PRICE_ASK | size=- addr=false order=false price=true chart=false concern=- | phone=- addrDu=false provConfirm=fals",
+      "[AI-QUYẾT] referent=UNKNOWN(0) | mẫu_cũ=[] | địa_chỉ=KHONG_CO(thiếu sdt+dia_chi) | hành_động=TU_VAN | 2070ms",
+      "[REQ] 3 request Pancake / 10s | nguồn: {\"list-hoithoai\":1,\"doc-tin-nhan\":2}"
+    ]
+  },
+  {
+    "nguon": "log:dien_kich_ban.log.lan1-id-trung",
+    "conversationId": "100000000000001_#eb6d7a7c",
+    "tinKhach": "shop ơi váy này bao nhiêu tiền vậy | text: có màu nào nữa không em | text: size M mặc được không, chị 55kg",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": true,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[AI-READ] nhãn=SIZE_ADVICE | size=M addr=false order=false price=true chart=false concern=- | phone=- addrDu=false provConfirm=fa",
+      "[AI-READ] -> set size khách = M (code đã trượt).",
+      "[REQ] 6 request Pancake / 10s | nguồn: {\"list-hoithoai\":2,\"doc-tin-nhan\":4}"
+    ]
+  },
+  {
+    "nguon": "log:dien_kich_ban.log.lan1-id-trung",
+    "conversationId": "100000000000001_#50283280",
+    "tinKhach": "mẫu này còn hàng không shop | text: ok chị lấy 1 cái nhé | text: size L màu đen | text: Nguyễn Thị Lan, 0900000000",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[AI-READ] nhãn=ORDER_CLOSE | size=L addr=false order=true price=false chart=false concern=- | phone=0912345678 addrDu=false provC",
+      "[REQ] 6 request Pancake / 10s | nguồn: {\"list-hoithoai\":2,\"doc-tin-nhan\":4}",
+      "[AI-QUYẾT] referent=UNKNOWN(0) | mẫu_cũ=[] | địa_chỉ=THIEU(thiếu dia_chi) | hành_động=XIN_DIA_CHI | 2862ms"
+    ]
+  },
+  {
+    "nguon": "log:dien_kich_ban.log.lan1-id-trung",
+    "conversationId": "100000000000001_#50283280",
+    "tinKhach": "số 25 đường Lê Lợi, phường Bến Nghé, quận 1, TP HCM",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": true,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[AI-READ] nhãn=ADDRESS | size=- addr=true order=true price=false chart=false concern=- | phone=- addrDu=true provConfirm=false re",
+      "[REQ] 6 request Pancake / 10s | nguồn: {\"list-hoithoai\":2,\"doc-tin-nhan\":4}",
+      "[AI-QUYẾT] referent=UNKNOWN(0) | mẫu_cũ=[] | địa_chỉ=DU | địa_chỉ_chuẩn=\"số 25 đường Lê Lợi, phường Bến Nghé, quận 1, TP HCM\" | hà"
+    ]
+  },
+  {
+    "nguon": "log:dien_kich_ban.log.lan1-id-trung",
+    "conversationId": "100000000000001_#ef020f51",
+    "tinKhach": "chị cao 1m58 nặng 53kg thì mặc size gì",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MGKSQ6072 (Corae).",
+      "[AI-READ] nhãn=SIZE_ADVICE | size=- addr=false order=false price=false chart=false concern=- | phone=- addrDu=false provConfirm=f",
+      "[AI-QUYẾT] referent=MGKSQ6072(1) | mẫu_cũ=[] | địa_chỉ=KHONG_CO(thiếu sdt+dia_chi) | hành_động=TU_VAN | 2028ms"
+    ]
+  },
+  {
+    "nguon": "log:dien_kich_ban.log.lan1-id-trung",
+    "conversationId": "100000000000001_#ef020f51",
+    "tinKhach": "lấy cho chị 1 cái nhé, 0900000000, 25 Lý Thường Kiệt, Hoàn Kiếm, Hà Nội",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MGKSQ6072 (Corae).",
+      "[AI-READ] nhãn=ORDER_CLOSE | size=M addr=true order=true price=false chart=false concern=- | phone=0912345678 addrDu=true provCon",
+      "[AI-QUYẾT] referent=MGKSQ6072(1) | mẫu_cũ=[MGKSQ6072] | địa_chỉ=DU | địa_chỉ_chuẩn=\"25 Lý Thường Kiệt, Hoàn Kiếm, Hà Nội\" | hành_đ"
+    ]
+  },
+  {
+    "nguon": "log:dien_kich_ban.log.lan1-id-trung",
+    "conversationId": "100000000000001_#ef020f51",
+    "tinKhach": "tư vấn em mẫu này nữa | image: [Photo]",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[Photo]",
+      "[REQ] 8 request Pancake / 10s | nguồn: {\"list-hoithoai\":3,\"doc-tin-nhan\":5}",
+      "[AI-READ] nhãn=PRICE_ASK | size=- addr=true order=false price=true chart=false concern=- | phone=0912345678 addrDu=true provConfi"
+    ]
+  },
+  {
+    "nguon": "log:dien_kich_ban.log.lan1-id-trung",
+    "conversationId": "100000000000001_#99ec18cf",
+    "tinKhach": "shop cho đổi trả trong bao lâu ạ | text: shop có cho kiểm hàng k ạ | text: váy này giặt máy được không em",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": null,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[reader] follow-up bằng chữ -> bám MẪU ẢNH GẦN NHẤT đã hiện: MRKVX6305 (Celyne).",
+      "[AI-READ] nhãn=RETURN_POLICY | size=- addr=false order=false price=false chart=false concern=chat | phone=- addrDu=false provConf",
+      "[AI-QUYẾT] referent=MRKVX6305(1) | mẫu_cũ=[] | địa_chỉ=KHONG_CO(thiếu sdt+dia_chi+size) | hành_động=TU_VAN | 2330ms"
+    ]
+  },
+  {
+    "nguon": "log:dien_kich_ban.log.truoc-do-lo-hong",
+    "conversationId": "100000000000001_#682fc293",
+    "tinKhach": "có màu nào nữa không em",
+    "coAnh": false,
+    "mong": {
+      "nhuongNguoiThat": true,
+      "botDaGui": null
+    },
+    "ghiChu": [
+      "[AI-READ] nhãn=COLOR_ASK | size=- addr=false order=false price=true chart=false concern=- | phone=- addrDu=false provConfirm=fals",
+      "[AI-QUYẾT] referent=UNKNOWN(0) | mẫu_cũ=[] | địa_chỉ=KHONG_CO(thiếu sdt+dia_chi+size) | hành_động=TU_VAN | 1480ms",
+      "[Bảo Trâm] Câu CHƯA CÓ KỊCH BẢN DẠY (AI định tự trả lời) -> ĐẨY NGƯỜI THẬT, không tự ý chế."
     ]
   },
   {

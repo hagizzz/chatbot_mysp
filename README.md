@@ -56,6 +56,18 @@ node order_worker.js           # lên đơn tự động — tiến trình RIÊN
 
 Trên Windows: `start_bot.bat` (tự khởi động lại khi chết) và `truy_bot.bat`.
 
+### Chat thử ngay trong máy (không đụng Pancake)
+
+```bash
+npm run chat-thu           # ngồi gõ, chat tay với bot — CẦN TERMINAL THẬT
+npm run dien-kich-ban      # diễn sẵn 3 kịch bản rồi in bản ghi — chạy đâu cũng được
+```
+
+Bot chạy **nguyên vẹn mã thật**, chỉ có đầu dây bên kia là hội thoại trong RAM:
+`fetch` bị chặn, `pages.fm` được giả lập, `pos.pages.fm` chặn cứng, OpenAI vẫn
+gọi thật. Không tin nào ra ngoài, không đơn nào được tạo, không tệp dữ liệu thật
+nào bị ghi. Xem [`docs/MOI_TRUONG_THU.md`](docs/MOI_TRUONG_THU.md).
+
 ### Môi trường thử (staging)
 
 Tạo `.env.staging` chỉ khai phần **khác** với `.env` (page thử, kho thử...), rồi:
@@ -86,9 +98,14 @@ WATCH_IDS=<conversationId> DUMP_CONV=<conversationId> node bot_worker_api_v3.js
 ## 6. Kiểm tra trước mỗi lần phát hành
 
 ```bash
-npm test                      # 52 test, offline, ~2 giây — chạy TRƯỚC mọi lần đè bản mới
+npm test                      # 99 test, offline, ~5 giây — chạy TRƯỚC mọi lần đè bản mới
 npm run thong-ke              # bot trả bao nhiêu tin, nhường người thật bao nhiêu ca, tốn bao nhiêu tiền AI
+npm run thong-ke-nguon        # câu bot nói ra đến TỪ ĐÂU: kịch bản hay code viết cứng
+npm run soi-kich-ban          # bắt mâu thuẫn giữa kịch bản và câu viết cứng trong mã
 ```
+
+`thong-ke-nguon` và `soi-kich-ban` trả lời câu "sửa câu bot nói ở đâu" và "vì sao
+sửa Google Doc mà bot không đổi". Xem [`docs/KICH_BAN_O_DAU.md`](docs/KICH_BAN_O_DAU.md).
 
 Xem `test/README.md`. Bộ test không gọi Pancake, không gọi OpenAI, không đụng dữ liệu khách.
 
@@ -167,6 +184,9 @@ nhân viên gỡ nhầm thẻ là đơn im lặng biến mất.
 | `giam_sat.js` | canh bot đứng hình / im lặng / lỗi dày |
 | `adapter_hoa.js` | nối sang hệ thống của bạn Hoà (đang chạy dữ liệu giả) |
 | `env_boot.js` | nạp biến môi trường theo `BOT_ENV` |
+| `pancake_gia_lap.js` | Pancake giả trong RAM — nền của môi trường chat thử |
+| `chat_thu.js` | ngồi gõ chat tay với bot, không đụng khách thật |
+| `dien_kich_ban.js` | diễn sẵn kịch bản trong `kich_ban_thu/` rồi in bản ghi |
 
 ## 9. Quy ước làm việc
 

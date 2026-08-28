@@ -7,7 +7,7 @@
 // ============================================================================
 const test = require("node:test");
 const assert = require("node:assert");
-const { chanDoan } = require("../giam_sat");
+const { chanDoan } = require("../loi/tien_ich/giam_sat");
 
 const NGUONG = { imToiDaMs: 15 * 60000, dungHinhMs: 3 * 60000, tiLeLoi: 0.3, toiThieuDeXetLoi: 10 };
 const tt = (p = {}) => ({ vongPoll: 100, luot: 50, traLoi: 40, loi: 0, tiLeLoi: 0, imBaoLauMs: 1000, vongCuoiCachDayMs: 4000, luotKeTuTraLoi: 0, ...p });

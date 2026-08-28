@@ -1,0 +1,121 @@
+{
+  "_doc": [
+    "Số liệu kinh doanh RIÊNG của MYS.P (SHOP_ID=mysp).",
+    "Trước 24/08/2026 mấy khối này nằm cứng trong bot_worker_api_v3.js, nên mở shop",
+    "mới là phải sửa mã. Nay tách ra đây; mã vẫn giữ bản viết cứng làm lưới đỡ cuối",
+    "nên xoá nhầm tệp này bot cũng không câm — nhưng sẽ nói số liệu MYS.P.",
+    "Shop mới: chép tệp này thành kich_ban/<shopId>.json rồi thay hết giá trị."
+  ],
+  "so_lieu": {
+    "ngan_hang": {
+      "ten": "Techcombank",
+      "stk": "19034747389015",
+      "chu_tk": "NGUYEN VAN HUNG"
+    },
+    "showroom": [
+      "📍 105 Bà Triệu, Hai Bà Trưng, Hà Nội",
+      "📍 131-133 Nguyễn Trãi, P. Bến Thành, Q1, TP.HCM"
+    ],
+    "dia_chi_doi_hang": {
+      "nguoi_nhan": "Công ty TNHH Mys.P",
+      "sdt": "0566826777",
+      "dia_chi": "Số 01 - Đường Huỳnh Thúc Kháng - Phường Dĩnh Kế - TP Bắc Giang - Tỉnh Bắc Ninh",
+      "so_ngay_doi": 15
+    },
+    "bang_size_3_vong": {
+      "S": {
+        "nguc": [
+          82,
+          84
+        ],
+        "eo": [
+          64,
+          66
+        ],
+        "mong": [
+          88,
+          90
+        ]
+      },
+      "M": {
+        "nguc": [
+          86,
+          88
+        ],
+        "eo": [
+          68,
+          70
+        ],
+        "mong": [
+          92,
+          94
+        ]
+      },
+      "L": {
+        "nguc": [
+          90,
+          92
+        ],
+        "eo": [
+          72,
+          74
+        ],
+        "mong": [
+          96,
+          98
+        ]
+      }
+    },
+    "bang_can_nang_size": {
+      "_doc": [
+        "khoang: size nào HỢP với cân nặng này, xếp theo ƯU TIÊN (lớn trước).",
+        "  Vùng chồng 56-57kg thuộc cả M lẫn L -> L đứng trước nên được chọn khi còn hàng.",
+        "nguong_co_ban: size CƠ BẢN cho một cân nặng — lấy mục ĐẦU TIÊN có 'den' >= cân nặng.",
+        "  Cố ý KHÔNG có cận dưới: khách 38kg vẫn ra S chứ không rơi ra ngoài bảng.",
+        "size_qua_tam: nặng hơn mọi ngưỡng -> trả size này (nơi gọi xử riêng ca 'quá tầm')."
+      ],
+      "khoang": [
+        {
+          "size": "L",
+          "tu": 56,
+          "den": 61
+        },
+        {
+          "size": "M",
+          "tu": 49,
+          "den": 57
+        },
+        {
+          "size": "S",
+          "tu": 40,
+          "den": 48
+        }
+      ],
+      "nguong_co_ban": [
+        {
+          "size": "S",
+          "den": 48
+        },
+        {
+          "size": "M",
+          "den": 55
+        },
+        {
+          "size": "L",
+          "den": 61
+        }
+      ],
+      "size_qua_tam": "L"
+    }
+  },
+  "cai_dat": {
+    "_doc": "Công tắc riêng của shop này. Bỏ trống dòng nào thì lấy theo .env / mặc định.",
+    "BAM_KHACH": "on",
+    "BAM_KHACH_LAN1_PHUT": 10,
+    "BAM_KHACH_LAN2_GIO": 2,
+    "BAM_KHACH_SO_LAN": 2,
+    "TACH_TIN": "on",
+    "SIET_NHAN_VIEN_TRA_LOI": "off",
+    "MO_MAN_MODE": "on"
+  }
+}

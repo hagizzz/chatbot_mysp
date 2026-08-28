@@ -1,0 +1,5 @@
+# Chuỗi KHÔNG rút về kho kịch bản — mỗi dòng một chuỗi JSON đúng nội dung.
+# Dùng cho thứ là DỮ LIỆU của shop chứ không phải LỜI: địa chỉ, tên riêng, mã.
+# Chúng cũng cần tách theo shop, nhưng thuộc cấu hình shop, không thuộc kịch bản.
+"105 Bà Triệu, Hai Bà Trưng"
+"131-133 Nguyễn Trãi, P. Bến Thành, Q1, TP.HCM"

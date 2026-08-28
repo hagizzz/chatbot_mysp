@@ -15,9 +15,9 @@ const test = require("node:test");
 const assert = require("node:assert");
 const fs = require("fs");
 
-const { addressComplete, normalizePhone, looksLikeAddress, buildOrderPlan } = require("../order_extractor");
-const { parseReplyAction, HUMAN_CHECK_REPLY } = require("../reasoning_engine");
-const { KINDS } = require("../ai_intent");
+const { addressComplete, normalizePhone, looksLikeAddress, buildOrderPlan } = require("../loi/don/order_extractor");
+const { parseReplyAction, HUMAN_CHECK_REPLY } = require("../loi/ai/reasoning_engine");
+const { KINDS } = require("../loi/ai/ai_intent");
 
 test.after(() => {
   for (const hau of ["", "-wal", "-shm"]) {

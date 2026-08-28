@@ -20,13 +20,13 @@ taskkill /IM node.exe /F >nul 2>&1
 timeout /t 3 /nobreak >nul
 
 echo --- update_index (them anh moi) ---   >> dong_bo_log.txt
-python update_index.py                     >> dong_bo_log.txt 2>&1
+python python\update_index.py                     >> dong_bo_log.txt 2>&1
 
 echo --- refresh_names (ten/mau) ---       >> dong_bo_log.txt
-python refresh_names.py                    >> dong_bo_log.txt 2>&1
+python python\refresh_names.py                    >> dong_bo_log.txt 2>&1
 
 echo --- upload_to_pancake (anh moi) ---   >> dong_bo_log.txt
-python upload_to_pancake.py                >> dong_bo_log.txt 2>&1
+python python\upload_to_pancake.py                >> dong_bo_log.txt 2>&1
 
 echo [%date% %time%] XONG dong bo HANG NGAY                      >> dong_bo_log.txt
 

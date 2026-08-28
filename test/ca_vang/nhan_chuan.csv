@@ -1,0 +1,115 @@
+﻿stt,cau_khach,co_anh,mau_dang_noi,tin_shop_truoc,da_chot_don,nhan_bot_dang_gan,nhan_dung,can_duyet,ghi_chu
+1,mình xin giá ạ,có,MGKVX6310,Dạ Váy Giannal giá 890.000đ ạ. Chị cho em xin chiều cao và cân nặng để em tư vấn size chuẩn cho mình nha!,,PRICE_ASK,PRICE_ASK,,
+2,mẫu này có hở lưng quá không ạ không mình sợ mak áo con hở ỏ trong ý ạ,có,MGKVX6010,Dạ Váy Meridian giá 1.190.000đ ạ. Chị cho em xin số điện thoại và địa chỉ để em lên đơn size M cho mình nha ạ,,PRODUCT_DETAIL_QA,PRODUCT_DETAIL_QA,,hỏi chi tiết: hở lưng
+3,tư vấn cho chị thiết kế zoise mặt hàng này có giá bao nhiêu?,có,MRKSQ6040,Dạ Set Zoise giá 1.650.000đ ạ. Chị cho em xin chiều cao và cân nặng để em tư vấn size chuẩn cho mình nha!,,PRICE_ASK,PRICE_ASK,,
+4,set này màu trắng kem hả em chị cao 1.53m nặng 48 kí,có,MRAD5171,"Dạ mẫu này bên em làm riêng màu xanh nhạt ạ — màu này đang rất được ưa chuộng, dễ phối đồ, hợp nhiều dáng người chị nha.",,COLOR_ASK,COLOR_ASK,XEM KỸ,"hỏi màu + cho số đo; luật ưu tiên COLOR_ASK trên WEIGHT_HEIGHT"
+5,bắt đầu mẫu này có size 1m6 56kg không ạ,,,[unrecognized],,SIZE_ADVICE,SIZE_ADVICE,,
+6,1m55 47kg,,,"Dạ em nhận được thông tin của chị rồi ạ, chị ưng ý cho em xin số điện thoại để em lên đơn cho mình nhe ạ?",,WEIGHT_HEIGHT,WEIGHT_HEIGHT,,
+7,không phải set ah shop,có,MRAK5158,"Dạ Aó Ingrid giá gốc 1.450.000đ, hiện đang ưu đãi còn 725.000đ ạ. Chị cho em xin chiều cao và cân nặng để em tư vấn size chuẩn cho mình nha!",,OTHER,SET_TYPE,XEM KỸ,"hỏi có phải set không; bot đang gắn OTHER"
+8,xin gia,có,MGKVX6310,Dạ Váy Giannal giá 890.000đ ạ. Chị cho em xin chiều cao và cân nặng để em tư vấn size chuẩn cho mình nha!,,PRICE_ASK,PRICE_ASK,,
+9,bắt đầu giá bao nhiêu ạ,có,,"Dạ em gửi chị một số mẫu để tham khảo ạ. Chị quan tâm mẫu nào thì nhắn lại giúp em, em sẽ hỗ trợ thêm thông tin chi tiết nhé.",,PRICE_ASK,PRICE_ASK,,
+10,xin giá a,có,,[unrecognized],,PRICE_ASK,PRICE_ASK,,
+11,shop ơi tầm mấy ngày e nhận được đồ v ạ,có,MRAD5171,Dạ chị cho em xin số điện thoại đặt hàng để em kiểm tra đơn giúp mình nha ạ.,,ORDER_STATUS,ORDER_STATUS,XEM KỸ,nếu khách CHƯA đặt thì phải là DELIVERY_QA
+12,co màu gi không mặt hàng này có giá bao nhiêu?,,MRAD5446,"Dạ mẫu này bên em có kem, hồng và đen chị nha. Em gửi ảnh thật từng màu chị xem thích màu nào hơn ạ?",,COLOR_ASK,PRICE_ASK,XEM KỸ,"hỏi màu + hỏi giá; luật ưu tiên giá"
+13,bắt đầu,có,Celya(MRKVX6069)=1250000,"Dạ em gửi chị một số mẫu để tham khảo ạ. Chị quan tâm mẫu nào thì nhắn lại giúp em, em sẽ hỗ trợ thêm thông tin chi tiết nhé.",,PRICE_ASK,GREETING,XEM KỸ,khách bấm nút Bắt đầu của Messenger
+14,👍,có,MR0SV6441,Dạ chị cho em xin chiều cao cân nặng để em tư vấn size chuẩn cho mình nha,,OTHER,THANKS,XEM KỸ,khách thả 👍
+15,chất có bị nóng không e ha,có,,"Dạ chị cứ yên tâm, Set Camellia mặc thoáng mát không bí đâu ạ. Mà bên em cho kiểm hàng trước khi thanh toán nữa — chị nhận hàng có thể trực tiếp cảm nhận ạ.",,MATERIAL_QA,MATERIAL_QA,,
+16,"áo không là như thế nào z sh,? cho xin hình được lg như thế này là áo hay nguyên set z sh",có,MRAD5446,Dạ Áo Ginevra giá 950.000đ ạ. Chị cho em xin chiều cao và cân nặng để em tư vấn size chuẩn cho mình nha!,,PRODUCT_DETAIL_QA,IMAGE_REQ,XEM KỸ,vừa xin hình vừa hỏi áo hay nguyên set
+17,"mẫu này e nhé, size s",có,MGKVX6310,"Dạ em nhận được ảnh của chị rồi ạ. Để tránh sai sót khi giao, chị nhắn giúp em địa chỉ bằng tin nhắn chữ (số nhà - phường/xã - tỉnh/thành) nha, hoặc chờ em kiểm tra lại giúp mình ạ.",,ORDER_CLOSE,ORDER_CLOSE,,
+18,chất gì vậy c,có,,Dạ chị chờ em kiểm tra lại chất liệu mẫu này rồi báo mình ngay nha ạ,,MATERIAL_QA,MATERIAL_QA,,
+19,m hỏi xe ghép 150k ship,có,,,,PRICE_ASK,DELIVERY_QA,XEM KỸ,nói chuyện ship xe ghép 150k
+20,áo có sẵn store hn không e,có,MRAD5171,"Dạ em nhận được ảnh của chị rồi ạ. Để tránh sai sót khi giao, chị nhắn giúp em địa chỉ bằng tin nhắn chữ (số nhà - phường/xã - tỉnh/thành) nha, hoặc chờ em kiểm tra lại giúp mình ạ.",,STORE_STOCK,STORE_STOCK,,
+21,tư vấn cho chị thiết kế camellia,có,MRAD5171,"Dạ Set Camellia giá gốc 1.640.000đ, hiện đang ưu đãi còn 820.000đ ạ. Chị cho em xin chiều cao và cân nặng để em tư vấn size chuẩn cho mình nha!",,PRICE_ASK,PRICE_ASK,,nhờ tư vấn 1 mẫu = báo giá + ảnh
+22,tư vấn chị thiết kế zoellea,có,MRKVX6382,Dạ Váy Zoellea giá 1.250.000đ ạ. Chị cho em xin chiều cao và cân nặng để em tư vấn size chuẩn cho mình nha!,,PRICE_ASK,PRICE_ASK,,
+23,70kg vừa không ạ,có,MMQD591,[multi-block],,SIZE_ADVICE,SIZE_ADVICE,,
+24,m55 45kg size nào,có,MGVX5197,"Dạ với 45kg chị mặc size S là vừa xinh ạ, Váy Aurelia mặc lên sang lắm đó chị, Chị ưng sản phẩm cho em xin số điện thoại và địa chỉ em lên đơn cho mình nhe?",,SIZE_ADVICE,SIZE_ADVICE,,
+25,c có hỏi set này đâu mà e tư vấn,có,MRKSQ6310,Dạ Set Givana giá 950.000đ ạ. Chị cho em xin số điện thoại và địa chỉ để em lên đơn size M cho mình nha ạ,,OTHER,COMPLAINT,XEM KỸ,"khách bực vì bot tư vấn nhầm mẫu; bot đang gắn OTHER"
+26,mẫu này có sẵn size m không shop,có,MRKVX6371,"Dạ em nhận được ảnh của chị rồi ạ. Để tránh sai sót khi giao, chị nhắn giúp em địa chỉ bằng tin nhắn chữ (số nhà - phường/xã - tỉnh/thành) nha, hoặc chờ em kiểm tra lại giúp mình ạ.",,STOCK,STOCK,,
+27,"thank e, c nghĩ chút r c nhắn nhé",có,MGKVX6010,"Dạ không biết chị còn phân vân điểm nào không ạ — về size, chất váy hay mẫu — chị cứ nói em tư vấn thêm cho mình dễ chọn nha!",,DEFER_DECISION,DEFER_DECISION,,
+28,mặt hàng này có giá bao nhiêu?,,,[unrecognized],,PRICE_ASK,PRICE_ASK,,
+29,cho xem anh thạt,có,MRKVX6382,,,IMAGE_REQ,IMAGE_REQ,XEM KỸ,xin ẢNH THẬT — shop chốt: bot gửi ảnh sẵn hay giao người thật chụp
+30,ngực 105 eo 85 mặc vừa không em,có,MRVX5422,"Dạ không biết chị còn phân vân điểm nào không ạ — về size, chất váy hay mẫu — chị cứ nói em tư vấn thêm cho mình dễ chọn nha!",,SIZE_ADVICE,SIZE_ADVICE,,
+31,váy giá bao nhiêu v ạ,có,MR0VS6078,Dạ Váy Orvoria giá 1.590.000đ ạ. Chị cho em xin chiều cao và cân nặng để em tư vấn size chuẩn cho mình nha!,,PRICE_ASK,PRICE_ASK,,
+32,m7 60kg thì sai gì được ạ,có,MRKSV6177,Dạ chị cho em xin chiều cao cân nặng để em tư vấn size chuẩn cho mình nha,,WEIGHT_HEIGHT,SIZE_ADVICE,XEM KỸ,1m7 60kg thì mặc size gì
+33,tư vấn cho chị thiết kế zoya,có,MR0SV6441,Dạ Set Zoya giá 980.000đ ạ. Chị cho em xin chiều cao và cân nặng để em tư vấn size chuẩn cho mình nha!,,PRICE_ASK,PRICE_ASK,,
+34,giá bộ nay,có,,[ocr-uncertain],,,PRICE_ASK,,
+35,tư vấn cho chị mẫu agnes,có,MRKAK6490,"Dạ không biết chị còn phân vân điểm nào không ạ — về size, chất váy hay mẫu — chị cứ nói em tư vấn thêm cho mình dễ chọn nha!",,PRICE_ASK,PRICE_ASK,,
+36,tư vấn cho chị mẫu ingrid,có,,"Dạ không biết chị còn phân vân điểm nào không ạ — về size, chất váy hay mẫu — chị cứ nói em tư vấn thêm cho mình dễ chọn nha!",,PRICE_ASK,PRICE_ASK,,
+37,xin giáays mẫu này,có,MGVX5147,[multi-block],,PRICE_ASK,PRICE_ASK,,
+38,cho mình giá và bảng size mẫu này nhé,,,[ocr-uncertain],,,PRICE_ASK,XEM KỸ,xin giá + bảng size
+39,shop em ở đâu e ơi,có,MRVS5190,"Dạ Set The Flow Dress giá gốc 2.240.000đ, hiện đang ưu đãi còn 1.120.000đ ạ. Chị cho em xin chiều cao và cân nặng để em tư vấn size chuẩn cho mình nha!",,STORE_ADDRESS,STORE_ADDRESS,,
+40,ib gia chất liệu vải là gì em,có,,"Dạ Set Camellia giá gốc 1.640.000đ, hiện đang ưu đãi còn 820.000đ. chất Polyester Chiffon nhẹ và lên màu tươi, dễ giặt dễ chăm, bên trong có lớp lót nên mặc thoải mái nha chị. Chị thường mặc size bao nhiêu ạ? để em tư vấn size chuẩn cho mình ạ?",,PRICE_ASK,PRICE_ASK,XEM KỸ,xin giá + hỏi chất liệu
+41,ib,có,MGKVX6310,,,GREETING,GREETING,,
+42,ok em,có,MRKSQ6040,Dạ vâng ạ,,POST_ORDER_CHITCHAT,THANKS,XEM KỸ,nếu lúc đó đã chốt đơn thì là POST_ORDER_CHITCHAT
+43,m xin giá,có,,,,PRICE_ASK,PRICE_ASK,,
+44,e lên đơn gửi lại rồi nhé shop,,,"Dạ em nhận được ảnh của chị rồi ạ. Để tránh sai sót khi giao, chị nhắn giúp em địa chỉ bằng tin nhắn chữ (số nhà - phường/xã - tỉnh/thành) nha, hoặc chờ em kiểm tra lại giúp mình ạ.",,SEND_ADDRESS_LATER,ORDER_CLOSE,XEM KỸ,câu tối nghĩa: nhờ lên đơn hay báo đã gửi thông tin?
+45,váy liền hay rời vậy sộp,có,,"Dạ em nhận được ảnh của chị rồi ạ. Để tránh sai sót khi giao, chị nhắn giúp em địa chỉ bằng tin nhắn chữ (số nhà - phường/xã - tỉnh/thành) nha, hoặc chờ em kiểm tra lại giúp mình ạ.",,SET_TYPE,SET_TYPE,,
+46,Bộ này có những màu nào shop,,Celyne(MRKVX6305)=950000,,,COLOR_ASK,COLOR_ASK,,
+47,e lấy nha c,,Miretta(MRKSQ6035)=950000,,,ORDER_CLOSE,ORDER_CLOSE,,
+48,Tư vấn cho chị mẫu này!,,Givora(MGKSQ6309)=990000,,,PRICE_ASK,PRICE_ASK,,
+49,giá,có,Celya(MRKVX6069)=1250000,,,PRICE_ASK,PRICE_ASK,,
+50,Cho xin giá set xanh,,,,,,PRICE_ASK,,
+51,Cao 1m60 nặng 56kg,,,,,,WEIGHT_HEIGHT,,
+52,Mình đk ktra hàng k shop,,,,,,DELIVERY_QA,,được kiểm tra hàng không
+53,Mình xin giá nha,,Genova(MR0SV6348)=990000,,,PRICE_ASK,PRICE_ASK,,
+54,Giá sản phẩm là bao nhiêu?,,Corae(MGKSQ6072)=990000,,,PRICE_ASK,PRICE_ASK,,
+55,Tư vấn cho Chị thiết kế Meridian,,Meridian(MGKVX6010)=1190000,,,PRICE_ASK,PRICE_ASK,,
+56,shop oi vay nay bao nhieu tien,,,,,PRICE_ASK,PRICE_ASK,,
+57,alo shop ơi,,,,,GREETING,GREETING,,
+58,mẫu này bn thế,có,Corae(MGKSQ6072)=990000,,,PRICE_ASK,PRICE_ASK,,
+59,"e cao m6, nặng 53kg thì size gì ạ",,,,,SIZE_ADVICE,SIZE_ADVICE,,
+60,mẫu này còn màu khác k shop,có,Grandeur(MMVX5282)=950000,,,COLOR_ASK,COLOR_ASK,,
+61,e cao m6 nặng 53kg thì mặc size gì nhỉ,,Grandeur(MMVX5282)=950000,,,SIZE_ADVICE,SIZE_ADVICE,,
+62,mình xin giá mẫu này với ạ,,Meridian(MGKVX6010)=1190000,,,PRICE_ASK,PRICE_ASK,,
+63,còn màu khác k shop,,Meridian(MGKVX6010)=1190000,,,COLOR_ASK,COLOR_ASK,,
+64,e mặc size gì hợp nhỉ,,Meridian(MGKVX6010)=1190000,,,SIZE_ADVICE,SIZE_ADVICE,,
+65,đặt 2c này miễn ship cả 2 đúng k ạ,có,Meridian(MGKVX6010)=1190000,,,PRICE_ASK,DELIVERY_QA,XEM KỸ,hỏi lấy 2 cái có miễn ship cả 2 không
+66,shop có cho kiểm hàng k ạ,,,,,DELIVERY_QA,DELIVERY_QA,,
+67,"bên mình có cho kiểm tra hàng trước không ạ, k vừa thì có được hỗ trợ đổi trả k ạ",,Ryleigh(MRVX559)=975000,,,DELIVERY_QA,RETURN_POLICY,XEM KỸ,"hỏi kiểm hàng + đổi trả; luật ưu tiên RETURN_POLICY"
+68,e cao m6 nặng 53kg mặc size gì ạ,,Ryleigh(MRVX559)=975000,,,SIZE_ADVICE,SIZE_ADVICE,,
+69,"0900000000 Thanh Xuân, Hà Nội",,MRVX559/M,,,ADDRESS,ADDRESS,,có cả sđt lẫn địa chỉ
+70,"gửi sớm cho em nhé shop, e cần gấp",,,,,URGENT,URGENT,,
+71,tư vấn e set này nữa,có,Camira(PMSQ5202)=690000,,,PRICE_ASK,PRICE_ASK,,"nhờ tư vấn mẫu mới, KHÔNG phải mua thêm"
+72,tư vấn em mẫu này với,có,,,,PRICE_ASK,PRICE_ASK,,
+73,thế gửi gấp cho e set này nha,có,Arlisse(NRSQ626)=1750000,,,ORDER_CLOSE,ORDER_CLOSE,,
+74,tư vấn cho mình những mẫu này với,có,Zoise(MRKSQ6040)=1650000,,,BROWSE_CATALOG,MULTI_MODEL,XEM KỸ,nhờ tư vấn nhiều mẫu cùng lúc
+75,mẫu này thì sao ạ,có,,,,PRICE_ASK,PRICE_ASK,,
+76,mẫu này có size không ạ,có,Zoanne(MRKVX6411)=950000,,,STOCK,STOCK,,
+77,chắc lấy cái dưới thôi,,Zoanne(MRKVX6411)=950000,,,ORDER_CLOSE,ORDER_CLOSE,,
+78,số nhà 67 nhé,,,,,ADDRESS,ADDRESS,,
+79,test bot,có,,,,OTHER,OTHER,XEM KỸ,"câu chạy thử, không phải khách thật — cân nhắc bỏ khỏi bộ đo"
+80,mẫu này bao nhiêu shop,có,,,,PRICE_ASK,PRICE_ASK,,
+81,mẫu này bao nhiêu tiền shop,có,Zoise(MRKSQ6040)=1650000,,,PRICE_ASK,PRICE_ASK,,
+82,ok chị lấy 1 cái size M nha,,Zoise(MRKSQ6040)=1650000,,,ORDER_CLOSE,ORDER_CLOSE,,
+83,"Thanh Xuân, Hà Nội",,Zoise(MRKSQ6040)=1650000,,,SEND_ADDRESS_LATER,ADDRESS,XEM KỸ,"chỉ có quận + tỉnh, chưa đủ giao; bot đang gắn SEND_ADDRESS_LATER"
+84,mẫu này mặc đi tiệc ở cty được k shop,có,Zoise(MRKSQ6040)=1650000,,,OCCASION_QA,OCCASION_QA,,
+85,"váy này vải gì em, mặc mùa hè có nóng không",,,,,MATERIAL_QA,MATERIAL_QA,,
+86,chị cao 1m58 nặng 55kg thì mặc size nào em,,,,,SIZE_ADVICE,SIZE_ADVICE,,
+87,shop cho đổi trả trong bao lâu ạ,,Celyne(MRKVX6305)=665000,,,RETURN_POLICY,RETURN_POLICY,,
+88,"ship về Đà Nẵng mấy ngày tới em, phí bao nhiêu",,,,,DELIVERY_QA,DELIVERY_QA,,
+89,shop có cửa hàng ở đâu để chị qua thử không,,,,,STORE_ADDRESS,STORE_ADDRESS,,
+90,bên em cho ship cod hay phải chuyển khoản trước,,,,,PAYMENT_METHOD,PAYMENT_METHOD,XEM KỸ,hỏi COD hay chuyển khoản trước
+91,mẫu này còn size L không em,,,,,STOCK,STOCK,,
+92,"shop có bán sỉ không, lấy 10 cái giá thế nào",,,,,WHOLESALE,WHOLESALE,,
+93,váy này mặc đi ăn cưới có hợp không em,,,,,OCCASION_QA,OCCASION_QA,,
+94,váy này giặt máy được không hay phải giặt tay,,,,,WASH_CARE,WASH_CARE,,
+95,"mẫu CAMELLIA này vải gì em, mặc mùa hè có nóng không",,Camellia(MRAD5171)=820000,,,MATERIAL_QA,MATERIAL_QA,,
+96,cho chị kiểm tra hàng trước khi thanh toán nhé,,,,,DELIVERY_QA,DELIVERY_QA,,
+97,mẫu CAMELLIA còn size L không em,,Camellia(MRAD5171)=820000,,,STOCK,STOCK,,
+98,mẫu CAMELLIA này ship về Đà Nẵng bao lâu em,,Camellia(MRAD5171)=820000,,,DELIVERY_QA,DELIVERY_QA,,
+99,chị bụng hơi to mặc mẫu này có che được không,,,,,FIT_SUITABILITY,FIT_SUITABILITY,,
+100,"lần trước chị mua bị lỗi đường chỉ, giờ tính sao đây",,,,,DEFECT_REPORT,DEFECT_REPORT,,
+101,bớt cho chị 50k được không em,,,,,DISCOUNT,DISCOUNT,,
+102,shop ơi váy này bao nhiêu tiền vậy,,,,,PRICE_ASK,PRICE_ASK,,
+103,"size M mặc được không, chị 55kg",,,,,SIZE_ADVICE,SIZE_ADVICE,,
+104,mẫu này còn hàng không shop,,,,,STOCK,STOCK,,
+105,mẫu CAMELLIA này có màu khác không em,,Camellia(MRAD5171)=820000,,,COLOR_ASK,COLOR_ASK,,
+106,váy này bao nhiêu tiền em,,,,,PRICE_ASK,PRICE_ASK,,
+107,"số 25 đường Lê Lợi, phường Bến Nghé, quận 1, TP HCM",,,,,ADDRESS,ADDRESS,,
+108,chị cao 1m58 nặng 53kg thì mặc size gì,,Corae(MGKSQ6072)=990000,,,SIZE_ADVICE,SIZE_ADVICE,,
+109,"lấy cho chị 1 cái nhé, 0900000000, 25 Lý Thường Kiệt, Hoàn Kiếm, Hà Nội",,Corae(MGKSQ6072)=990000,,,ORDER_CLOSE,ORDER_CLOSE,,chốt kèm sđt + địa chỉ
+110,tư vấn em mẫu này nữa,có,Camira(PMSQ5202)=690000,,,PRICE_ASK,PRICE_ASK,,
+111,có màu nào nữa không em,,,,,COLOR_ASK,COLOR_ASK,,
+112,Lên đơn mẫu này cho mình chưa nhỉ,có,Talia(MRAD572)=2640000,,,ORDER_STATUS,ORDER_STATUS,,
+113,Ko em,,,,,,OTHER,XEM KỸ,"câu cụt 'Ko em' — từ chối cái gì đó, không rõ"
+114,Gui size mình chọn,,,,,OTHER,ORDER_CLOSE,XEM KỸ,'gửi size mình chọn' — nhờ gửi hàng theo size đã chọn?

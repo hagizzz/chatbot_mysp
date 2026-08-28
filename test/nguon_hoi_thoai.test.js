@@ -6,7 +6,7 @@
 // ============================================================================
 const test = require("node:test");
 const assert = require("node:assert");
-const { xacDinhNguon, moTa, danhDau } = require("../nguon_hoi_thoai");
+const { xacDinhNguon, moTa, danhDau } = require("../loi/bo_nho/nguon_hoi_thoai");
 
 test("phân loại đủ ba nguồn, không có ca nào rơi ra ngoài", () => {
   assert.strictEqual(xacDinhNguon({ fromAd: true }), "quang_cao");

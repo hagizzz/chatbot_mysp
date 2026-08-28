@@ -14,17 +14,17 @@
 //   (Bật/tắt độc lập với bot tư vấn — KHÔNG ghi đè conversation_memory.json.)
 // ============================================================================
 require("./env_boot");   // nạp .env theo BOT_ENV (thật/thử) — phải trước mọi require đọc process.env
-const cfg = require("./order_config");
-const { getConversations, readConversation } = require("./pancake_reader");
-const pageReg = require("./page_registry");
-const { hasTag, addTag, removeTag } = require("./conversation_tags");
-const hangDoiDon = require("./hang_doi_don");
-const { resolveVariant, matchProvince, resolveCommune, createOrder, updateOrder, confirmOrder, getShops, getOrdersByPhone, getOrderById } = require("./pos_client");
-const { reportUrgent, markProcessed, markCod, markResult, listOpenOrders, nowVN } = require("./urgent_sheet");
-const { writeQuaShop, nowVN: nowVNQS } = require("./quashop_sheet");
-const { buildOrderPlan } = require("./order_extractor");
-const store = require("./order_store");
-const { addConversationNote } = require("./pancake_sender");
+const cfg = require("./loi/don/order_config");
+const { getConversations, readConversation } = require("./loi/pancake/pancake_reader");
+const pageReg = require("./loi/pancake/page_registry");
+const { hasTag, addTag, removeTag } = require("./loi/pancake/conversation_tags");
+const hangDoiDon = require("./loi/don/hang_doi_don");
+const { resolveVariant, matchProvince, resolveCommune, createOrder, updateOrder, confirmOrder, getShops, getOrdersByPhone, getOrderById } = require("./loi/don/pos_client");
+const { reportUrgent, markProcessed, markCod, markResult, listOpenOrders, nowVN } = require("./loi/tien_ich/urgent_sheet");
+const { writeQuaShop, nowVN: nowVNQS } = require("./loi/tien_ich/quashop_sheet");
+const { buildOrderPlan } = require("./loi/don/order_extractor");
+const store = require("./loi/don/order_store");
+const { addConversationNote } = require("./loi/pancake/pancake_sender");
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
@@ -67,7 +67,7 @@ function _orderVariationIds(o) {
 }
 // Tập "mã SP" (folded) xuất hiện trong đơn — để khớp theo MÃ dù size/màu khác (NV sửa size).
 function _orderProductCodes(o) {
-  const fold = require("./pos_client").fold;
+  const fold = require("./loi/don/pos_client").fold;
   const items = o.items || o.order_items || o.products || [];
   const out = new Set();
   for (const x of (Array.isArray(items) ? items : [])) {
@@ -93,7 +93,7 @@ async function findReusableOrder(phone, wantVariationId, wantCode) {
   try {
     const list = await getOrdersByPhone(phone);
     const vid = String(wantVariationId || "");
-    const wc = (require("./pos_client").fold)(wantCode || "");
+    const wc = (require("./loi/don/pos_client").fold)(wantCode || "");
     for (const o of list) {
       const kind = _statusKind(o);
       if (kind === "dead") continue;
@@ -377,13 +377,13 @@ function productCodeFromItems(o) {
 // "Thời gian xử lý" = khi đơn sang "Đã gửi hàng" (shop này: status 2 / "shipped").
 function isShippingStatus(o) {
   const st = Number(o && o.status);
-  const n = (require("./pos_client").fold)(o.status_name || "");
+  const n = (require("./loi/don/pos_client").fold)(o.status_name || "");
   if (st === 2 || st === 5) return true;
   return /GUI HANG|SHIPPED|SHIPPING|DELIVER/.test(n);
 }
 // "Kết quả" cuối: Đã nhận / Đã hoàn / Đã hủy -> trả tên VI, không thì null.
 function finalResult(o) {
-  const n = (require("./pos_client").fold)(o.status_name || "");
+  const n = (require("./loi/don/pos_client").fold)(o.status_name || "");
   if (/DA NHAN|RECEIVED|DELIVERED|COMPLETED|SUCCESS/.test(n)) return "Đã nhận";
   if (/HOAN|RETURNED|RETURNING|REFUND/.test(n)) return "Đã hoàn";
   if (/HUY|CANCEL/.test(n)) return "Đã hủy";
@@ -393,7 +393,7 @@ function finalResult(o) {
 // Thứ tự ưu tiên: hủy/hoàn/nhận (cuối) -> chuyển hàng (chưa cuối).
 function statusResult(o) {
   const st = Number(o && o.status);
-  const n = (require("./pos_client").fold)(o.status_name || "");
+  const n = (require("./loi/don/pos_client").fold)(o.status_name || "");
   if (/HUY|CANCEL|REMOVED/.test(n)) return { text: "Đã hủy", final: true };
   if (/HOAN|RETURNED|RETURNING|REFUND/.test(n)) return { text: "Hàng hoàn", final: true };
   if (/DA NHAN|RECEIVED|DELIVERED|COMPLETED|SUCCESS/.test(n)) return { text: "Đã nhận", final: true };

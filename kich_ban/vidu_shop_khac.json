@@ -1,0 +1,43 @@
+{
+  "_doc": [
+    "VÍ DỤ MẪU cho shop mới — KHÔNG được nạp (tên tệp phải trùng SHOP_ID mới có tác dụng).",
+    "Chép tệp này thành kich_ban/<shopId>.json rồi sửa. Khai gì đè nấy; không khai thì",
+    "kế thừa nguyên mac_dinh.json, tức bot chạy y như bản gốc.",
+    "",
+    "Ngăn nào shop được đụng:",
+    "  giong    — ĐƯỢC, và nên. Đổi giọng không bao giờ làm sai giá/địa chỉ/đơn.",
+    "  cau      — ĐƯỢC. Đè từng câu theo khoá của mac_dinh.json.",
+    "  so_lieu  — ĐƯỢC, và BẮT BUỘC khai đủ (tài khoản, showroom, bảng size...).",
+    "  cai_dat  — ĐƯỢC, nhưng cẩn thận: đổi hành vi cả bot, không phải một câu chữ.",
+    "  prompt   — KHÔNG. Luật dạy AI, chỉ sửa ở mac_dinh.json. Khai ở đây sẽ bị bỏ qua và kho kêu."
+  ],
+
+  "giong": {
+    "_doc": "Shop này bán đồ nam, khách lớn tuổi -> xưng hô khác, không emoji, câu gọn.",
+    "xung": "shop",
+    "goi_khach": "anh",
+    "mo_dau_da": "khong",
+    "emoji": { "muc": "khong" }
+  },
+
+  "cau": {
+    "_doc": "Đè từng câu. Khoá lấy đúng theo mac_dinh.json. Mảng = nhiều biến thể, code xoay vòng.",
+    "tran_an_chat_luong": {
+      "cau": [
+        "Hàng bên shop tự sản xuất nên anh yên tâm về chất lượng ạ",
+        "Đồ bên shop làm kỹ từng đường may, anh cứ yên tâm ạ"
+      ],
+      "bien": [],
+      "mo_ta": "Cùng khoá, cùng tình huống với mac_dinh.json — chỉ khác giọng và cách xưng hô."
+    }
+  },
+
+  "so_lieu": {
+    "_doc": "BẮT BUỘC khai đủ, xem SO_LIEU_BAT_BUOC trong kho_kich_ban.js. Không khai thì bot KHÔNG được bịa, cũng KHÔNG được mượn của shop khác — nó sẽ từ chối gửi.",
+    "ngan_hang": { "ten": "<tên ngân hàng>", "stk": "<số tài khoản>", "chu_tk": "<chủ tài khoản>" }
+  },
+
+  "cai_dat": {
+    "_doc": "Công tắc hành vi. Thứ tự ưu tiên: shop > mac_dinh > .env > mặc định trong mã."
+  }
+}

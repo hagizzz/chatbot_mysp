@@ -49,3 +49,19 @@ raw.txt
 test/ca_vang/tra_cuu_conv.local.json
 *.local.json
 data/
+
+# Mốc bỏ qua tin cũ theo từng hội thoại (reset_hoi_thoai.js ghi)
+moc_bo_qua.json
+
+# Khoá chống hai bot cùng chạy (PID của máy này)
+bot.lock
+
+# ===== Dọn 27/08/2026 =====
+# Kho lưu trữ: bản sao lưu, log cũ, tệp rỗng do gõ nhầm. Chỉ DỜI vào đây chứ không
+# xoá, nên nó chứa cả .env.staging.bak (có bí mật) và ~70 MB chỉ mục build lại được.
+# Tuyệt đối không đưa lên git.
+luu_tru/
+
+# Log hội thoại THẬT — dữ liệu nguồn của bộ ca vàng (test/trich_ca_vang.js đọc).
+# Có tên và tin nhắn của khách thật, không được đưa lên git.
+test/log_that/

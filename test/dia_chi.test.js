@@ -7,7 +7,7 @@
 // ============================================================================
 const test = require("node:test");
 const assert = require("node:assert");
-const { fold, explicitProvince, inferProvince, provinceDisplay } = require("../vn_address");
+const { fold, explicitProvince, inferProvince, provinceDisplay } = require("../loi/tien_ich/vn_address");
 
 test("bỏ dấu và chuẩn hoá", () => {
   assert.strictEqual(fold("Hà Nội"), "ha noi");

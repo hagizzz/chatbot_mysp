@@ -9,9 +9,13 @@
     "don": "node order_worker.js",
     "test": "node --test \"test/*.test.js\"",
     "ca-vang": "node test/trich_ca_vang.js",
-    "thong-ke": "node thong_ke.js 7 --ly-do",
-    "chuyen-bo-nho": "node chuyen_bo_nho_sang_sqlite.js",
-    "do-anh": "node do_do_nhan_dien_anh.js"
+    "thong-ke": "node cong_cu/thong_ke.js 7 --ly-do",
+    "thong-ke-nguon": "node cong_cu/thong_ke_nguon.js 7",
+    "soi-kich-ban": "node loi/soi_kich_ban.js",
+    "chuyen-bo-nho": "node cong_cu/chuyen_bo_nho_sang_sqlite.js",
+    "do-anh": "node loi/do_do_nhan_dien_anh.js",
+    "chat-thu": "node cong_cu/chat_thu.js",
+    "dien-kich-ban": "node cong_cu/dien_kich_ban.js"
   },
   "dependencies": {
     "dotenv": "^16.4.5",

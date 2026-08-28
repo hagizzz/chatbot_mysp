@@ -7,7 +7,7 @@
 // ============================================================================
 const test = require("node:test");
 const assert = require("node:assert");
-const { phanLoai, dem, timNguong, theoBienThe } = require("../do_do_nhan_dien_anh");
+const { phanLoai, dem, timNguong, theoBienThe } = require("../loi/san_pham/do_do_nhan_dien_anh");
 
 const ca = (maDung, maDoan, score, gap, bienThe = "cat") => ({ maDung, maDoan, score, gap, bienThe });
 

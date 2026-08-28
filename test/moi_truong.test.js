@@ -13,7 +13,7 @@ const GOC = path.join(__dirname, "..");
 function docDryRun(env) {
   const ra = execFileSync(
     process.execPath,
-    ["-e", 'require("./env_boot"); process.stdout.write(String(require("./order_config").DRY_RUN))'],
+    ["-e", 'require("./env_boot"); process.stdout.write(String(require("./loi/don/order_config").DRY_RUN))'],
     { cwd: GOC, env: { ...process.env, ...env }, encoding: "utf8" }
   );
   return ra.trim().split(/\s+/).pop() === "true";
